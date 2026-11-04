@@ -4,11 +4,16 @@ import {
   Layers, 
   PlusCircle, 
   Trash2, 
-  Info,
-  Maximize2,
-  HardHat
+  Info, 
+  Maximize2, 
+  Compass, 
+  Box,
+  CheckCircle2
 } from 'lucide-react';
 
+/**
+ * MODULE 1: Total Built-Up Area
+ */
 export function TotalAreaModule({ builtup, updateBuiltup }) {
   const handleFloorChange = (idx, field, val) => {
     const newFloors = [...builtup.floors];
@@ -57,8 +62,8 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
             <Maximize2 className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">1. Total Built-Up Area Calculation</h3>
-            <p className="text-xs text-slate-500">Measure outer-to-outer length & breadth in AutoCAD plan</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">1. Total Built-Up Area (AutoCAD Outer-to-Outer)</h3>
+            <p className="text-xs text-slate-500">Floor-wise outer length and breadth measurements</p>
           </div>
         </div>
         <button
@@ -135,11 +140,10 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
         </table>
       </div>
 
-      {/* Summary Footer Banner */}
-      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2">
           <Info className="w-4 h-4 text-blue-500" />
-          <span>Sum of all measured AutoCAD floor slabs (outer edge to outer edge)</span>
+          <span>Ground floor outer area is used as reference for plinth backfilling.</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-500 uppercase">Total Built-Up Area:</span>
@@ -152,6 +156,9 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
   );
 }
 
+/**
+ * MODULE 2: Footing & Column Schedule
+ */
 export function FootingModule({ footings, updateFootings }) {
   const handleFootingChange = (idx, field, val) => {
     const newFootings = [...footings];
@@ -193,7 +200,7 @@ export function FootingModule({ footings, updateFootings }) {
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">2. Footing & Column Foundation Calculation</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">2. Footing & Column Schedule</h3>
             <p className="text-xs text-slate-500">Nos, Column size (L x B x D), Footing size (L x B x D), Excavation Depth & PCC Bed</p>
           </div>
         </div>
@@ -336,6 +343,307 @@ export function FootingModule({ footings, updateFootings }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * MODULE 3: Plinth Beam Calculation (Audited from Excel Row 29-35 & Sheet 1.FOUNDATION)
+ */
+export function PlinthBeamModule({ plinthBeam, updatePlinthBeam, estimate }) {
+  const handleChange = (field, val) => {
+    updatePlinthBeam({
+      ...plinthBeam,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  const excVol = (plinthBeam.length || 0) * (plinthBeam.excavationB || 0) * (plinthBeam.excavationD || 0);
+  const concVol = (plinthBeam.length || 0) * (plinthBeam.concreteB || 0) * (plinthBeam.concreteD || 0);
+
+  return (
+    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl">
+            <Compass className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">3. Plinth Beam Calculation</h3>
+            <p className="text-xs text-slate-500">Excavation trench & Concrete M20 (4kg/cft steel reinforcement)</p>
+          </div>
+        </div>
+        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-lg">
+          M20 Nominal Mix Design
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Trench Excavation */}
+        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Plinth Beam Excavation</span>
+            <span className="text-xs font-bold text-amber-600">{Math.round(excVol * 10) / 10} CFT</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <label className="text-slate-500 block mb-1">Beam Length (ft)</label>
+              <input
+                type="number"
+                value={plinthBeam.length}
+                onChange={(e) => handleChange('length', e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+              />
+            </div>
+            <div>
+              <label className="text-slate-500 block mb-1">Trench Breadth (ft)</label>
+              <input
+                type="number"
+                step="0.05"
+                value={plinthBeam.excavationB}
+                onChange={(e) => handleChange('excavationB', e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="text-slate-500 block mb-1">Trench Depth (ft)</label>
+              <input
+                type="number"
+                step="0.05"
+                value={plinthBeam.excavationD}
+                onChange={(e) => handleChange('excavationD', e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
+              />
+            </div>
+          </div>
+          <div className="text-[11px] text-slate-400">
+            Formula: Length × Trench B × Trench D = {plinthBeam.length}' × {plinthBeam.excavationB}' × {plinthBeam.excavationD}'
+          </div>
+        </div>
+
+        {/* Concrete Beam */}
+        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Plinth Beam Concrete (M20)</span>
+            <span className="text-xs font-bold text-emerald-600">{Math.round(concVol * 10) / 10} CFT</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <label className="text-slate-500 block mb-1">Beam Length (ft)</label>
+              <input
+                type="number"
+                disabled
+                value={plinthBeam.length}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold text-slate-500"
+              />
+            </div>
+            <div>
+              <label className="text-slate-500 block mb-1">Beam Breadth (ft)</label>
+              <input
+                type="number"
+                step="0.05"
+                value={plinthBeam.concreteB}
+                onChange={(e) => handleChange('concreteB', e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="text-slate-500 block mb-1">Beam Depth (ft)</label>
+              <input
+                type="number"
+                step="0.05"
+                value={plinthBeam.concreteD}
+                onChange={(e) => handleChange('concreteD', e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold"
+              />
+            </div>
+          </div>
+          <div className="text-[11px] text-slate-400">
+            Formula: Length × Beam B × Beam D = {plinthBeam.length}' × {plinthBeam.concreteB}' × {plinthBeam.concreteD}'
+          </div>
+        </div>
+      </div>
+
+      {/* Output Summary Strip */}
+      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-400">Plinth Beam Steel Rebar (4kg/CFT): </span>
+          <span className="font-bold text-slate-900 dark:text-white">{Math.round(estimate.plinthSteelKg * 10) / 10} Kg</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Cement Required: </span>
+          <span className="font-bold text-blue-600 dark:text-blue-400">{Math.round((estimate.plinthConcreteCft / 35.314) * 8.064 * 10) / 10} Bags</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Direct Plinth Concrete Cost: </span>
+          <span className="font-extrabold text-emerald-600">₹ {Math.round(estimate.plinthConcreteTotalCost).toLocaleString('en-IN')}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * MODULE 4: Basement - Flyash Brickwork Details (Audited from Excel Row 38-47 & Sheet 2.BASEMENT)
+ */
+export function BasementModule({ basement, updateBasement, estimate }) {
+  const handleChange = (field, val) => {
+    updateBasement({
+      ...basement,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  return (
+    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 rounded-xl">
+            <Box className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">4. Basement - Flyash Brickwork Details</h3>
+            <p className="text-xs text-slate-500">Flyash brick masonry, both-side plastering, gravel filling, 4" M-sand bed & flooring PCC</p>
+          </div>
+        </div>
+        <span className="text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-3 py-1 rounded-lg">
+          Flyash Masonry 1:6
+        </span>
+      </div>
+
+      {/* Inputs Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <label className="text-slate-500 font-semibold block mb-1">Masonry Length (ft)</label>
+          <input
+            type="number"
+            value={basement.flyashLength}
+            onChange={(e) => handleChange('flyashLength', e.target.value)}
+            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+          />
+          <span className="text-[10px] text-slate-400 mt-1 block">Usually matches Plinth Length</span>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <label className="text-slate-500 font-semibold block mb-1">Wall Thickness (ft)</label>
+          <input
+            type="number"
+            step="0.05"
+            value={basement.flyashBreadth}
+            onChange={(e) => handleChange('flyashBreadth', e.target.value)}
+            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+          />
+          <span className="text-[10px] text-slate-400 mt-1 block">9" Brickwork (0.75 ft)</span>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <label className="text-slate-500 font-semibold block mb-1">Masonry Depth (ft)</label>
+          <input
+            type="number"
+            step="0.05"
+            value={basement.flyashDepth}
+            onChange={(e) => handleChange('flyashDepth', e.target.value)}
+            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+          />
+          <span className="text-[10px] text-slate-400 mt-1 block">+3" for 1 layer below beam</span>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <label className="text-slate-500 font-semibold block mb-1">Outer Perimeter (ft)</label>
+          <input
+            type="number"
+            value={basement.outerPerimeter}
+            onChange={(e) => handleChange('outerPerimeter', e.target.value)}
+            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+          />
+          <span className="text-[10px] text-slate-400 mt-1 block">2 × (L + B) = 122 RFT</span>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <label className="text-slate-500 font-semibold block mb-1">Basement Height (ft)</label>
+          <input
+            type="number"
+            step="0.5"
+            value={basement.height}
+            onChange={(e) => handleChange('height', e.target.value)}
+            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+          />
+          <span className="text-[10px] text-slate-400 mt-1 block">Above ground level</span>
+        </div>
+      </div>
+
+      {/* Computed Reactive Breakdown Cards (Audited from Sheet 2.BASEMENT) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+        {/* 1. Flyash Masonry */}
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase block">1. Flyash Brickwork</span>
+          <div className="text-base font-extrabold text-slate-900 dark:text-white">
+            {Math.round(estimate.basementBrickworkCft * 10) / 10} CFT
+          </div>
+          <div className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold">
+            {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Bricks
+          </div>
+          <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+            Cost: ₹ {Math.round(estimate.basementBrickworkTotalCost).toLocaleString('en-IN')}
+          </div>
+        </div>
+
+        {/* 2. Outer Plastering */}
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase block">2. Both-Side Plastering</span>
+          <div className="text-base font-extrabold text-slate-900 dark:text-white">
+            {Math.round(estimate.basementPlasteringSqft)} Sq.ft
+          </div>
+          <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
+            1:6 Mortar (P-Sand)
+          </div>
+          <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+            Cost: ₹ {Math.round(estimate.basementPlasterTotalCost).toLocaleString('en-IN')}
+          </div>
+        </div>
+
+        {/* 3. Gravel Backfilling */}
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase block">3. Gravel Backfilling</span>
+          <div className="text-base font-extrabold text-slate-900 dark:text-white">
+            {Math.round(estimate.basementGravelCft * 10) / 10} CFT
+          </div>
+          <div className="text-[11px] text-amber-600 font-semibold">
+            Net Area: {Math.round(estimate.netBasementArea)} sq.ft
+          </div>
+          <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+            Cost: ₹ {Math.round(estimate.basementGravelTotalCost).toLocaleString('en-IN')}
+          </div>
+        </div>
+
+        {/* 4. M-Sand 4" Bed */}
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase block">4. M-Sand 4" Layer</span>
+          <div className="text-base font-extrabold text-slate-900 dark:text-white">
+            {Math.round(estimate.basementMsandLayerCft * 10) / 10} CFT
+          </div>
+          <div className="text-[11px] text-cyan-600 font-semibold">
+            4" Layer above gravel
+          </div>
+          <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+            Cost: ₹ {Math.round(estimate.basementMsandMatCost).toLocaleString('en-IN')}
+          </div>
+        </div>
+
+        {/* 5. Flooring PCC Bed */}
+        <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase block">5. Flooring PCC Bed</span>
+          <div className="text-base font-extrabold text-slate-900 dark:text-white">
+            {Math.round(estimate.flooringPccSqft * 10) / 10} Sq.ft
+          </div>
+          <div className="text-[11px] text-emerald-600 font-semibold">
+            1:4:8 Bed Concrete
+          </div>
+          <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+            Cost: ₹ {Math.round(estimate.flooringPccTotalCost).toLocaleString('en-IN')}
+          </div>
+        </div>
       </div>
     </div>
   );

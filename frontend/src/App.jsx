@@ -15,24 +15,23 @@ import {
   Save,
   Check,
   Box,
-  Lock
+  Compass
 } from 'lucide-react';
 
 import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from './data/initialData';
-import { calculateFootingAndArea } from './utils/calculator';
+import { calculateSubstructureAudit } from './utils/calculator';
 import RateMasterModal from './components/RateMasterModal';
-import { TotalAreaModule, FootingModule } from './components/StepperForms';
 import { 
-  FoundationDashboard, 
-  FoundationBOQView, 
-  FoundationBOMView, 
-  FoundationQuotationView 
-} from './components/DeliverablesViews';
+  TotalAreaModule, 
+  FootingModule, 
+  PlinthBeamModule, 
+  BasementModule 
+} from './components/StepperForms';
 
-const STORAGE_KEY_DATA = 'rmc_focused_footing_data_v2';
-const STORAGE_KEY_RATES = 'rmc_focused_rates_v2';
+const STORAGE_KEY_DATA = 'rmc_substructure_audit_v3';
+const STORAGE_KEY_RATES = 'rmc_substructure_rates_v3';
 
-// Set this to true later whenever you want to re-enable them!
+// Deliverables tabs (disabled for now, can be toggled on anytime)
 const ENABLE_DELIVERABLES_TABS = false;
 
 export default function App() {
@@ -59,7 +58,6 @@ export default function App() {
     return INITIAL_PROJECT_DATA;
   });
 
-  // Navigation: forced to 'inputs' while other tabs are disabled
   const [activeTab, setActiveTab] = useState('inputs');
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -74,9 +72,9 @@ export default function App() {
     localStorage.setItem('rmc_dark', String(darkMode));
   }, [darkMode]);
 
-  // Reactive Calculation Engine
+  // Reactive Calculation Engine (Audited against Excel)
   const estimate = useMemo(() => {
-    return calculateFootingAndArea(data, rates);
+    return calculateSubstructureAudit(data, rates);
   }, [data, rates]);
 
   // Updaters
@@ -88,6 +86,14 @@ export default function App() {
     setData(prev => ({ ...prev, footings: newFootings }));
   };
 
+  const updatePlinthBeam = (newPlinthBeam) => {
+    setData(prev => ({ ...prev, plinthBeam: newPlinthBeam }));
+  };
+
+  const updateBasement = (newBasement) => {
+    setData(prev => ({ ...prev, basement: newBasement }));
+  };
+
   const handleSave = () => {
     localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
     localStorage.setItem(STORAGE_KEY_RATES, JSON.stringify(rates));
@@ -96,7 +102,7 @@ export default function App() {
   };
 
   const handleResetToSample = () => {
-    if (window.confirm("Standard sample data (Total Area + Footings) reload panna poroma?")) {
+    if (window.confirm("Standard sample data (Area + Footings + Plinth + Basement) reload panna poroma?")) {
       setData(INITIAL_PROJECT_DATA);
       setRates(DEFAULT_RATES);
       localStorage.removeItem(STORAGE_KEY_DATA);
@@ -105,9 +111,9 @@ export default function App() {
   };
 
   const allTabs = [
-    { id: 'inputs', label: 'Inputs (Total Area & Footings)', icon: Layers, badge: `${estimate.totalColumnsCount} Cols`, disabled: false },
+    { id: 'inputs', label: 'Civil Inputs (4 Modules)', icon: Layers, badge: 'Active', disabled: false },
     { id: 'dashboard', label: 'Foundation Summary', icon: PieChart, disabled: !ENABLE_DELIVERABLES_TABS },
-    { id: 'boq', label: 'Foundation BOQ', icon: FileSpreadsheet, badge: '5 Items', disabled: !ENABLE_DELIVERABLES_TABS },
+    { id: 'boq', label: 'Foundation BOQ', icon: FileSpreadsheet, badge: '12 Items', disabled: !ENABLE_DELIVERABLES_TABS },
     { id: 'bom', label: 'Materials BOM', icon: Box, badge: 'Procurement', disabled: !ENABLE_DELIVERABLES_TABS },
     { id: 'quotation', label: 'Client Quotation', icon: FileText, badge: 'Print PDF', disabled: !ENABLE_DELIVERABLES_TABS },
   ];
@@ -125,38 +131,45 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-base tracking-tight text-slate-900 dark:text-white">
-                  RMC Foundation & Area Engine
+                  RMC Substructure Engine
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                  Total Area & Footings
+                  Modules 1 to 4 Audited
                 </span>
               </div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                AutoCAD Plan: Total Area & Footing Substructure Engine
+                AutoCAD Plan: Total Area, Footings, Plinth Beam & Basement Flyash Masonry
               </div>
             </div>
           </div>
 
-          {/* Quick Header Metric Badge */}
-          <div className="hidden md:flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60">
+          {/* Quick Header Metric Badges */}
+          <div className="hidden lg:flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
             <div className="text-right">
               <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Total Built-Up</span>
-              <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+              <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
                 {Math.round(estimate.totalBuiltupArea)} Sq.ft
               </span>
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="text-left">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Total Columns</span>
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                {estimate.totalColumnsCount} Nos
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Plinth Beam Conc</span>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                {Math.round(estimate.plinthConcreteCft * 10) / 10} CFT
               </span>
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="text-left">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Footing Concrete</span>
-              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                {Math.round(estimate.totalFootingConcreteCft)} CFT
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Basement Flyash</span>
+              <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
+                {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Bricks
+              </span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="text-left">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Substructure Total</span>
+              <span className="text-xs font-black text-slate-900 dark:text-white">
+                ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
               </span>
             </div>
           </div>
@@ -247,66 +260,71 @@ export default function App() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        {/* ACTIVE TAB: Total Area & Footing Modules */}
+        {/* ACTIVE TAB: All 4 Substructure Modules */}
         {activeTab === 'inputs' && (
           <div className="space-y-6">
-            {/* Quick Live Footing Quantities Overview Banner */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+            {/* Quick Live Substructure Quantities Ribbon */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-left">
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Built-Up Area</span>
-                <span className="text-xl font-black text-blue-600 dark:text-blue-400">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Built-Up Area</span>
+                <span className="text-lg font-black text-blue-600 dark:text-blue-400">
                   {Math.round(estimate.totalBuiltupArea)} Sq.ft
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Earth Excavation</span>
-                <span className="text-xl font-black text-amber-600 dark:text-amber-400">
-                  {Math.round(estimate.totalExcavationCft)} CFT
-                </span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-500 uppercase block">Footing Concrete (M20)</span>
-                <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Footing Concrete (M20)</span>
+                <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
                   {Math.round(estimate.totalFootingConcreteCft)} CFT
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-500 uppercase block">PCC Bed Concrete</span>
-                <span className="text-xl font-black text-indigo-600 dark:text-indigo-400">
-                  {Math.round(estimate.totalPccCft)} CFT
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Plinth Concrete (M20)</span>
+                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                  {Math.round(estimate.plinthConcreteCft * 10) / 10} CFT
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Flyash Bricks</span>
+                <span className="text-lg font-black text-purple-600 dark:text-purple-400">
+                  {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Nos
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Gravel Filling</span>
+                <span className="text-lg font-black text-amber-600 dark:text-amber-400">
+                  {Math.round(estimate.basementGravelCft)} CFT
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Substructure Quote</span>
+                <span className="text-lg font-black text-slate-900 dark:text-white">
+                  ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
                 </span>
               </div>
             </div>
 
-            {/* 1. Total Area Module */}
+            {/* MODULE 1: Total Built-Up Area */}
             <TotalAreaModule builtup={data.builtup} updateBuiltup={updateBuiltup} />
 
-            {/* 2. Footing Module */}
+            {/* MODULE 2: Footing & Column Schedule */}
             <FootingModule footings={data.footings} updateFootings={updateFootings} />
+
+            {/* MODULE 3: Plinth Beam Calculation */}
+            <PlinthBeamModule 
+              plinthBeam={data.plinthBeam} 
+              updatePlinthBeam={updatePlinthBeam} 
+              estimate={estimate} 
+            />
+
+            {/* MODULE 4: Basement Flyash Brickwork Details */}
+            <BasementModule 
+              basement={data.basement} 
+              updateBasement={updateBasement} 
+              estimate={estimate} 
+            />
           </div>
-        )}
-
-        {/* DELIVERABLE TABS (Kept fully intact in code, ready to toggle on with ENABLE_DELIVERABLES_TABS) */}
-        {ENABLE_DELIVERABLES_TABS && activeTab === 'dashboard' && (
-          <FoundationDashboard estimate={estimate} rates={rates} />
-        )}
-
-        {ENABLE_DELIVERABLES_TABS && activeTab === 'boq' && (
-          <FoundationBOQView estimate={estimate} rates={rates} />
-        )}
-
-        {ENABLE_DELIVERABLES_TABS && activeTab === 'bom' && (
-          <FoundationBOMView bomSummary={estimate.bomSummary} />
-        )}
-
-        {ENABLE_DELIVERABLES_TABS && activeTab === 'quotation' && (
-          <FoundationQuotationView 
-            estimate={estimate} 
-            projectInfo={data.projectInfo} 
-            rates={rates} 
-          />
         )}
       </main>
 
@@ -314,15 +332,15 @@ export default function App() {
       <footer className="mt-auto py-5 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-500 text-center no-print">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            Built with React & Tailwind CSS • Total Area & Footing Foundation Engine
+            Built with React & Tailwind CSS • Audited from <span className="font-semibold text-slate-700 dark:text-slate-300">03-11-2026_BRICK_ESTIMATE.xlsm</span>
           </div>
           <div>
-            RM Construction & Structural Engineering Consultancy
+            RM Construction & Structural Engineering Consultancy • Modules 1, 2, 3 & 4
           </div>
         </div>
       </footer>
 
-      {/* Rate Master Modal */}
+      {/* Global Rate Master Modal */}
       <RateMasterModal
         isOpen={isRateModalOpen}
         onClose={() => setIsRateModalOpen(false)}
