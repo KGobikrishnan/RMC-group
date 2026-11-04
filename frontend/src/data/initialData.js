@@ -8,8 +8,9 @@ export const DEFAULT_RATES = {
   aggregate: 58,          // Rs/CFT (20mm Blue Metal)
   gravel: 22,             // Rs/CFT (Basement Gravel Backfilling)
   brickFlyash: 8.5,       // Rs/piece (Flyash Bricks for Basement)
+  brickChamber: 12.0,     // Rs/piece (Red Chamber Bricks for Superstructure)
 
-  // Foundation & Substructure Labour Rates (Rs/CFT or Rs/Sq.ft)
+  // Substructure Labour Rates
   labourExcavationPerCft: 8,       // Earth excavation labour
   labourPccPerCft: 18,             // Bed PCC labour
   labourFootingConcretePerCft: 25, // Footing RCC labour
@@ -21,6 +22,17 @@ export const DEFAULT_RATES = {
   labourBasementPlasterPerSqft: 12,// 1:6 Plastering labour
   labourBasementGravelPerCft: 4,   // Gravel spreading & rolling
   labourFlooringPccPerSqft: 10,    // Flooring PCC bed labour
+
+  // Superstructure (5, 6, 7) Labour & Contract Rates
+  labourChamberBrickworkPerCft: 22,// Red Chamber Brickwork labour
+  labourCeilingPlasterPerSqft: 42.5,// Ceiling Plastering (1:3 Mortar)
+  labourInnerPlasterPerSqft: 39.5, // Inner Wall Plastering (1:6 Mortar)
+  labourOuterPlasterPerSqft: 34,   // Outer Wall Plastering (1:6 Mortar)
+  
+  // Sill, Lintel & Lofts RCC Labour
+  labourSillBeamPerRft: 45,        // Sill concrete beam
+  labourLintelBeamPerRft: 65,      // Lintel beam RCC
+  labourLoftsSunshadesPerCft: 35,  // Lofts, sunshades & counter slab
 
   // Contractor Margin / Markup
   contractorMarginPct: 12,        // 10% Profit + 2% Wastage
@@ -71,32 +83,84 @@ export const INITIAL_PROJECT_DATA = {
       pccDepth: 1.0 
     },
   ],
-  // 3. Plinth Beam
-  plinthBeam: {
-    name: 'PB1',
-    // In excel Row 32: Length = 201 ft (from 28*3 + 39*3 or outer runs)
-    length: 201,
-    excavationB: 1.0,
-    excavationD: 0.5,
-    concreteB: 0.75,
-    concreteD: 1.25,
-  },
-  // 4. Basement Flyash Brickwork & Earth Filling Details
+  // 3. Plinth Beams Schedule
+  plinthBeams: [
+    {
+      id: 'pb1',
+      name: 'PB1',
+      length: 201,
+      excavationB: 1.0,
+      excavationD: 0.5,
+      concreteB: 0.75,
+      concreteD: 1.25,
+    }
+  ],
+  // 4. Basement Flyash Brickwork & Earth Filling
   basement: {
     name: 'Basement Flyash Brickwork',
-    // In excel Row 42: L=201, B=0.75, D=1.25 (added 3" for 1 layer below P.Beam)
     flyashLength: 201,
     flyashBreadth: 0.75,
     flyashDepth: 1.25,
-    // Outer perimeter: (22*2 + 39*2) = 122 ft, Height = 3 ft
     outerPerimeter: 122,
     height: 3.0,
-    // Auto calculated in sheet:
-    // Plinth Beam area = 201 * 0.75 = 150.75 sq.ft
-    // Net Filling Area = 858 - 150.75 = 707.25 sq.ft
-    // Backfilling Gravel = 707.25 * 3 = 2121.75 CFT
-    // M-sand 4" layer = 707.25 * 0.33 = 233.39 CFT
-    // Flooring PCC Area = 707.25 sq.ft
-    // Plastering Area = 122 * 3 * 2 = 732 sq.ft
+  },
+  // 5. Superstructure Brickwork (Red Chamber Bricks 9" & 4.5" Walls) & Openings
+  brickwork: {
+    walls: [
+      { id: 'w1', name: 'GF Vertical 9" Wall', length: 111, breadth: 0.75, height: 9 },
+      { id: 'w2', name: 'GF Horizontal 9" Wall', length: 84, breadth: 0.75, height: 9 },
+      { id: 'w3', name: 'GF Vertical 4.5" Wall', length: 0, breadth: 0.375, height: 9 },
+      { id: 'w4', name: 'GF Horizontal 4.5" Wall', length: 50, breadth: 0.375, height: 9 },
+    ],
+    parapet: {
+      length: 132,
+      breadth: 0.75,
+      height: 3.0,
+    },
+    openings: [
+      { id: 'op1', type: 'Main Door Open', nos: 1, width: 3.25, thickness: 0.75, height: 7, deductionCft: 17.06 },
+      { id: 'op2', type: 'Room Doors Open', nos: 3, width: 3.0, thickness: 0.75, height: 7, deductionCft: 47.25 },
+      { id: 'op3', type: 'Toilet PVC Doors Open', nos: 2, width: 2.5, thickness: 0.375, height: 7, deductionCft: 14.44 },
+      { id: 'op4', type: 'UPVC Windows Open', nos: 5, width: 3.0, thickness: 0.75, height: 4.2, deductionCft: 42.75 },
+      { id: 'op5', type: 'Wall Opening Arch', nos: 1, width: 4.0, thickness: 0.75, height: 7, deductionCft: 42.75 },
+      { id: 'op6', type: 'Ventilators Open', nos: 2, width: 2.0, thickness: 0.75, height: 1.5, deductionCft: 4.5 },
+    ]
+  },
+  // 6. Wall & Ceiling Plastering (Inner & Outer)
+  plastering: {
+    rooms: [
+      { id: 'r1', name: 'Hall', length: 10, breadth: 22.25, height: 10 },
+      { id: 'r2', name: 'Kitchen', length: 10, breadth: 8.25, height: 10 },
+      { id: 'r3', name: 'Bed room 1', length: 10, breadth: 11.25, height: 10 },
+      { id: 'r4', name: 'Bed room 2', length: 10, breadth: 8.0, height: 10 },
+      { id: 'r5', name: 'Pooja Room', length: 10, breadth: 3.5, height: 10 },
+      { id: 'r6', name: 'Portico', length: 20.5, breadth: 6.0, height: 10 },
+      { id: 'r7', name: 'Toilet 1', length: 10, breadth: 3.0, height: 10 },
+      { id: 'r8', name: 'Toilet 2', length: 10, breadth: 3.0, height: 10 },
+      { id: 'r9', name: 'Loft Slabs', length: 30, breadth: 1.75, height: 0 },
+      { id: 'r10', name: 'Counter Slab', length: 16, breadth: 2.5, height: 0 },
+    ],
+    // Total opening deductions in plastering: 488.5 sq.ft
+    innerDeductionsSqft: 488.5,
+    outerSurfaces: [
+      { id: 'o1', name: 'Building Outer Area', length: 122, height: 13.5, multiplier: 1 },
+      { id: 'o2', name: 'Parapet Wall Inner & Top', length: 132, height: 4.0, multiplier: 1 },
+      { id: 'o3', name: 'Sunshade Outer Plaster', length: 22.5, height: 2.25, multiplier: 2 },
+    ]
+  },
+  // 7. Sill Beam, Lintel Beam & Lofts/Sunshades RCC (DATA SHEET 8)
+  sillAndLintel: {
+    lintelLength: 245,     // Lintel beam throughout building (245 rft)
+    lintelB: 0.75,         // 9" width
+    lintelD: 0.5,          // 6" depth
+    sillLength: 122,       // Sill beam along window level (122 rft)
+    sillB: 0.75,           // 9" width
+    sillD: 0.25,           // 3" depth
+    slabs: [
+      { id: 's1', name: 'Kitchen Counter Slab', length: 16, breadth: 3.0, depth: 0.25 },
+      { id: 's2', name: 'Bedrooms & Kitchen Lofts', length: 30, breadth: 1.75, depth: 0.25 },
+      { id: 's3', name: 'Window Sunshades', length: 22.5, breadth: 2.25, depth: 0.25 },
+      { id: 's4', name: 'Paran / Cupboard Slab', length: 6.5, breadth: 4.0, depth: 0.333 },
+    ]
   }
 };

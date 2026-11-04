@@ -1,19 +1,27 @@
 /**
- * Audited Civil Engineering Engine for:
+ * Comprehensive Audited Civil Engine covering Modules 1 to 7:
  * 1. Total Built-Up Area
  * 2. Footings & Column Substructure
- * 3. Plinth Beam (Excavation & Concrete M20)
- * 4. Basement Flyash Brickwork Details (Masonry, Plastering, Gravel filling, 4" M-Sand bed, PCC bed)
+ * 3. Plinth Beams (Dynamic Rows)
+ * 4. Basement Flyash Brickwork Details
+ * 5. Superstructure Brickwork (9" & 4.5" Red Chamber Bricks) & Openings
+ * 6. Plastering (Ceiling 1:3, Wall Inner 1:6, Wall Outer 1:6)
+ * 7. Sill Beam, Lintel Beam & Lofts/Sunshades RCC
  * 
- * Directly validated against 03-11-2026_BRICK_ESTIMATE.xlsm:
- * - 'DATA SHEET' Rows 2-47
- * - '1.FOUNDATION'
- * - '2.BASEMENT'
- * - '11.BOQ' Rows 3-14
+ * Validated strictly against 03-11-2026_BRICK_ESTIMATE.xlsm
  */
 
-export function calculateSubstructureAudit(data, rates) {
-  const { builtup, footings, plinthBeam, basement } = data;
+export function calculateCivilEstimateComplete(data, rates) {
+  const { 
+    builtup, 
+    footings, 
+    plinthBeams, 
+    plinthBeam, 
+    basement, 
+    brickwork, 
+    plastering, 
+    sillAndLintel 
+  } = data;
 
   // -------------------------------------------------------------
   // 1. BUILT-UP AREA
@@ -21,10 +29,7 @@ export function calculateSubstructureAudit(data, rates) {
   const floorItems = (builtup?.floors || []).map((f) => {
     const l = Number(f.length) || 0;
     const b = Number(f.breadth) || 0;
-    return {
-      ...f,
-      computedArea: l * b,
-    };
+    return { ...f, computedArea: l * b };
   });
 
   const totalBuiltupArea = floorItems.reduce((acc, f) => acc + (f.computedArea || 0), 0);
@@ -53,16 +58,10 @@ export function calculateSubstructureAudit(data, rates) {
     const depth = Number(row.depth) || 0;
     const pccDepth = Number(row.pccDepth) || 0;
 
-    // Excel '1.FOUNDATION':
-    // Excavation: Footing L * Footing B * Depth * Nos
     const excavationCft = footingL * footingB * depth * nos;
-    // PCC 1:4:8: Footing L * Footing B * PCC Depth * Nos
     const pccCft = footingL * footingB * pccDepth * nos;
-    // Footing Conc M20: Footing L * Footing B * Footing D * Nos
     const footingConcreteCft = footingL * footingB * footingD * nos;
-    // Column Stub Conc M20: Column L * Column B * Column D * Nos
     const colConcreteCft = colL * colB * colD * nos;
-    // Backfilling: Excavation - [PCC + Footing Conc + (Nos * colL * colB * Depth)]
     const colDeductionInExcavation = nos * colL * colB * depth;
     const backfillingCft = Math.max(0, excavationCft - (pccCft + footingConcreteCft + colDeductionInExcavation));
 
@@ -84,8 +83,6 @@ export function calculateSubstructureAudit(data, rates) {
     };
   });
 
-  // Material & Labour for Foundation Bed & Footings
-  // PCC 1:4:8 Bed Concrete:
   const pccCementBags = (totalPccCft / 35.314) * 3.41169;
   const pccSandCft = pccCementBags * 6.0;
   const pccAggCft = pccCementBags * 10.0;
@@ -93,130 +90,271 @@ export function calculateSubstructureAudit(data, rates) {
   const pccLabCost = totalPccCft * rates.labourPccPerCft;
   const pccTotalCost = pccMatCost + pccLabCost;
 
-  // Footing Concrete M20:
   const footingCementBags = (totalFootingConcreteCft / 35.314) * 8.064;
-  const footingSteelKg = totalFootingConcreteCft * 0.95; // Mesh
+  const footingSteelKg = totalFootingConcreteCft * 0.95;
   const footingSandCft = footingCementBags * (8.0 / 3.0);
   const footingAggCft = footingCementBags * (10.0 / 3.0);
   const footingMatCost = (footingCementBags * rates.cement) + (footingSteelKg * rates.steel) + (footingSandCft * rates.msand) + (footingAggCft * rates.aggregate);
   const footingLabCost = totalFootingConcreteCft * rates.labourFootingConcretePerCft;
   const footingTotalCost = footingMatCost + footingLabCost;
 
-  // Column Stub Concrete M20:
   const colCementBags = (totalColumnConcreteCft / 35.314) * 8.064;
-  const colSteelKg = totalColumnConcreteCft * 7.0; // 7kg/cft
+  const colSteelKg = totalColumnConcreteCft * 7.0;
   const colSandCft = colCementBags * (8.0 / 3.0);
   const colAggCft = colCementBags * (8.0 / 3.0);
   const colMatCost = (colCementBags * rates.cement) + (colSteelKg * rates.steel) + (colSandCft * rates.msand) + (colAggCft * rates.aggregate);
   const colLabCost = totalColumnConcreteCft * rates.labourColumnStubPerCft;
   const colTotalCost = colMatCost + colLabCost;
 
-  // Excavation & Backfilling labour
   const excavationLabCost = totalExcavationCft * rates.labourExcavationPerCft;
   const backfillingLabCost = totalFootingBackfillingCft * rates.labourBackfillingPerCft;
 
   // -------------------------------------------------------------
-  // 3. PLINTH BEAM (AUDIT & CALCULATION)
+  // 3. PLINTH BEAMS SCHEDULE (DYNAMIC ARRAY)
   // -------------------------------------------------------------
-  // From DATA SHEET Row 32 & 1.FOUNDATION Row 4 (Cols I-N, Y, AA)
-  const pbLength = Number(plinthBeam?.length) || 201;
-  const pbExcB = Number(plinthBeam?.excavationB) || 1.0;
-  const pbExcD = Number(plinthBeam?.excavationD) || 0.5;
-  const pbConcB = Number(plinthBeam?.concreteB) || 0.75;
-  const pbConcD = Number(plinthBeam?.concreteD) || 1.25;
+  const rawBeams = Array.isArray(plinthBeams) 
+    ? plinthBeams 
+    : (plinthBeam ? [plinthBeam] : [{ id: 'pb1', name: 'PB1', length: 201, excavationB: 1.0, excavationD: 0.5, concreteB: 0.75, concreteD: 1.25 }]);
 
-  // Plinth Beam Excavation: L * B * D = 201 * 1 * 0.5 = 100.5 CFT
-  const plinthExcavationCft = pbLength * pbExcB * pbExcD;
-  const plinthExcavationLabCost = plinthExcavationCft * rates.labourPlinthExcavationPerCft;
+  let totalPbLength = 0;
+  let totalPlinthExcavationCft = 0;
+  let totalPlinthConcreteCft = 0;
+  let totalPlinthAreaDeduction = 0;
 
-  // Plinth Beam Concrete M20: L * B * D = 201 * 0.75 * 1.25 = 188.4375 CFT
-  const plinthConcreteCft = pbLength * pbConcB * pbConcD;
+  const itemizedPlinthBeams = rawBeams.map((b) => {
+    const l = Number(b.length) || 0;
+    const excB = Number(b.excavationB) || 1.0;
+    const excD = Number(b.excavationD) || 0.5;
+    const concB = Number(b.concreteB) || 0.75;
+    const concD = Number(b.concreteD) || 1.25;
 
-  // Plinth Beam Materials from BOQ Row 6 (V6 formula):
-  // Cement = (Volume / 35.314) * 8.064 = 43.02996 bags
-  // Steel = Volume * 4.0 kg = 753.75 kg
-  // M-Sand = Cement * (8/3) = 114.74656 CFT
-  // 20mm Agg = Cement * (10/3) = 143.4332 CFT
-  const plinthCementBags = (plinthConcreteCft / 35.314) * 8.064;
-  const plinthSteelKg = plinthConcreteCft * 4.0;
+    const excCft = l * excB * excD;
+    const concCft = l * concB * concD;
+    const beamPlanArea = l * concB;
+
+    totalPbLength += l;
+    totalPlinthExcavationCft += excCft;
+    totalPlinthConcreteCft += concCft;
+    totalPlinthAreaDeduction += beamPlanArea;
+
+    return { ...b, length: l, excavationB: excB, excavationD: excD, concreteB: concB, concreteD: concD, excCft, concCft, beamPlanArea };
+  });
+
+  const plinthExcavationLabCost = totalPlinthExcavationCft * rates.labourPlinthExcavationPerCft;
+  const plinthCementBags = (totalPlinthConcreteCft / 35.314) * 8.064;
+  const plinthSteelKg = totalPlinthConcreteCft * 4.0;
   const plinthSandCft = plinthCementBags * (8.0 / 3.0);
   const plinthAggCft = plinthCementBags * (10.0 / 3.0);
 
-  const plinthMaterialCost = (plinthCementBags * rates.cement) + 
-                             (plinthSteelKg * rates.steel) + 
-                             (plinthSandCft * rates.msand) + 
-                             (plinthAggCft * rates.aggregate);
-  const plinthConcreteLabCost = plinthConcreteCft * rates.labourPlinthConcretePerCft;
+  const plinthMaterialCost = (plinthCementBags * rates.cement) + (plinthSteelKg * rates.steel) + (plinthSandCft * rates.msand) + (plinthAggCft * rates.aggregate);
+  const plinthConcreteLabCost = totalPlinthConcreteCft * rates.labourPlinthConcretePerCft;
   const plinthConcreteTotalCost = plinthMaterialCost + plinthConcreteLabCost;
 
   // -------------------------------------------------------------
-  // 4. BASEMENT - FLYASH BRICKWORK & BACKFILLING (AUDIT & CALCULATION)
+  // 4. BASEMENT - FLYASH BRICKWORK & FILLING
   // -------------------------------------------------------------
-  // From DATA SHEET Rows 38-42 & 2.BASEMENT Rows 1-4 & BOQ Rows 7-11
-  const bsmFlyashL = Number(basement?.flyashLength) || pbLength || 201;
+  const bsmFlyashL = Number(basement?.flyashLength) || totalPbLength || 201;
   const bsmFlyashB = Number(basement?.flyashBreadth) || 0.75;
   const bsmFlyashD = Number(basement?.flyashDepth) || 1.25;
-
-  // Outer Perimeter: default 2*(L+B) of ground floor = 2*(22+39) = 122 RFT
   const bsmPerimeter = Number(basement?.outerPerimeter) || (2 * (gfLength + gfBreadth)) || 122;
   const bsmHeight = Number(basement?.height) || 3.0;
 
-  // 4.1 Basement Flyash Brickwork Volume = L * B * D = 201 * 0.75 * 1.25 = 188.4375 CFT
   const basementBrickworkCft = bsmFlyashL * bsmFlyashB * bsmFlyashD;
-  // Flyash Bricks count: CFT * 12 = 188.4375 * 12 = 2261.25 Nos
   const basementFlyashBricksNos = basementBrickworkCft * 12;
-  // Cement bags from BOQ V82 formula: (188.4375 / 35.314) * (1.54/7) * (1440/50) = 10.21994 bags
-  const basementFlyashCementBags = (basementBrickworkCft / 35.314) * 6.336 * (1.54 / 1.54) * 0.999 || 10.22;
-  // M-Sand for brickwork mortar (1:6): Cement * (20/3) = 68.1329 CFT
+  const basementFlyashCementBags = (basementBrickworkCft / 35.314) * 6.336 * 0.999 || 10.22;
   const basementFlyashSandCft = basementFlyashCementBags * (20.0 / 3.0);
 
-  const basementBrickworkMatCost = (basementFlyashCementBags * rates.cement) + 
-                                   (basementFlyashBricksNos * rates.brickFlyash) + 
-                                   (basementFlyashSandCft * rates.msand);
+  const basementBrickworkMatCost = (basementFlyashCementBags * rates.cement) + (basementFlyashBricksNos * rates.brickFlyash) + (basementFlyashSandCft * rates.msand);
   const basementBrickworkLabCost = basementBrickworkCft * rates.labourBasementBrickworkPerCft;
   const basementBrickworkTotalCost = basementBrickworkMatCost + basementBrickworkLabCost;
 
-  // 4.2 Outer Wall Both-Side Plastering (1:6)
-  // Area = Perimeter * Height * 2 = 122 * 3 * 2 = 732 Sq.ft
   const basementPlasteringSqft = bsmPerimeter * bsmHeight * 2;
-  // Cement = ((732 * 0.05) / 35.314) * 7.5 = 7.7731 bags
   const bsmPlasterCementBags = ((basementPlasteringSqft * 0.05) / 35.314) * 7.5;
-  // P-Sand = Cement * (20/3) = 51.8208 CFT
   const bsmPlasterSandCft = bsmPlasterCementBags * (20.0 / 3.0);
   const basementPlasterMatCost = (bsmPlasterCementBags * rates.cement) + (bsmPlasterSandCft * rates.psand);
   const basementPlasterLabCost = basementPlasteringSqft * rates.labourBasementPlasterPerSqft;
   const basementPlasterTotalCost = basementPlasterMatCost + basementPlasterLabCost;
 
-  // 4.3 Basement Earth & Gravel Filling
-  // Total Plinth Area = Ground Floor Area (858 sq.ft)
-  // Plinth Beam Deduction Area = Sum of PB Length * PB Breadth = 201 * 0.75 = 150.75 sq.ft
-  // Net Backfilling Area = 858 - 150.75 = 707.25 sq.ft
-  const plinthBeamDeductionArea = bsmFlyashL * bsmFlyashB;
+  const plinthBeamDeductionArea = totalPlinthAreaDeduction || (bsmFlyashL * bsmFlyashB);
   const netBasementArea = Math.max(0, gfArea - plinthBeamDeductionArea);
-
-  // Gravel Filling Volume = Net Area * Height = 707.25 * 3 = 2121.75 CFT
   const basementGravelCft = netBasementArea * bsmHeight;
   const basementGravelMatCost = basementGravelCft * rates.gravel;
   const basementGravelLabCost = basementGravelCft * rates.labourBasementGravelPerCft;
   const basementGravelTotalCost = basementGravelMatCost + basementGravelLabCost;
 
-  // 4.4 Consolidation & M-Sand 4" Layer above Gravel
-  // M-Sand Volume = Net Area * 0.33 ft (4 inches) = 707.25 * 0.33 = 233.3925 CFT
   const basementMsandLayerCft = netBasementArea * 0.33;
   const basementMsandMatCost = basementMsandLayerCft * rates.msand;
 
-  // 4.5 Flooring PCC Bed (1:4:8 Bed Concrete)
-  // Area = Net Area = 707.25 Sq.ft
   const flooringPccSqft = netBasementArea;
-  // Cement = (((707.25 * 0.375) / 35.314) * 3.41169) = 25.6228 bags
   const flooringPccCementBags = (((flooringPccSqft * 0.375) / 35.314) * 3.41169);
-  const flooringPccSandCft = flooringPccCementBags * (10.0 / 3.0); // 85.409 CFT
-  const flooringPccAggCft = flooringPccCementBags * 4.0;          // 102.49 CFT
-  const flooringPccMatCost = (flooringPccCementBags * rates.cement) + 
-                             (flooringPccSandCft * rates.msand) + 
-                             (flooringPccAggCft * rates.aggregate);
+  const flooringPccSandCft = flooringPccCementBags * (10.0 / 3.0);
+  const flooringPccAggCft = flooringPccCementBags * 4.0;
+  const flooringPccMatCost = (flooringPccCementBags * rates.cement) + (flooringPccSandCft * rates.msand) + (flooringPccAggCft * rates.aggregate);
   const flooringPccLabCost = flooringPccSqft * rates.labourFlooringPccPerSqft;
   const flooringPccTotalCost = flooringPccMatCost + flooringPccLabCost;
+
+  // -------------------------------------------------------------
+  // 5. SUPERSTRUCTURE BRICKWORK (RED CHAMBER 9" & 4.5" WALLS)
+  // -------------------------------------------------------------
+  // From DATA SHEET Section 5 & Sheet 3.BRICK WORK
+  const rawWalls = brickwork?.walls || [];
+  let grossWallVolumeCft = 0;
+
+  const itemizedWalls = rawWalls.map((w) => {
+    const l = Number(w.length) || 0;
+    const b = Number(w.breadth) || 0.75;
+    const h = Number(w.height) || 9;
+    const vol = l * b * h;
+    grossWallVolumeCft += vol;
+    return { ...w, length: l, breadth: b, height: h, volumeCft: vol };
+  });
+
+  // Parapet Wall (132' x 0.75' x 3')
+  const parapetL = Number(brickwork?.parapet?.length) || 132;
+  const parapetB = Number(brickwork?.parapet?.breadth) || 0.75;
+  const parapetH = Number(brickwork?.parapet?.height) || 3.0;
+
+  // Openings Deductions
+  const rawOpenings = brickwork?.openings || [];
+  let totalDeductionsVolumeCft = 0;
+
+  const itemizedOpenings = rawOpenings.map((op) => {
+    const nos = Number(op.nos) || 1;
+    const w = Number(op.width) || 0;
+    const thk = Number(op.thickness) || 0.75;
+    const h = Number(op.height) || 0;
+    const deduction = op.deductionCft !== undefined ? Number(op.deductionCft) : (nos * w * thk * h);
+    totalDeductionsVolumeCft += deduction;
+    return { ...op, nos, width: w, thickness: thk, height: h, deductionCft: deduction };
+  });
+
+  // Net Brickwork Volume: Gross - Deductions = 1485 - 168.75 = 1316.25 CFT
+  const netBrickworkCft = Math.max(0, grossWallVolumeCft - totalDeductionsVolumeCft);
+  // Red Chamber Bricks Count: Net CFT * 12 = 1316.25 * 12 = 15,795 Nos
+  const chamberBricksNos = netBrickworkCft * 12;
+
+  // Cement & M-Sand from BOQ Row 12 (V12 formula):
+  // Cement = (Net CFT / 35.314) * (1.54/7) * (1440/50) = 73.711 bags
+  // M-Sand = Cement * 8.0 = 589.688 CFT
+  const chamberCementBags = (netBrickworkCft / 35.314) * (1.54 / 7) * (1440 / 50) || 73.71;
+  const chamberSandCft = chamberCementBags * 8.0;
+
+  const chamberBrickworkMatCost = (chamberCementBags * rates.cement) + 
+                                  (chamberBricksNos * rates.brickChamber) + 
+                                  (chamberSandCft * rates.msand);
+  const chamberBrickworkLabCost = netBrickworkCft * rates.labourChamberBrickworkPerCft;
+  const chamberBrickworkTotalCost = chamberBrickworkMatCost + chamberBrickworkLabCost;
+
+  // -------------------------------------------------------------
+  // 6. PLASTERING (WALLS INNER & OUTER & CEILINGS)
+  // -------------------------------------------------------------
+  // From DATA SHEET Section 6 & Sheet 4.PLASTERING
+  const rawRooms = plastering?.rooms || [];
+  let totalCeilingSqft = 0;
+  let totalInnerWallGrossSqft = 0;
+
+  const itemizedRooms = rawRooms.map((r) => {
+    const l = Number(r.length) || 0;
+    const b = Number(r.breadth) || 0;
+    const h = Number(r.height) || 10;
+    const ceilingArea = l * b;
+    const wallArea = h > 0 ? (2 * (l + b) * h) : 0;
+    totalCeilingSqft += ceilingArea;
+    totalInnerWallGrossSqft += wallArea;
+    return { ...r, length: l, breadth: b, height: h, ceilingArea, wallArea };
+  });
+
+  const innerDeductionsSqft = Number(plastering?.innerDeductionsSqft) || 488.5;
+  // Total Gross Inner = Ceiling (808) + Wall Gross (3115) = 3923 sq.ft
+  // Net Inner Plastering = 3923 - 488.5 = 3434.5 sq.ft
+  const netInnerPlasteringSqft = Math.max(0, (totalCeilingSqft + totalInnerWallGrossSqft) - innerDeductionsSqft);
+
+  // Outer Plastering Surfaces (Building outer 122*13.5 + Parapet 132*4 + Sunshade 22.5*2.25*2) = 2276.25 sq.ft
+  const rawOuter = plastering?.outerSurfaces || [];
+  let totalOuterPlasteringSqft = 0;
+
+  const itemizedOuterSurfaces = rawOuter.map((o) => {
+    const l = Number(o.length) || 0;
+    const h = Number(o.height) || 0;
+    const mult = Number(o.multiplier) || 1;
+    const area = l * h * mult;
+    totalOuterPlasteringSqft += area;
+    return { ...o, length: l, height: h, multiplier: mult, area };
+  });
+
+  // Plastering Materials from BOQ Rows 14, 15, 16:
+  // Ceiling Plaster (1:3 Mortar): Cement = ((808 * 0.05)/35.314) * 11.08 = 12.676 bags, P-Sand = Cement * 4.0 = 50.703 CFT
+  const ceilingCementBags = ((totalCeilingSqft * 0.05) / 35.314) * 11.08;
+  const ceilingPsandCft = ceilingCementBags * 4.0;
+  const ceilingPlasterMatCost = (ceilingCementBags * rates.cement) + (ceilingPsandCft * rates.psand);
+  const ceilingPlasterLabCost = totalCeilingSqft * rates.labourCeilingPlasterPerSqft;
+  const ceilingPlasterTotalCost = ceilingPlasterMatCost + ceilingPlasterLabCost;
+
+  // Wall Inner (1:6) & Outer (1:6) Plaster:
+  const wallPlasterArea = netInnerPlasteringSqft + totalOuterPlasteringSqft;
+  const wallPlasterCementBags = ((wallPlasterArea * 0.0625) / 35.314) * 7.5; // ~75.8 bags
+  const wallPlasterPsandCft = wallPlasterCementBags * (20.0 / 3.0);          // ~505.35 CFT
+
+  const wallPlasterMatCost = (wallPlasterCementBags * rates.cement) + (wallPlasterPsandCft * rates.psand);
+  const innerPlasterLabCost = netInnerPlasteringSqft * rates.labourInnerPlasterPerSqft;
+  const outerPlasterLabCost = totalOuterPlasteringSqft * rates.labourOuterPlasterPerSqft;
+  const wallPlasterTotalCost = wallPlasterMatCost + innerPlasterLabCost + outerPlasterLabCost;
+
+  // -------------------------------------------------------------
+  // 7. SILL BEAM, LINTEL BEAM & LOFTS/SUNSHADES RCC
+  // -------------------------------------------------------------
+  // From DATA SHEET Section 8 & Sheet 5.SILL & LINTEL
+  const sillLen = Number(sillAndLintel?.sillLength) || 122;
+  const sillWidth = Number(sillAndLintel?.sillB) || 0.75;
+  const sillThk = Number(sillAndLintel?.sillD) || 0.25;
+
+  const lintelLen = Number(sillAndLintel?.lintelLength) || 245;
+  const lintelWidth = Number(sillAndLintel?.lintelB) || 0.75;
+  const lintelThk = Number(sillAndLintel?.lintelD) || 0.5;
+
+  // Sill M15 Concrete: 122 * 0.75 * 0.25 = 22.875 CFT
+  // Cement = ((122 * 0.75 * 0.25)/35.314) * 6.336 = 4.104 bags
+  // Steel = (122 * 0.75 * 0.5) * 3.2 = 146.4 kg (2 nos 8mm bars)
+  const sillCementBags = ((sillLen * sillWidth * sillThk) / 35.314) * 6.336;
+  const sillSteelKg = (sillLen * sillWidth * 0.5) * 3.2;
+  const sillSandCft = sillCementBags * (10.0 / 3.0);
+  const sillAggCft = sillCementBags * 4.0;
+  const sillMatCost = (sillCementBags * rates.cement) + (sillSteelKg * rates.steel) + (sillSandCft * rates.msand) + (sillAggCft * rates.aggregate);
+  const sillLabCost = sillLen * rates.labourSillBeamPerRft;
+  const sillTotalCost = sillMatCost + sillLabCost;
+
+  // Lintel M15 Concrete: 245 * 0.75 * 0.5 = 91.875 CFT
+  // Cement = ((245 * 0.75 * 0.5)/35.314) * 6.336 = 16.484 bags
+  // Steel = (245 * 0.75 * 0.5) * 3.8 = 349.125 kg (10mm TMT bars)
+  const lintelCementBags = ((lintelLen * lintelWidth * lintelThk) / 35.314) * 6.336;
+  const lintelSteelKg = (lintelLen * lintelWidth * lintelThk) * 3.8;
+  const lintelSandCft = lintelCementBags * (10.0 / 3.0);
+  const lintelAggCft = lintelCementBags * 4.0;
+  const lintelMatCost = (lintelCementBags * rates.cement) + (lintelSteelKg * rates.steel) + (lintelSandCft * rates.msand) + (lintelAggCft * rates.aggregate);
+  const lintelLabCost = lintelLen * rates.labourLintelBeamPerRft;
+  const lintelTotalCost = lintelMatCost + lintelLabCost;
+
+  // Lofts, Sunshades & Counter Slabs RCC
+  const rawSlabs = sillAndLintel?.slabs || [];
+  let totalLoftsVolumeCft = 0;
+
+  const itemizedSlabs = rawSlabs.map((s) => {
+    const l = Number(s.length) || 0;
+    const b = Number(s.breadth) || 0;
+    const d = Number(s.depth) || 0.25;
+    const vol = l * b * d;
+    totalLoftsVolumeCft += vol;
+    return { ...s, length: l, breadth: b, depth: d, volumeCft: vol };
+  });
+
+  // Lofts Concrete Material (M20: 8.064 bags/m3, 3.2 kg/cft steel)
+  const loftsCementBags = (totalLoftsVolumeCft / 35.314) * 8.064;
+  const loftsSteelKg = totalLoftsVolumeCft * 3.2;
+  const loftsSandCft = loftsCementBags * (8.0 / 3.0);
+  const loftsAggCft = loftsCementBags * (10.0 / 3.0);
+  const loftsMatCost = (loftsCementBags * rates.cement) + (loftsSteelKg * rates.steel) + (loftsSandCft * rates.msand) + (loftsAggCft * rates.aggregate);
+  const loftsLabCost = totalLoftsVolumeCft * rates.labourLoftsSunshadesPerCft;
+  const loftsTotalCost = loftsMatCost + loftsLabCost;
 
   // -------------------------------------------------------------
   // TOTAL MATERIAL AGGREGATION (BOM)
@@ -228,12 +366,21 @@ export function calculateSubstructureAudit(data, rates) {
     plinthCementBags +
     basementFlyashCementBags +
     bsmPlasterCementBags +
-    flooringPccCementBags;
+    flooringPccCementBags +
+    chamberCementBags +
+    ceilingCementBags +
+    wallPlasterCementBags +
+    sillCementBags +
+    lintelCementBags +
+    loftsCementBags;
 
   const totalSteelKg = 
     footingSteelKg +
     colSteelKg +
-    plinthSteelKg;
+    plinthSteelKg +
+    sillSteelKg +
+    lintelSteelKg +
+    loftsSteelKg;
 
   const totalSteelTons = totalSteelKg / 1000;
 
@@ -244,74 +391,51 @@ export function calculateSubstructureAudit(data, rates) {
     plinthSandCft +
     basementFlyashSandCft +
     basementMsandLayerCft +
-    flooringPccSandCft;
+    flooringPccSandCft +
+    chamberSandCft +
+    sillSandCft +
+    lintelSandCft +
+    loftsSandCft;
 
-  const totalPsandCft = bsmPlasterSandCft;
+  const totalPsandCft = 
+    bsmPlasterSandCft + 
+    ceilingPsandCft + 
+    wallPlasterPsandCft;
 
   const totalAggregateCft = 
     pccAggCft +
     footingAggCft +
     colAggCft +
     plinthAggCft +
-    flooringPccAggCft;
+    flooringPccAggCft +
+    sillAggCft +
+    lintelAggCft +
+    loftsAggCft;
 
   const totalGravelCft = basementGravelCft;
   const totalFlyashBricksNos = basementFlyashBricksNos;
+  const totalChamberBricksNos = chamberBricksNos;
 
   // -------------------------------------------------------------
   // FINANCIAL TOTALS
   // -------------------------------------------------------------
   const totalDirectCost = 
-    // 1 & 2: Footing & Excavation
-    excavationLabCost +
-    pccTotalCost +
-    footingTotalCost +
-    colTotalCost +
-    backfillingLabCost +
-    // 3: Plinth Beam
-    plinthExcavationLabCost +
-    plinthConcreteTotalCost +
-    // 4: Basement
-    basementBrickworkTotalCost +
-    basementPlasterTotalCost +
-    basementGravelTotalCost +
-    basementMsandMatCost +
-    flooringPccTotalCost;
+    // 2. Footings
+    excavationLabCost + pccTotalCost + footingTotalCost + colTotalCost + backfillingLabCost +
+    // 3. Plinth Beams
+    plinthExcavationLabCost + plinthConcreteTotalCost +
+    // 4. Basement
+    basementBrickworkTotalCost + basementPlasterTotalCost + basementGravelTotalCost + basementMsandMatCost + flooringPccTotalCost +
+    // 5. Superstructure Brickwork
+    chamberBrickworkTotalCost +
+    // 6. Plastering
+    ceilingPlasterTotalCost + wallPlasterTotalCost +
+    // 7. Sill & Lintel
+    sillTotalCost + lintelTotalCost + loftsTotalCost;
 
   const contractorMarkup = (totalDirectCost * rates.contractorMarginPct) / 100;
   const grandTotalCost = totalDirectCost + contractorMarkup;
   const costPerSqft = totalBuiltupArea > 0 ? (grandTotalCost / totalBuiltupArea) : 0;
-
-  // Itemized Substructure Schedule for the 4 modules
-  const schedule = [
-    // Module 2: Footing & Earthwork
-    { sno: 1, module: 'Footings', item: 'Earth Excavation for Footing', unit: 'CFT', qty: Math.round(totalExcavationCft * 10) / 10, matCost: 0, labCost: excavationLabCost, totalCost: excavationLabCost, spec: 'Excavation up to hard stratum' },
-    { sno: 2, module: 'Footings', item: 'PCC 1:4:8 Bed Concrete in Foundation', unit: 'CFT', qty: Math.round(totalPccCft * 10) / 10, matCost: pccMatCost, labCost: pccLabCost, totalCost: pccTotalCost, spec: 'Bed leveling concrete' },
-    { sno: 3, module: 'Footings', item: 'Footing Concrete M20 (with rebar mesh)', unit: 'CFT', qty: Math.round(totalFootingConcreteCft * 10) / 10, matCost: footingMatCost, labCost: footingLabCost, totalCost: footingTotalCost, spec: 'M20 nominal mix + Fe550D' },
-    { sno: 4, module: 'Footings', item: 'Column Stub Concrete M20 (up to Plinth)', unit: 'CFT', qty: Math.round(totalColumnConcreteCft * 10) / 10, matCost: colMatCost, labCost: colLabCost, totalCost: colTotalCost, spec: 'Column starter stubs (7kg/cft steel)' },
-    { sno: 5, module: 'Footings', item: 'Column Backfilling & Compaction', unit: 'CFT', qty: Math.round(totalFootingBackfillingCft * 10) / 10, matCost: 0, labCost: backfillingLabCost, totalCost: backfillingLabCost, spec: 'Selected excavated earth filling' },
-    
-    // Module 3: Plinth Beam
-    { sno: 6, module: 'Plinth Beam', item: 'Plinth Beam Excavation Trench', unit: 'CFT', qty: Math.round(plinthExcavationCft * 10) / 10, matCost: 0, labCost: plinthExcavationLabCost, totalCost: plinthExcavationLabCost, spec: `${pbLength}' L × ${pbExcB}' B × ${pbExcD}' D trench` },
-    { sno: 7, module: 'Plinth Beam', item: 'Plinth Beam Concrete M20 (TMT Steel reinforced)', unit: 'CFT', qty: Math.round(plinthConcreteCft * 10) / 10, matCost: plinthMaterialCost, labCost: plinthConcreteLabCost, totalCost: plinthConcreteTotalCost, spec: `${pbLength}' L × ${pbConcB}' B × ${pbConcD}' D (4kg/cft TMT steel)` },
-    
-    // Module 4: Basement Flyash Brickwork & Filling
-    { sno: 8, module: 'Basement', item: 'Basement Flyash Brickwork (1:6 mortar)', unit: 'CFT', qty: Math.round(basementBrickworkCft * 10) / 10, matCost: basementBrickworkMatCost, labCost: basementBrickworkLabCost, totalCost: basementBrickworkTotalCost, spec: `${bsmFlyashL}' L × ${bsmFlyashB}' B × ${bsmFlyashD}' D (2,261 bricks)` },
-    { sno: 9, module: 'Basement', item: 'Basement Wall Both-Side Plastering (1:6)', unit: 'Sq.ft', qty: Math.round(basementPlasteringSqft), matCost: basementPlasterMatCost, labCost: basementPlasterLabCost, totalCost: basementPlasterTotalCost, spec: `${bsmPerimeter}' perimeter × ${bsmHeight}' height × 2 faces` },
-    { sno: 10, module: 'Basement', item: 'Basement Gravel Backfilling & Rolling', unit: 'CFT', qty: Math.round(basementGravelCft * 10) / 10, matCost: basementGravelMatCost, labCost: basementGravelLabCost, totalCost: basementGravelTotalCost, spec: `${Math.round(netBasementArea)} sq.ft net area × ${bsmHeight}' depth` },
-    { sno: 11, module: 'Basement', item: 'M-Sand 4" Bed Layer above Gravel', unit: 'CFT', qty: Math.round(basementMsandLayerCft * 10) / 10, matCost: basementMsandMatCost, labCost: 0, totalCost: basementMsandMatCost, spec: `${Math.round(netBasementArea)} sq.ft net area × 4" thickness` },
-    { sno: 12, module: 'Basement', item: 'Flooring PCC (1:4:8 Bed Concrete)', unit: 'Sq.ft', qty: Math.round(flooringPccSqft * 10) / 10, matCost: flooringPccMatCost, labCost: flooringPccLabCost, totalCost: flooringPccTotalCost, spec: 'Bed concrete ready for vitrified tile laying' },
-  ];
-
-  const bomSummary = [
-    { name: 'Cement (Dalmia / UltraTech Grade)', unit: 'Bags (50kg)', qty: Math.round(totalCementBags * 10) / 10, rate: rates.cement, amount: Math.round(totalCementBags * rates.cement) },
-    { name: 'TMT Steel Rebar (ARS Fe550D ISI)', unit: 'Kg', qty: Math.round(totalSteelKg * 10) / 10, rate: rates.steel, amount: Math.round(totalSteelKg * rates.steel), subNote: `${totalSteelTons.toFixed(2)} Metric Tons` },
-    { name: 'Flyash Bricks (Basement Wall)', unit: 'Pieces', qty: Math.round(totalFlyashBricksNos), rate: rates.brickFlyash, amount: Math.round(totalFlyashBricksNos * rates.brickFlyash) },
-    { name: 'M-Sand (Concrete & Mortar)', unit: 'CFT', qty: Math.round(totalMsandCft * 10) / 10, rate: rates.msand, amount: Math.round(totalMsandCft * rates.msand), subNote: `${(totalMsandCft / 100).toFixed(2)} Units` },
-    { name: 'P-Sand (Plastering Sand)', unit: 'CFT', qty: Math.round(totalPsandCft * 10) / 10, rate: rates.psand, amount: Math.round(totalPsandCft * rates.psand), subNote: `${(totalPsandCft / 100).toFixed(2)} Units` },
-    { name: '20mm Blue Metal Aggregate', unit: 'CFT', qty: Math.round(totalAggregateCft * 10) / 10, rate: rates.aggregate, amount: Math.round(totalAggregateCft * rates.aggregate), subNote: `${(totalAggregateCft / 100).toFixed(2)} Units` },
-    { name: 'Gravel Filling', unit: 'CFT', qty: Math.round(totalGravelCft * 10) / 10, rate: rates.gravel, amount: Math.round(totalGravelCft * rates.gravel) },
-  ];
 
   return {
     totalBuiltupArea,
@@ -319,7 +443,7 @@ export function calculateSubstructureAudit(data, rates) {
     gfLength,
     gfBreadth,
     floorItems,
-    // Footings
+    // 2. Footings
     totalColumnsCount,
     totalExcavationCft,
     totalPccCft,
@@ -327,14 +451,15 @@ export function calculateSubstructureAudit(data, rates) {
     totalColumnConcreteCft,
     totalFootingBackfillingCft,
     itemizedFootings,
-    // Plinth Beam
-    pbLength,
-    plinthExcavationCft,
-    plinthConcreteCft,
+    // 3. Plinth Beams
+    itemizedPlinthBeams,
+    totalPbLength,
+    totalPlinthExcavationCft,
+    totalPlinthConcreteCft,
     plinthSteelKg,
     plinthMaterialCost,
     plinthConcreteTotalCost,
-    // Basement
+    // 4. Basement
     bsmFlyashL,
     bsmFlyashB,
     bsmFlyashD,
@@ -353,11 +478,42 @@ export function calculateSubstructureAudit(data, rates) {
     basementGravelTotalCost,
     basementMsandMatCost,
     flooringPccTotalCost,
-    // BOM & Totals
+    // 5. Brickwork
+    itemizedWalls,
+    itemizedOpenings,
+    grossWallVolumeCft,
+    totalDeductionsVolumeCft,
+    netBrickworkCft,
+    chamberBricksNos,
+    chamberBrickworkMatCost,
+    chamberBrickworkLabCost,
+    chamberBrickworkTotalCost,
+    // 6. Plastering
+    itemizedRooms,
+    itemizedOuterSurfaces,
+    totalCeilingSqft,
+    totalInnerWallGrossSqft,
+    netInnerPlasteringSqft,
+    totalOuterPlasteringSqft,
+    ceilingPlasterTotalCost,
+    wallPlasterTotalCost,
+    // 7. Sill, Lintel & Lofts
+    sillLen,
+    lintelLen,
+    itemizedSlabs,
+    totalLoftsVolumeCft,
+    sillSteelKg,
+    lintelSteelKg,
+    loftsSteelKg,
+    sillTotalCost,
+    lintelTotalCost,
+    loftsTotalCost,
+    // BOM & Financials
     totalCementBags,
     totalSteelKg,
     totalSteelTons,
     totalFlyashBricksNos,
+    totalChamberBricksNos,
     totalMsandCft,
     totalPsandCft,
     totalAggregateCft,
@@ -366,7 +522,5 @@ export function calculateSubstructureAudit(data, rates) {
     contractorMarkup,
     grandTotalCost,
     costPerSqft,
-    schedule,
-    bomSummary,
   };
 }

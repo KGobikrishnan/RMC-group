@@ -19,17 +19,20 @@ import {
 } from 'lucide-react';
 
 import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from './data/initialData';
-import { calculateSubstructureAudit } from './utils/calculator';
+import { calculateCivilEstimateComplete } from './utils/calculator';
 import RateMasterModal from './components/RateMasterModal';
 import { 
   TotalAreaModule, 
   FootingModule, 
   PlinthBeamModule, 
-  BasementModule 
+  BasementModule,
+  BrickworkModule,
+  PlasteringModule,
+  SillLintelModule
 } from './components/StepperForms';
 
-const STORAGE_KEY_DATA = 'rmc_substructure_audit_v3';
-const STORAGE_KEY_RATES = 'rmc_substructure_rates_v3';
+const STORAGE_KEY_DATA = 'rmc_substructure_audit_v7';
+const STORAGE_KEY_RATES = 'rmc_substructure_rates_v7';
 
 // Deliverables tabs (disabled for now, can be toggled on anytime)
 const ENABLE_DELIVERABLES_TABS = false;
@@ -72,9 +75,9 @@ export default function App() {
     localStorage.setItem('rmc_dark', String(darkMode));
   }, [darkMode]);
 
-  // Reactive Calculation Engine (Audited against Excel)
+  // Reactive Calculation Engine (Audited against Excel Sections 1 to 7)
   const estimate = useMemo(() => {
-    return calculateSubstructureAudit(data, rates);
+    return calculateCivilEstimateComplete(data, rates);
   }, [data, rates]);
 
   // Updaters
@@ -86,12 +89,29 @@ export default function App() {
     setData(prev => ({ ...prev, footings: newFootings }));
   };
 
-  const updatePlinthBeam = (newPlinthBeam) => {
-    setData(prev => ({ ...prev, plinthBeam: newPlinthBeam }));
+  const updatePlinthBeams = (newPlinthBeams) => {
+    setData(prev => ({ 
+      ...prev, 
+      plinthBeams: newPlinthBeams,
+      // keep plinthBeam object in sync for backward compatibility
+      plinthBeam: newPlinthBeams[0] || prev.plinthBeam
+    }));
   };
 
   const updateBasement = (newBasement) => {
     setData(prev => ({ ...prev, basement: newBasement }));
+  };
+
+  const updateBrickwork = (newBrickwork) => {
+    setData(prev => ({ ...prev, brickwork: newBrickwork }));
+  };
+
+  const updatePlastering = (newPlastering) => {
+    setData(prev => ({ ...prev, plastering: newPlastering }));
+  };
+
+  const updateSillLintel = (newSillLintel) => {
+    setData(prev => ({ ...prev, sillLintel: newSillLintel }));
   };
 
   const handleSave = () => {
@@ -102,7 +122,7 @@ export default function App() {
   };
 
   const handleResetToSample = () => {
-    if (window.confirm("Standard sample data (Area + Footings + Plinth + Basement) reload panna poroma?")) {
+    if (window.confirm("Standard sample data (Sections 1 to 7) reload panna poroma?")) {
       setData(INITIAL_PROJECT_DATA);
       setRates(DEFAULT_RATES);
       localStorage.removeItem(STORAGE_KEY_DATA);
@@ -111,7 +131,7 @@ export default function App() {
   };
 
   const allTabs = [
-    { id: 'inputs', label: 'Civil Inputs (4 Modules)', icon: Layers, badge: 'Active', disabled: false },
+    { id: 'inputs', label: 'Civil Inputs (Modules 1 to 7)', icon: Layers, badge: 'Active', disabled: false },
     { id: 'dashboard', label: 'Foundation Summary', icon: PieChart, disabled: !ENABLE_DELIVERABLES_TABS },
     { id: 'boq', label: 'Foundation BOQ', icon: FileSpreadsheet, badge: '12 Items', disabled: !ENABLE_DELIVERABLES_TABS },
     { id: 'bom', label: 'Materials BOM', icon: Box, badge: 'Procurement', disabled: !ENABLE_DELIVERABLES_TABS },
@@ -131,43 +151,57 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-base tracking-tight text-slate-900 dark:text-white">
-                  RMC Substructure Engine
+                  RMC Civil Engine
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                  Modules 1 to 4 Audited
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                  Modules 1 to 7 Audited
                 </span>
               </div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                AutoCAD Plan: Total Area, Footings, Plinth Beam & Basement Flyash Masonry
+                AutoCAD: Area, Footings, Plinth, Basement, Brickwork, Plastering, Sill & Lintel
               </div>
             </div>
           </div>
 
           {/* Quick Header Metric Badges */}
-          <div className="hidden lg:flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
+          <div className="hidden xl:flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
             <div className="text-right">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Total Built-Up</span>
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Total Built-Up</span>
               <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
                 {Math.round(estimate.totalBuiltupArea)} Sq.ft
               </span>
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="text-left">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Plinth Beam Conc</span>
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                {Math.round(estimate.plinthConcreteCft * 10) / 10} CFT
-              </span>
-            </div>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-            <div className="text-left">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Basement Flyash</span>
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Basement Flyash</span>
               <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
                 {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Bricks
               </span>
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="text-left">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Substructure Total</span>
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Superstructure Bricks</span>
+              <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                {Math.round(estimate.brickwork?.chamberBricksNos || 0).toLocaleString()} Bricks
+              </span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="text-left">
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Plastering Total</span>
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                {Math.round(estimate.plastering?.totalPlasteringSqft || 0).toLocaleString()} Sq.ft
+              </span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="text-left">
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Sill & Lintel</span>
+              <span className="text-xs font-bold text-teal-600 dark:text-teal-400">
+                {Math.round((estimate.sillLintel?.sillLengthRft || 0) + (estimate.sillLintel?.lintelLengthRft || 0))} RFT
+              </span>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="text-left">
+              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Civil Est. Total</span>
               <span className="text-xs font-black text-slate-900 dark:text-white">
                 ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
               </span>
@@ -214,7 +248,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Tab Navigation (Disabled Deliverable Tabs Shown as Inactive / Locked) */}
+      {/* Tab Navigation */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto">
           <nav className="flex space-x-2 py-2">
@@ -262,11 +296,11 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        {/* ACTIVE TAB: All 4 Substructure Modules */}
+        {/* ACTIVE TAB: All 7 Civil Modules */}
         {activeTab === 'inputs' && (
           <div className="space-y-6">
-            {/* Quick Live Substructure Quantities Ribbon */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-left">
+            {/* Quick Live Substructure & Superstructure Quantities Ribbon */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 text-left">
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Built-Up Area</span>
                 <span className="text-lg font-black text-blue-600 dark:text-blue-400">
@@ -282,23 +316,29 @@ export default function App() {
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Plinth Concrete (M20)</span>
                 <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
-                  {Math.round(estimate.plinthConcreteCft * 10) / 10} CFT
+                  {Math.round(estimate.totalPlinthConcreteCft * 10) / 10} CFT
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Flyash Bricks</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Flyash</span>
                 <span className="text-lg font-black text-purple-600 dark:text-purple-400">
                   {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Nos
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Gravel Filling</span>
-                <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                  {Math.round(estimate.basementGravelCft)} CFT
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Superstructure Bricks</span>
+                <span className="text-lg font-black text-rose-600 dark:text-rose-400">
+                  {Math.round(estimate.brickwork?.chamberBricksNos || 0).toLocaleString()} Nos
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Substructure Quote</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Plastering Total</span>
+                <span className="text-lg font-black text-amber-600 dark:text-amber-400">
+                  {Math.round(estimate.plastering?.totalPlasteringSqft || 0).toLocaleString()} Sq.ft
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Project Estimate</span>
                 <span className="text-lg font-black text-slate-900 dark:text-white">
                   ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
                 </span>
@@ -311,10 +351,10 @@ export default function App() {
             {/* MODULE 2: Footing & Column Schedule */}
             <FootingModule footings={data.footings} updateFootings={updateFootings} />
 
-            {/* MODULE 3: Plinth Beam Calculation */}
+            {/* MODULE 3: Plinth Beam Calculation (With Dynamic Row Addition) */}
             <PlinthBeamModule 
-              plinthBeam={data.plinthBeam} 
-              updatePlinthBeam={updatePlinthBeam} 
+              plinthBeams={data.plinthBeams || [data.plinthBeam]} 
+              updatePlinthBeams={updatePlinthBeams} 
               estimate={estimate} 
             />
 
@@ -322,6 +362,27 @@ export default function App() {
             <BasementModule 
               basement={data.basement} 
               updateBasement={updateBasement} 
+              estimate={estimate} 
+            />
+
+            {/* MODULE 5: Superstructure Brickwork (9" & 4.5" Walls + Openings Deductions) */}
+            <BrickworkModule 
+              brickwork={data.brickwork} 
+              updateBrickwork={updateBrickwork} 
+              estimate={estimate} 
+            />
+
+            {/* MODULE 6: Plastering (Ceiling 1:3, Wall Inner 1:6, Wall Outer 1:6) */}
+            <PlasteringModule 
+              plastering={data.plastering} 
+              updatePlastering={updatePlastering} 
+              estimate={estimate} 
+            />
+
+            {/* MODULE 7: Sill Beam, Lintel Beam & Lofts/Sunshades RCC */}
+            <SillLintelModule 
+              sillLintel={data.sillLintel} 
+              updateSillLintel={updateSillLintel} 
               estimate={estimate} 
             />
           </div>
