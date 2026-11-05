@@ -237,19 +237,18 @@ export function FootingModule({ footings, updateFootings, estimate }) {
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
             {footings.map((f, idx) => {
               const itemCalculated = estimate?.itemizedFootings?.[idx];
-              const rowBackfill = itemCalculated?.backfillingCft !== undefined
-                ? Math.round(itemCalculated.backfillingCft * 10) / 10
-                : Math.round(
-                    Math.max(
-                      0,
-                      (f.footingL * f.footingB * f.depth * f.nos) -
-                      (
-                        (f.footingL * f.footingB * f.pccDepth * f.nos) +
-                        (f.footingL * f.footingB * f.footingD * f.nos) +
-                        (f.nos * f.colL * f.colB * f.depth)
-                      )
-                    ) * 10
-                  ) / 10;
+              const rawBackfill = itemCalculated?.backfillingCft !== undefined
+                ? itemCalculated.backfillingCft
+                : Math.max(
+                    0,
+                    (f.footingL * f.footingB * f.depth * f.nos) -
+                    (
+                      (f.footingL * f.footingB * f.pccDepth * f.nos) +
+                      (f.footingL * f.footingB * f.footingD * f.nos) +
+                      (f.nos * f.colL * f.colB * f.colD)
+                    )
+                  );
+              const rowBackfill = (Number(rawBackfill) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
               return (
               <tr key={f.id || idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
@@ -373,31 +372,31 @@ export function FootingModule({ footings, updateFootings, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Earthwork Excavation: </span>
           <span className="font-extrabold text-amber-600 dark:text-amber-400">
-            {Math.round(estimate?.totalExcavationCft || 0)} CFT
+            {(estimate?.totalExcavationCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">PCC 1:4:8 Bed: </span>
           <span className="font-extrabold text-slate-700 dark:text-slate-300">
-            {Math.round(estimate?.totalPccCft || 0)} CFT
+            {(estimate?.totalPccCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Footing Concrete (M20): </span>
           <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
-            {Math.round(estimate?.totalFootingConcreteCft || 0)} CFT
+            {(estimate?.totalFootingConcreteCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Column Stub (M20): </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
-            {Math.round(estimate?.totalColumnConcreteCft || 0)} CFT
+            {(estimate?.totalColumnConcreteCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Column Backfilling Vol: </span>
           <span className="font-black text-amber-600 dark:text-amber-400">
-            {Math.round((estimate?.totalFootingBackfillingCft || 0) * 10) / 10} CFT
+            {(estimate?.totalFootingBackfillingCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">

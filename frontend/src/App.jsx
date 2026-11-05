@@ -357,7 +357,7 @@ export default function App() {
             <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 text-xs">
               <span className="text-[10px] font-bold text-slate-400 uppercase block">Grand Project Total</span>
               <span className="text-base font-black text-blue-600 dark:text-blue-400">
-                ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
+                ₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
               <span className="text-[10px] text-slate-500 block mt-0.5">
                 ₹ {Math.round(estimate.costPerSqft).toLocaleString('en-IN')} / sq.ft
@@ -417,12 +417,12 @@ export default function App() {
               <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
               <div>
                 <span className="text-[9px] text-slate-400 uppercase font-bold block">Footing Concrete</span>
-                <span className="font-bold text-indigo-600 dark:text-indigo-400">{Math.round(estimate.totalFootingConcreteCft)} CFT</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">{(estimate.totalFootingConcreteCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT</span>
               </div>
               <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
               <div>
                 <span className="text-[9px] text-slate-400 uppercase font-bold block">Plinth M20</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">{Math.round(estimate.totalPlinthConcreteCft * 10) / 10} CFT</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{(estimate.totalPlinthConcreteCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT</span>
               </div>
               <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
               <div>
@@ -432,7 +432,7 @@ export default function App() {
               <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
               <div>
                 <span className="text-[9px] text-slate-400 uppercase font-bold block">Grand Total</span>
-                <span className="font-black text-slate-900 dark:text-white">₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}</span>
+                <span className="font-black text-slate-900 dark:text-white">₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
 
@@ -485,43 +485,43 @@ export default function App() {
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Built-Up Area</span>
                 <span className="text-lg font-black text-blue-600 dark:text-blue-400">
-                  {Math.round(estimate.totalBuiltupArea)} Sq.ft
+                  {(estimate.totalBuiltupArea || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Sq.ft
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Footing Concrete (M20)</span>
                 <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                  {Math.round(estimate.totalFootingConcreteCft)} CFT
+                  {(estimate.totalFootingConcreteCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Plinth Concrete (M20)</span>
                 <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
-                  {Math.round(estimate.totalPlinthConcreteCft * 10) / 10} CFT
+                  {(estimate.totalPlinthConcreteCft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CFT
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Flyash</span>
                 <span className="text-lg font-black text-purple-600 dark:text-purple-400">
-                  {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Nos
+                  {(estimate.basementFlyashBricksNos || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Nos
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Superstructure Bricks</span>
                 <span className="text-lg font-black text-rose-600 dark:text-rose-400">
-                  {Math.round(estimate.brickwork?.chamberBricksNos || 0).toLocaleString()} Nos
+                  {(estimate.brickwork?.chamberBricksNos || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Nos
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Plastering Total</span>
                 <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                  {Math.round(estimate.plastering?.totalPlasteringSqft || 0).toLocaleString()} Sq.ft
+                  {(estimate.plastering?.totalPlasteringSqft || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Sq.ft
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Project Estimate</span>
                 <span className="text-lg font-black text-slate-900 dark:text-white">
-                  ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
+                  ₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
