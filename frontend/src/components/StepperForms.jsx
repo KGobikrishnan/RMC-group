@@ -124,7 +124,7 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
                     />
                   </td>
                   <td className="py-2 px-3 text-right font-extrabold text-blue-600 dark:text-blue-400 text-sm">
-                    {Math.round(floorArea)} sq.ft
+                    {format2Dec(floorArea)} sq.ft
                   </td>
                   <td className="py-2 px-3 text-center">
                     <button
@@ -150,7 +150,7 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-500 uppercase">Total Built-Up Area:</span>
           <span className="text-lg font-black text-blue-600 dark:text-blue-400">
-            {Math.round(totalArea)} Sq.ft
+            {format2Dec(totalArea)} Sq.ft
           </span>
         </div>
       </div>
@@ -544,7 +544,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
                         />
                       </td>
                       <td className="py-1.5 px-2.5 text-right font-extrabold text-amber-600 dark:text-amber-400">
-                        {Math.round(excCft * 10) / 10}
+                        {format2Dec(excCft)}
                       </td>
                       <td className="py-1.5 px-1 text-center">
                         <button
@@ -568,7 +568,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
                   </td>
                   <td colSpan="2" className="py-2 px-2 text-right text-slate-500">Total Vol:</td>
                   <td className="py-2 px-2.5 text-right font-black text-amber-600 dark:text-amber-400">
-                    {Math.round((estimate?.totalPlinthExcavationCft || 0) * 10) / 10} CFT
+                    {format2Dec(estimate?.totalPlinthExcavationCft)} CFT
                   </td>
                   <td></td>
                 </tr>
@@ -645,10 +645,10 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
                         />
                       </td>
                       <td className="py-1.5 px-2.5 text-right font-extrabold text-emerald-600 dark:text-emerald-400">
-                        {Math.round(concCft * 100) / 100}
+                        {format2Dec(concCft)}
                       </td>
                       <td className="py-1.5 px-1 text-center font-semibold text-slate-500 text-[11px]">
-                        {Math.round(beamArea * 10) / 10}
+                        {format2Dec(beamArea)}
                       </td>
                     </tr>
                   );
@@ -662,7 +662,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
                   </td>
                   <td colSpan="2" className="py-2 px-2 text-right text-slate-500">Total Vol:</td>
                   <td className="py-2 px-2.5 text-right font-black text-emerald-600 dark:text-emerald-400">
-                    {Math.round((estimate?.totalPlinthConcreteCft || 0) * 100) / 100} CFT
+                    {format2Dec(estimate?.totalPlinthConcreteCft)} CFT
                   </td>
                   <td className="py-2 px-1 text-center font-bold text-slate-600 dark:text-slate-300 text-[11px]">
                     {Math.round((estimate?.plinthBeamDeductionArea || 0) * 10) / 10}
@@ -685,7 +685,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Trench Excavation: </span>
           <span className="font-extrabold text-amber-600 dark:text-amber-400">
-            {Math.round((estimate?.totalPlinthExcavationCft || 0) * 10) / 10} CFT
+            {format2Dec(estimate?.totalPlinthExcavationCft)} CFT
           </span>
         </div>
         <div>
@@ -873,7 +873,7 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
               </span>
             </div>
             <div className="text-base font-black text-blue-700 dark:text-blue-300">
-              {Math.round(estimate?.gfArea ?? (gfLength * gfBreadth))} <span className="text-xs font-semibold">Sq.ft</span>
+              {format2Dec(estimate?.gfArea ?? (gfLength * gfBreadth))} <span className="text-xs font-semibold">Sq.ft</span>
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
               Ground Floor ({gfLength} × {gfBreadth}) • Upper floors excluded
@@ -889,7 +889,7 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
               </span>
             </div>
             <div className="text-base font-black text-emerald-700 dark:text-emerald-300">
-              - {Math.round((estimate?.plinthBeamDeductionArea || 0) * 10) / 10} <span className="text-xs font-semibold">Sq.ft</span>
+              - {format2Dec(estimate?.plinthBeamDeductionArea)} <span className="text-xs font-semibold">Sq.ft</span>
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
               Beam Plan Area Deducted (L42)
@@ -1654,31 +1654,31 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Sill Concrete Beam: </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
-            {Math.round(sillLength)} RFT ({Math.round(estimate?.sillSteelKg || 0)} kg steel)
+            {format2Dec(sillLength)} RFT ({format2Dec(estimate?.sillSteelKg)} kg steel)
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Lintel Beam: </span>
           <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
-            {Math.round(lintelLength)} RFT ({Math.round(estimate?.lintelSteelKg || 0)} kg steel)
+            {format2Dec(lintelLength)} RFT ({format2Dec(estimate?.lintelSteelKg)} kg steel)
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Lofts & Sunshades (M20): </span>
           <span className="font-extrabold text-slate-800 dark:text-slate-200">
-            {Math.round((estimate?.totalLoftsVolumeCft || 0) * 10) / 10} CFT
+            {format2Dec(estimate?.totalLoftsVolumeCft)} CFT
           </span>
         </div>
         <div>
-          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Rebar (Sill + Lintel + Lofts): </span>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Rebar: </span>
           <span className="font-black text-teal-600 dark:text-teal-400">
-            {Math.round((estimate?.sillSteelKg || 0) + (estimate?.lintelSteelKg || 0) + (estimate?.loftsSteelKg || 0))} kg
+            {format2Dec((estimate?.sillSteelKg || 0) + (estimate?.lintelSteelKg || 0) + (estimate?.loftsSteelKg || 0))} kg
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Sill, Lintel & Lofts Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round((estimate?.sillTotalCost || 0) + (estimate?.lintelTotalCost || 0) + (estimate?.loftsTotalCost || 0)).toLocaleString('en-IN')}
+            ₹ {format2Dec((estimate?.sillTotalCost || 0) + (estimate?.lintelTotalCost || 0) + (estimate?.loftsTotalCost || 0))}
           </span>
         </div>
       </div>
@@ -1822,25 +1822,25 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Tiles Flooring: </span>
           <span className="font-extrabold text-amber-600 dark:text-amber-400">
-            {Math.round((currentData.flooringArea ?? 532.5) + (currentData.bathroomFloorArea ?? 60) + (currentData.parkingArea ?? 123))} Sq.ft
+            {format2Dec((Number(currentData.flooringArea) || 532.5) + (Number(currentData.bathroomFloorArea) || 60) + (Number(currentData.parkingArea) || 123))} Sq.ft
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Wall Dadoing: </span>
           <span className="font-extrabold text-orange-600 dark:text-orange-400">
-            {Math.round((currentData.kitchenWallArea ?? 64) + (currentData.bathroomWallArea ?? 520))} Sq.ft
+            {format2Dec((Number(currentData.kitchenWallArea) || 64) + (Number(currentData.bathroomWallArea) || 520))} Sq.ft
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Araldite Paste Area: </span>
           <span className="font-extrabold text-slate-800 dark:text-slate-200">
-            {Math.round(estimate?.tilePasteAreaSqft || 901.8)} Sq.ft
+            {format2Dec(estimate?.tilePasteAreaSqft || 901.78)} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total Tiles & Granite Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalTilesCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalTilesCost)}
           </span>
         </div>
       </div>
@@ -2019,13 +2019,13 @@ export function JoineryModule({ joinery, updateJoinery, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Joinery Opening Area: </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
-            {Math.round(estimate?.totalJoineryAreaSqft || 0)} Sq.ft
+            {format2Dec(estimate?.totalJoineryAreaSqft)} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total Doors & Windows Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalJoineryCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalJoineryCost)}
           </span>
         </div>
       </div>
@@ -2154,19 +2154,19 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Slab Concrete Volume: </span>
           <span className="font-extrabold text-violet-600 dark:text-violet-400">
-            {Math.round((estimate?.totalRoofConcreteVolumeCft || 444.82) * 10) / 10} CFT
+            {format2Dec(estimate?.totalRoofConcreteVolumeCft)} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Roof Steel Rebar: </span>
           <span className="font-extrabold text-purple-600 dark:text-purple-400">
-            {Math.round(estimate?.roofSteelKg || 1557)} kg
+            {format2Dec(estimate?.roofSteelKg)} kg
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total Roof Concrete Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalRoofConcreteCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalRoofConcreteCost)}
           </span>
         </div>
       </div>
@@ -2254,13 +2254,13 @@ export function PaintingModule({ painting, updatePainting, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Paint Surface Area: </span>
           <span className="font-extrabold text-pink-600 dark:text-pink-400">
-            {Math.round((currentData.innerWallArea ?? 2626.5) + (currentData.outerWallArea ?? 2276.25) + (currentData.ceilingArea ?? 808))} Sq.ft
+            {format2Dec((Number(currentData.innerWallArea) || 2626.5) + (Number(currentData.outerWallArea) || 2276.25) + (Number(currentData.ceilingArea) || 808))} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total Painting Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalPaintingCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalPaintingCost)}
           </span>
         </div>
       </div>
@@ -2373,25 +2373,25 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Steps Brickwork Volume: </span>
           <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-            {Math.round((estimate?.scBrickworkVolumeCft || 42.85) * 10) / 10} CFT
+            {format2Dec(estimate?.scBrickworkVolumeCft)} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Granite Surface Area: </span>
           <span className="font-extrabold text-teal-600 dark:text-teal-400">
-            {Math.round(estimate?.scStepGraniteArea || 171.5)} Sq.ft
+            {format2Dec(estimate?.scStepGraniteArea)} Sq.ft
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Waist Slab Concrete: </span>
           <span className="font-extrabold text-slate-800 dark:text-slate-200">
-            {Math.round(estimate?.scConcreteVolumeCft || 63)} CFT
+            {format2Dec(estimate?.scConcreteVolumeCft)} CFT
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total Staircase Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalStaircaseCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalStaircaseCost)}
           </span>
         </div>
       </div>
@@ -2469,19 +2469,19 @@ export function OthersModule({ others, updateOthers, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Electrical & Plumbing Cost: </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
-            ₹ {Math.round(estimate?.electricalTotalCost || 171600).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.electricalTotalCost)}
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Terrace Surkhi Volume: </span>
           <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
-            {Math.round((estimate?.terraceSurkhiVolumeCft || 191.6) * 10) / 10} CFT
+            {format2Dec(estimate?.terraceSurkhiVolumeCft)} CFT
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total MEP & Terrace Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalOthersCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalOthersCost)}
           </span>
         </div>
       </div>
@@ -2635,19 +2635,19 @@ export function AdditionalWorksModule({ additionalWorks, updateAdditionalWorks, 
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">UG Sump (2,500 L): </span>
           <span className="font-extrabold text-rose-600 dark:text-rose-400">
-            ₹ 30,000
+            ₹ 30,000.00
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Septic Tank (10,200 L): </span>
           <span className="font-extrabold text-pink-600 dark:text-pink-400">
-            ₹ 1,73,400
+            ₹ 1,73,400.00
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Total Additional Works Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round(estimate?.totalAdditionalCost || 0).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.totalAdditionalCost)}
           </span>
         </div>
       </div>
