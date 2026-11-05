@@ -282,9 +282,16 @@ export function calculateCivilEstimateComplete(data, rates) {
     return { ...r, length: l, breadth: b, height: h, ceilingArea, wallArea };
   });
 
-  const innerDeductionsSqft = Number(plastering?.innerDeductionsSqft) || 488.5;
-  // Total Gross Inner = Ceiling (808) + Wall Gross (3115) = 3923 sq.ft
-  // Net Inner Plastering = 3923 - 488.5 = 3434.5 sq.ft
+  // Compute opening area deduction dynamically from openings (or plastering.innerDeductionsSqft if specified)
+  const computedOpeningAreaSqft = (brickwork?.openings || []).reduce((acc, op) => {
+    const nos = Number(op.nos) || 1;
+    const w = Number(op.width) || 0;
+    const h = Number(op.height) || 0;
+    return acc + (nos * w * h);
+  }, 0);
+  // Both sides plastered (or door opening jambs deduction = 2 * openings area)
+  const dynamicInnerDeduction = computedOpeningAreaSqft > 0 ? (computedOpeningAreaSqft * 2) : 488.5;
+  const innerDeductionsSqft = Number(plastering?.innerDeductionsSqft) || dynamicInnerDeduction;
   const netInnerPlasteringSqft = Math.max(0, (totalCeilingSqft + totalInnerWallGrossSqft) - innerDeductionsSqft);
 
   // Outer Plastering Surfaces (Building outer 122*13.5 + Parapet 132*4 + Sunshade 22.5*2.25*2) = 2276.25 sq.ft
@@ -322,11 +329,17 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 7. SILL BEAM, LINTEL BEAM & LOFTS/SUNSHADES RCC
   // -------------------------------------------------------------
   // From DATA SHEET Section 8 & Sheet 5.SILL & LINTEL
-  const sillLen = Number(sillAndLintel?.sillLength) || 122;
+  // Sill length defaults to computed ground floor perimeter (2*(L+B)) unless isSillManual is true
+  const sillLen = (sillAndLintel?.isSillManual && sillAndLintel?.sillLength !== undefined && sillAndLintel?.sillLength !== '')
+    ? Number(sillAndLintel.sillLength)
+    : (computedGfPerimeter || bsmPerimeter || Number(sillAndLintel?.sillLength) || 122);
   const sillWidth = Number(sillAndLintel?.sillB) || 0.75;
   const sillThk = Number(sillAndLintel?.sillD) || 0.25;
 
-  const lintelLen = Number(sillAndLintel?.lintelLength) || 245;
+  // Lintel length defaults to total Plinth Beam length unless isLintelManual is true
+  const lintelLen = (sillAndLintel?.isLintelManual && sillAndLintel?.lintelLength !== undefined && sillAndLintel?.lintelLength !== '')
+    ? Number(sillAndLintel.lintelLength)
+    : (totalPbLength || Number(sillAndLintel?.lintelLength) || 245);
   const lintelWidth = Number(sillAndLintel?.lintelB) || 0.75;
   const lintelThk = Number(sillAndLintel?.lintelD) || 0.5;
 
@@ -378,13 +391,54 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 8. TILES & GRANITE WORK (Sheet 6.TILES WORK & BOQ Items 30-38)
   // -------------------------------------------------------------
   const tilesInput = data?.tiles || {};
-  const tileFlooringSqft = Number(tilesInput.flooringArea) || 532.5;
-  const tileBathroomFloorSqft = Number(tilesInput.bathroomFloorArea) || 60;
-  const tileParkingSqft = Number(tilesInput.parkingArea) || 123;
-  const tileKitchenWallSqft = Number(tilesInput.kitchenWallArea) || 64;
-  const tileBathroomWallSqft = Number(tilesInput.bathroomWallArea) || 520;
-  const tileSkirtingRft = Number(tilesInput.skirtingLength) || 86.28;
-  const tileCountertopSqft = Number(tilesInput.countertopArea) || 60;
+  
+  // Calculate dynamic room areas from plastering.rooms if user altered rooms:
+  const roomsList = plastering?.rooms || [];
+  const hallRoom = roomsList.find(r => /hall/i.test(r.name)) || {};
+  const bedRooms = roomsList.filter(r => /bed/i.test(r.name));
+  const poojaRoom = roomsList.find(r => /pooja/i.test(r.name)) || {};
+  const kitchenRoom = roomsList.find(r => /kitchen/i.test(r.name)) || {};
+  const toiletRooms = roomsList.filter(r => /toilet|bath/i.test(r.name));
+  const porticoRoom = roomsList.find(r => /portico|parking/i.test(r.name)) || {};
+
+  const dynFlooringSqft = ((Number(hallRoom.length)||0)*(Number(hallRoom.breadth)||0)) +
+    bedRooms.reduce((acc, r) => acc + ((Number(r.length)||0)*(Number(r.breadth)||0)), 0) +
+    ((Number(poojaRoom.length)||0)*(Number(poojaRoom.breadth)||0)) +
+    ((Number(kitchenRoom.length)||0)*(Number(kitchenRoom.breadth)||0));
+
+  const dynBathroomFloorSqft = toiletRooms.reduce((acc, r) => acc + ((Number(r.length)||0)*(Number(r.breadth)||0)), 0);
+  const dynParkingSqft = ((Number(porticoRoom.length)||0)*(Number(porticoRoom.breadth)||0));
+  const dynKitchenWallSqft = ((Number(kitchenRoom.length)||0) + (Number(kitchenRoom.breadth)||0)) > 0 ? ((Number(kitchenRoom.length)||10) * 4) : 64;
+  const dynBathroomWallSqft = toiletRooms.reduce((acc, r) => acc + (2 * ((Number(r.length)||0) + (Number(r.breadth)||0)) * 7), 0); // 7ft dadoing
+  const dynCountertopSqft = ((Number(kitchenRoom.length)||16) * (Number(kitchenRoom.breadth)||3) > 0) ? 60 : 60;
+
+  const tileFlooringSqft = (tilesInput?.isFlooringManual && tilesInput.flooringArea !== undefined && tilesInput.flooringArea !== '') 
+    ? Number(tilesInput.flooringArea) 
+    : (dynFlooringSqft > 0 ? dynFlooringSqft : (Number(tilesInput?.flooringArea) || 532.5));
+
+  const tileBathroomFloorSqft = (tilesInput?.isBathroomFloorManual && tilesInput.bathroomFloorArea !== undefined && tilesInput.bathroomFloorArea !== '') 
+    ? Number(tilesInput.bathroomFloorArea) 
+    : (dynBathroomFloorSqft > 0 ? dynBathroomFloorSqft : (Number(tilesInput?.bathroomFloorArea) || 60));
+
+  const tileParkingSqft = (tilesInput?.isParkingManual && tilesInput.parkingArea !== undefined && tilesInput.parkingArea !== '') 
+    ? Number(tilesInput.parkingArea) 
+    : (dynParkingSqft > 0 ? dynParkingSqft : (Number(tilesInput?.parkingArea) || 123));
+
+  const tileKitchenWallSqft = (tilesInput?.isKitchenWallManual && tilesInput.kitchenWallArea !== undefined && tilesInput.kitchenWallArea !== '') 
+    ? Number(tilesInput.kitchenWallArea) 
+    : (dynKitchenWallSqft > 0 ? dynKitchenWallSqft : (Number(tilesInput?.kitchenWallArea) || 64));
+
+  const tileBathroomWallSqft = (tilesInput?.isBathroomWallManual && tilesInput.bathroomWallArea !== undefined && tilesInput.bathroomWallArea !== '') 
+    ? Number(tilesInput.bathroomWallArea) 
+    : (dynBathroomWallSqft > 0 ? dynBathroomWallSqft : (Number(tilesInput?.bathroomWallArea) || 520));
+
+  const tileSkirtingRft = (tilesInput?.isSkirtingManual && tilesInput.skirtingLength !== undefined && tilesInput.skirtingLength !== '') 
+    ? Number(tilesInput.skirtingLength) 
+    : (dynFlooringSqft > 0 ? (dynFlooringSqft / 6.17) : (Number(tilesInput?.skirtingLength) || 86.28));
+
+  const tileCountertopSqft = (tilesInput.countertopArea !== undefined && tilesInput.countertopArea !== '') 
+    ? Number(tilesInput.countertopArea) 
+    : 60;
 
   // Tile Material Costs (Supply)
   const tileFlooringMatCost = tileFlooringSqft * (rates.tileFlooringRate || 60);
@@ -454,15 +508,19 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 11. ROOF SLAB & ROOF BEAM CONCRETE (Sheet 8.SLAB CONCRETE & BOQ Item 20)
   // -------------------------------------------------------------
   const roofSlabInput = data?.roofSlab || {};
-  // Plinth beam length defaults to 201 RFT
-  const roofBeamLength = Number(roofSlabInput.beamLength) || totalPbLength || 201;
+  // If user hasn't explicitly set isBeamManual, auto-link to totalPbLength from Section 3!
+  const roofBeamLength = (roofSlabInput?.isBeamManual && roofSlabInput?.beamLength !== undefined && roofSlabInput?.beamLength !== '')
+    ? Number(roofSlabInput.beamLength)
+    : (totalPbLength || Number(roofSlabInput?.beamLength) || 201);
   const roofBeamBreadth = Number(roofSlabInput.beamBreadth) || 0.75;
   const roofBeamDepth = Number(roofSlabInput.beamDepth) || 0.583;
-  const roofBeamVolumeCft = roofBeamLength * roofBeamBreadth * roofBeamDepth; // 87.89 CFT
+  const roofBeamVolumeCft = roofBeamLength * roofBeamBreadth * roofBeamDepth;
   const roofBeamCost = roofBeamVolumeCft * (rates.roofBeamConcreteRate || 748.1);
 
-  // Roof Slab Area defaults to Ground Floor Area (858 sq.ft)
-  const roofSlabArea = Number(roofSlabInput.slabArea) || gfArea || 858;
+  // If user hasn't explicitly set isSlabManual, auto-link to Ground Floor Area (gfArea) from Section 1!
+  const roofSlabArea = (roofSlabInput?.isSlabManual && roofSlabInput?.slabArea !== undefined && roofSlabInput?.slabArea !== '')
+    ? Number(roofSlabInput.slabArea)
+    : (gfArea || Number(roofSlabInput?.slabArea) || 858);
   const roofSlabThickness = Number(roofSlabInput.slabThickness) || 0.416; // 5 inches
   const roofSlabVolumeCft = roofSlabArea * roofSlabThickness; // 356.93 CFT
   const roofSlabCost = roofSlabVolumeCft * (rates.roofSlabConcreteRate || 523.8);
@@ -480,9 +538,18 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 12. PAINTING WORK (Sheet 9.PAINTING & BOQ Items 39-41)
   // -------------------------------------------------------------
   const paintingInput = data?.painting || {};
-  const paintInnerSqft = Number(paintingInput.innerWallArea) || (netInnerPlasteringSqft || 2626.5);
-  const paintOuterSqft = Number(paintingInput.outerWallArea) || (totalOuterPlasteringSqft || 2276.25);
-  const paintCeilingSqft = Number(paintingInput.ceilingArea) || (totalCeilingSqft || 808);
+  // Dynamically linked to plastering unless isManual
+  const paintInnerSqft = (paintingInput?.isInnerManual && paintingInput.innerWallArea !== undefined && paintingInput.innerWallArea !== '')
+    ? Number(paintingInput.innerWallArea)
+    : (netInnerPlasteringSqft > 0 ? Math.max(0, netInnerPlasteringSqft - totalCeilingSqft) : (Number(paintingInput?.innerWallArea) || 2626.5));
+
+  const paintOuterSqft = (paintingInput?.isOuterManual && paintingInput.outerWallArea !== undefined && paintingInput.outerWallArea !== '')
+    ? Number(paintingInput.outerWallArea)
+    : (totalOuterPlasteringSqft > 0 ? totalOuterPlasteringSqft : (Number(paintingInput?.outerWallArea) || 2276.25));
+
+  const paintCeilingSqft = (paintingInput?.isCeilingManual && paintingInput.ceilingArea !== undefined && paintingInput.ceilingArea !== '')
+    ? Number(paintingInput.ceilingArea)
+    : (totalCeilingSqft > 0 ? totalCeilingSqft : (Number(paintingInput?.ceilingArea) || 808));
 
   const paintInnerCost = paintInnerSqft * (rates.paintInnerRate || 28);
   const paintOuterCost = paintOuterSqft * (rates.paintOuterRate || 34);
@@ -530,8 +597,16 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 14. OTHERS: ELECTRICAL, PLUMBING & TERRACE SURKHI (DATA SHEET Row 167)
   // -------------------------------------------------------------
   const othersInput = data?.others || {};
-  const electricalSqft = Number(othersInput.electricalArea) || gfArea || 858;
-  const terraceSurkhiSqft = Number(othersInput.terraceSurkhiArea) || (gfArea - (bsmPerimeter * 0.75)) || 766.5;
+  // Electrical dynamically linked to totalBuiltupArea
+  const electricalSqft = (othersInput?.isElectricalManual && othersInput.electricalArea !== undefined && othersInput.electricalArea !== '')
+    ? Number(othersInput.electricalArea)
+    : (totalBuiltupArea || gfArea || 858);
+
+  // Terrace Surkhi dynamically linked to roofSlabArea minus outer perimeter parapet
+  const dynamicSurkhiArea = Math.max(0, (roofSlabArea || gfArea) - (bsmPerimeter * 0.75));
+  const terraceSurkhiSqft = (othersInput?.isSurkhiManual && othersInput.terraceSurkhiArea !== undefined && othersInput.terraceSurkhiArea !== '')
+    ? Number(othersInput.terraceSurkhiArea)
+    : (dynamicSurkhiArea > 0 ? dynamicSurkhiArea : 766.5);
 
   const electricalTotalCost = electricalSqft * (rates.electricalPlumbingRate || 200);
   const terraceSurkhiVolumeCft = terraceSurkhiSqft * 0.25; // 3 inches chips concrete bed
@@ -632,7 +707,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   // -------------------------------------------------------------
   const totalDirectCost = 
     // 2. Footings
-    excavationLabCost + pccTotalCost + footingTotalCost + colTotalCost + backfillingLabCost +
+    (excavationLabCost + pccTotalCost + footingTotalCost + colTotalCost + backfillingLabCost) +
     // 3. Plinth Beams
     plinthExcavationLabCost + plinthConcreteTotalCost +
     // 4. Basement
@@ -958,6 +1033,11 @@ export function calculateCivilEstimateComplete(data, rates) {
     totalColumnConcreteCft,
     totalFootingBackfillingCft,
     itemizedFootings,
+    footingTotalCost,
+    colTotalCost,
+    pccTotalCost,
+    excavationLabCost,
+    backfillingLabCost,
     // 3. Plinth Beams
     itemizedPlinthBeams,
     totalPbLength,

@@ -403,7 +403,7 @@ export function FootingModule({ footings, updateFootings, estimate }) {
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Footing + Col Cost:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round((estimate?.footingTotalCost || 0) + (estimate?.colTotalCost || 0) + (estimate?.pccTotalCost || 0) + (estimate?.excavationLabCost || 0) + (estimate?.backfillingLabCost || 0)).toLocaleString('en-IN')}
+            ₹ {format2Dec((estimate?.footingTotalCost || 0) + (estimate?.colTotalCost || 0) + (estimate?.pccTotalCost || 0) + (estimate?.excavationLabCost || 0) + (estimate?.backfillingLabCost || 0))}
           </span>
         </div>
       </div>
