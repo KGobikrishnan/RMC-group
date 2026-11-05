@@ -1567,7 +1567,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
                 Outer Perimeter 🔗
               </span>
             </span>
-            <span className="text-blue-600 font-black">{sillLength} RFT</span>
+            <span className="text-blue-600 font-black">{format2Dec((sillLength || 0) * (sillB || 0.75) * (sillD || 0.25))} CFT</span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
@@ -1611,7 +1611,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
                 Superstructure Walls 🔗
               </span>
             </span>
-            <span className="text-indigo-600 font-black">{lintelLength} RFT</span>
+            <span className="text-indigo-600 font-black">{format2Dec((lintelLength || 0) * (lintelB || 0.75) * (lintelD || 0.5))} CFT</span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
@@ -1732,18 +1732,18 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
         </div>
       </div>
 
-      {/* Module 7 Results Strip (Sill RFT, Lintel RFT, Lofts CFT, Rebar & Total Cost) */}
+      {/* Module 7 Results Strip (Sill CFT, Lintel CFT, Lofts CFT, Rebar & Total Cost) */}
       <div className="p-3.5 rounded-xl bg-gradient-to-r from-teal-500/10 to-indigo-500/10 border border-teal-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Sill Concrete Beam: </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
-            {format2Dec(sillLength)} RFT ({format2Dec(estimate?.sillSteelKg)} kg steel)
+            {format2Dec((sillLength || 0) * (sillB || 0.75) * (sillD || 0.25))} CFT ({format2Dec(estimate?.sillSteelKg)} kg steel)
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Lintel Beam: </span>
           <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
-            {format2Dec(lintelLength)} RFT ({format2Dec(estimate?.lintelSteelKg)} kg steel)
+            {format2Dec((lintelLength || 0) * (lintelB || 0.75) * (lintelD || 0.5))} CFT ({format2Dec(estimate?.lintelSteelKg)} kg steel)
           </span>
         </div>
         <div>
