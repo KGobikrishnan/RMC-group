@@ -23,7 +23,10 @@ import {
   Receipt,
   Grid,
   Paintbrush,
-  Hammer
+  Hammer,
+  Home,
+  Users,
+  FolderGit2
 } from 'lucide-react';
 
 import rmcLogo from './assets/logo-rmc.png';
@@ -51,8 +54,12 @@ import {
   FoundationDashboard,
   FoundationBOQView,
   FoundationBOMView,
-  FoundationQuotationView
+  FoundationQuotationView,
+  ProfitBreakupDashboard
 } from './components/DeliverablesViews';
+import { ProjectMainDashboard } from './components/MainDashboard';
+import { ClientDirectoryPage } from './components/ClientDirectory';
+import { ProjectDirectoryPage } from './components/ProjectDirectory';
 
 const STORAGE_KEY_DATA = 'rmc_substructure_audit_v8';
 const STORAGE_KEY_RATES = 'rmc_substructure_rates_v8';
@@ -84,7 +91,7 @@ export default function App() {
     return INITIAL_PROJECT_DATA;
   });
 
-  const [activeTab, setActiveTab] = useState('inputs');
+  const [activeTab, setActiveTab] = useState('dashboard_home');
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -183,8 +190,22 @@ export default function App() {
     }
   };
 
+  const updateProjectInfo = (newInfo) => {
+    setData(prev => ({
+      ...prev,
+      projectInfo: {
+        ...(prev.projectInfo || {}),
+        ...newInfo
+      }
+    }));
+  };
+
   const allTabs = [
-    { id: 'inputs', label: 'Project Inputs (Modules 1 to 15)', icon: Layers, badge: 'Active', disabled: false },
+    { id: 'dashboard_home', label: 'Main Dashboard', icon: Home, badge: 'Overview', disabled: false },
+    { id: 'projects', label: 'Project Directory', icon: FolderGit2, badge: 'Portfolio', disabled: false },
+    { id: 'clients', label: 'Client Directory', icon: Users, badge: 'CRM', disabled: false },
+    { id: 'inputs', label: 'Project Inputs (Modules 1 to 15)', icon: Layers, badge: '15 Modules', disabled: false },
+    { id: 'breakup', label: 'Profit & Rate/Sq.ft', icon: Sliders, badge: `${rates.contractorMarginPct || 10}% Margin`, disabled: false },
     { id: 'dashboard', label: 'Foundation Summary', icon: PieChart, disabled: false },
     { id: 'boq', label: 'Civil BOQ', icon: FileSpreadsheet, badge: `${estimate.boqSchedule?.length || 18} Items`, disabled: false },
     { id: 'bom', label: 'Materials BOM', icon: Box, badge: 'Procurement', disabled: false },
@@ -302,46 +323,6 @@ export default function App() {
                             {item.badge}
                           </span>
                         )}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Quick Module Jump Links (1 to 15) */}
-          <div>
-            {!sidebarCollapsed && (
-              <div className="px-3 mb-2 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Input Modules (1 - 15)
-                </span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-                  Quick Jump ⚡
-                </span>
-              </div>
-            )}
-            <div className="space-y-0.5">
-              {inputModules.map((mod) => {
-                const Icon = mod.icon;
-                return (
-                  <button
-                    key={mod.id}
-                    onClick={() => {
-                      scrollToModule(mod.id);
-                      setMobileSidebarOpen(false);
-                    }}
-                    title={mod.label}
-                    className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-blue-400 transition-all text-left group"
-                  >
-                    <Icon className="w-3.5 h-3.5 flex-shrink-0 text-slate-400 group-hover:text-blue-500" />
-                    {!sidebarCollapsed && (
-                      <div className="flex-1 flex items-center justify-between min-w-0">
-                        <span className="truncate">{mod.label}</span>
-                        <span className="text-[9px] text-slate-400 dark:text-slate-500 ml-1">
-                          {mod.badge}
-                        </span>
                       </div>
                     )}
                   </button>
@@ -477,7 +458,47 @@ export default function App() {
         </header>
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        {/* ACTIVE TAB: All 7 Civil Modules */}
+        {/* TAB 0: Main Project Dashboard (Good Morning/Afternoon + Client Overview) */}
+        {activeTab === 'dashboard_home' && (
+          <ProjectMainDashboard 
+            data={data}
+            estimate={estimate}
+            rates={rates}
+            setActiveTab={setActiveTab}
+            scrollToModule={scrollToModule}
+            updateProjectInfo={updateProjectInfo}
+          />
+        )}
+
+        {/* TAB 0.1: Project Directory (Portfolio of all sites) */}
+        {activeTab === 'projects' && (
+          <ProjectDirectoryPage
+            setActiveTab={setActiveTab}
+            onSelectProject={(prj) => {
+              updateProjectInfo({
+                clientName: prj.clientName,
+                siteLocation: prj.siteLocation
+              });
+            }}
+            currentEstimate={estimate}
+          />
+        )}
+
+        {/* TAB 0.2: Client Directory & CRM */}
+        {activeTab === 'clients' && (
+          <ClientDirectoryPage
+            setActiveTab={setActiveTab}
+            onSelectClient={(cli) => {
+              updateProjectInfo({
+                clientName: cli.name,
+                siteLocation: cli.location,
+                contactNumber: cli.phone
+              });
+            }}
+          />
+        )}
+
+        {/* ACTIVE TAB: All 15 Civil Modules */}
         {activeTab === 'inputs' && (
           <div className="space-y-6">
             {/* Quick Live Substructure & Superstructure Quantities Ribbon */}
@@ -645,6 +666,15 @@ export default function App() {
               />
             </div>
           </div>
+        )}
+
+        {/* TAB 1.5: Profit Breakup & Rate/Sq.ft Simulator (Sheet 12.Breakup) */}
+        {activeTab === 'breakup' && (
+          <ProfitBreakupDashboard 
+            estimate={estimate} 
+            rates={rates} 
+            updateRates={setRates} 
+          />
         )}
 
         {/* TAB 2: Foundation Summary Dashboard */}
