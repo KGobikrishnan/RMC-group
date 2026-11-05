@@ -484,7 +484,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
               </span>
             </div>
             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400">
-              Total: {Math.round(estimate?.totalPlinthExcavationCft || 0)} CFT
+              Total: {format2Dec(estimate?.totalPlinthExcavationCft)} CFT
             </span>
           </div>
 
@@ -588,7 +588,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
               </span>
             </div>
             <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-              Total: {Math.round(estimate?.totalPlinthConcreteCft || 0)} CFT
+              Total: {format2Dec(estimate?.totalPlinthConcreteCft)} CFT
             </span>
           </div>
 
@@ -666,7 +666,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
                     {format2Dec(estimate?.totalPlinthConcreteCft)} CFT
                   </td>
                   <td className="py-2 px-1 text-center font-bold text-slate-600 dark:text-slate-300 text-[11px]">
-                    {Math.round((estimate?.plinthBeamDeductionArea || 0) * 10) / 10}
+                    {format2Dec(estimate?.plinthBeamDeductionArea)}
                   </td>
                 </tr>
               </tfoot>
@@ -680,7 +680,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Beam Length: </span>
           <span className="font-extrabold text-slate-800 dark:text-slate-200">
-            {Math.round(estimate?.totalPbLength || 0)} RFT
+            {format2Dec(estimate?.totalPbLength)} RFT
           </span>
         </div>
         <div>
@@ -692,25 +692,25 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Plinth Concrete (M20): </span>
           <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-            {Math.round((estimate?.totalPlinthConcreteCft || 0) * 10) / 10} CFT
+            {format2Dec(estimate?.totalPlinthConcreteCft)} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Beam Area Deduction: </span>
           <span className="font-extrabold text-indigo-600 dark:text-indigo-400" title="Auto-deducted in Section 4 Basement Gravel & Sand Filling (L42)">
-            {Math.round(estimate?.plinthBeamDeductionArea || 0)} Sq.ft 🔗
+            {format2Dec(estimate?.plinthBeamDeductionArea)} Sq.ft 🔗
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Steel Rebar: </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
-            {Math.round(estimate?.plinthSteelKg || 0)} kg
+            {format2Dec(estimate?.plinthSteelKg)} kg
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Plinth Total:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round((estimate?.plinthConcreteTotalCost || 0) + (estimate?.plinthExcavationLabCost || 0)).toLocaleString('en-IN')}
+            ₹ {format2Dec((estimate?.plinthConcreteTotalCost || 0) + (estimate?.plinthExcavationLabCost || 0))}
           </span>
         </div>
       </div>
