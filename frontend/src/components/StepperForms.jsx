@@ -4,15 +4,16 @@ import {
   Layers, 
   PlusCircle, 
   Trash2, 
-  Info, 
-  Maximize2, 
-  Compass, 
+  Info,
+  Maximize2,
+  Compass,
   Box,
   Hammer,
   Paintbrush,
   CheckCircle2
 } from 'lucide-react';
 
+export const format2Dec = (val) => (Number(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 /**
  * MODULE 1: Total Built-Up Area
  */
