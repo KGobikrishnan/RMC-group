@@ -166,7 +166,7 @@ export function FootingModule({ footings, updateFootings, estimate }) {
     const newFootings = [...footings];
     newFootings[idx] = { 
       ...newFootings[idx], 
-      [field]: field === 'id' || field === 'colId' ? val : (parseFloat(val) || 0) 
+      [field]: field === 'id' || field === 'colId' ? val : (val === '' ? '' : (isNaN(val) ? val : parseFloat(val)))
     };
     updateFootings(newFootings);
   };
@@ -418,7 +418,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
 
   const handleBeamChange = (idx, field, val) => {
     const newBeams = [...beams];
-    const parsedVal = field === 'name' ? val : (parseFloat(val) || 0);
+    const parsedVal = field === 'name' ? val : (val === '' ? '' : (isNaN(val) ? val : parseFloat(val)));
     newBeams[idx] = {
       ...newBeams[idx],
       [field]: parsedVal
@@ -733,16 +733,17 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
     : autoGfPerimeter;
 
   const handleChange = (field, val) => {
+    const parsed = val === '' ? '' : (isNaN(val) ? val : parseFloat(val));
     if (field === 'outerPerimeter') {
       updateBasement({
         ...basement,
-        outerPerimeter: parseFloat(val) || 0,
+        outerPerimeter: parsed,
         isPerimeterManual: true
       });
     } else {
       updateBasement({
         ...basement,
-        [field]: parseFloat(val) || 0
+        [field]: parsed
       });
     }
   };
@@ -1694,7 +1695,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
   const handleChange = (field, val) => {
     updateTiles({
       ...currentData,
-      [field]: parseFloat(val) || 0
+      [field]: val === '' ? '' : (isNaN(val) ? val : parseFloat(val))
     });
   };
 
@@ -1857,7 +1858,7 @@ export function JoineryModule({ joinery, updateJoinery, estimate }) {
     const newItems = [...items];
     newItems[idx] = {
       ...newItems[idx],
-      [field]: field === 'name' || field === 'spec' ? val : (parseFloat(val) || 0)
+      [field]: field === 'name' || field === 'spec' ? val : (val === '' ? '' : (isNaN(val) ? val : parseFloat(val)))
     };
     updateJoinery({ items: newItems });
   };
@@ -2041,7 +2042,7 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
   const handleChange = (field, val) => {
     updateRoofSlab({
       ...currentData,
-      [field]: parseFloat(val) || 0
+      [field]: val === '' ? '' : (isNaN(val) ? val : parseFloat(val))
     });
   };
 
@@ -2182,7 +2183,7 @@ export function PaintingModule({ painting, updatePainting, estimate }) {
   const handleChange = (field, val) => {
     updatePainting({
       ...currentData,
-      [field]: parseFloat(val) || 0
+      [field]: val === '' ? '' : (isNaN(val) ? val : parseFloat(val))
     });
   };
 
@@ -2276,7 +2277,7 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
   const handleChange = (field, val) => {
     updateStaircase({
       ...currentData,
-      [field]: parseFloat(val) || 0
+      [field]: val === '' ? '' : (isNaN(val) ? val : parseFloat(val))
     });
   };
 
@@ -2407,7 +2408,7 @@ export function OthersModule({ others, updateOthers, estimate }) {
   const handleChange = (field, val) => {
     updateOthers({
       ...currentData,
-      [field]: parseFloat(val) || 0
+      [field]: val === '' ? '' : (isNaN(val) ? val : parseFloat(val))
     });
   };
 
@@ -2498,7 +2499,7 @@ export function AdditionalWorksModule({ additionalWorks, updateAdditionalWorks, 
     const newItems = [...items];
     newItems[idx] = {
       ...newItems[idx],
-      [field]: field === 'name' || field === 'unit' || field === 'spec' ? val : (parseFloat(val) || 0)
+      [field]: field === 'name' || field === 'unit' || field === 'spec' ? val : (val === '' ? '' : (isNaN(val) ? val : parseFloat(val)))
     };
     updateAdditionalWorks(newItems);
   };
