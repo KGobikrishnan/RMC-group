@@ -15,8 +15,18 @@ import {
   Save,
   Check,
   Box,
-  Compass
+  Compass,
+  Menu,
+  X,
+  ChevronRight,
+  TrendingUp,
+  Receipt,
+  Grid,
+  Paintbrush,
+  Hammer
 } from 'lucide-react';
+
+import rmcLogo from './assets/logo-rmc.png';
 
 import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from './data/initialData';
 import { calculateCivilEstimateComplete } from './utils/calculator';
@@ -77,6 +87,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('inputs');
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Sync dark mode class
   useEffect(() => {
@@ -179,162 +191,290 @@ export default function App() {
     { id: 'quotation', label: 'Client Quotation', icon: FileText, badge: 'Print PDF', disabled: false },
   ];
 
+  const inputModules = [
+    { id: 'sec1', label: '1. Built-Up Area', icon: Maximize2, badge: `${Math.round(estimate.totalBuiltupArea)} sqft` },
+    { id: 'sec2', label: '2. Footing & Columns', icon: Box, badge: `${Math.round(estimate.totalFootingConcreteCft)} cft` },
+    { id: 'sec3', label: '3. Plinth Beams', icon: Building2, badge: `${Math.round(estimate.totalPlinthConcreteCft * 10) / 10} cft` },
+    { id: 'sec4', label: '4. Basement & Gravel', icon: Grid, badge: `${Math.round(estimate.basementGravelCft)} cft` },
+    { id: 'sec5', label: '5. Brickwork (Chamber)', icon: Hammer, badge: `${Math.round(estimate.brickwork?.chamberBricksNos || 0)} nos` },
+    { id: 'sec6', label: '6. Plastering (1:3 & 1:6)', icon: Paintbrush, badge: `${Math.round(estimate.plastering?.totalPlasteringSqft || 0)} sqft` },
+    { id: 'sec7', label: '7. Sill, Lintel & Lofts', icon: Layers, badge: 'RCC' },
+    { id: 'sec8', label: '8. Tiles & Granite', icon: Grid, badge: 'Finishes' },
+    { id: 'sec10', label: '10. Doors & Windows', icon: Receipt, badge: 'Joinery' },
+    { id: 'sec11', label: '11. Roof Slab & Beams', icon: Building2, badge: `${Math.round(estimate.totalRoofConcreteVolumeCft || 0)} cft` },
+    { id: 'sec12', label: '12. Painting Work', icon: Paintbrush, badge: 'Asian' },
+    { id: 'sec13', label: '13. Staircase Works', icon: TrendingUp, badge: 'Granite' },
+    { id: 'sec14', label: '14. MEP & Terrace Surkhi', icon: Compass, badge: 'Surkhi' },
+    { id: 'sec15', label: '15. Additional Works', icon: HardHat, badge: 'Site Works' },
+  ];
+
+  const scrollToModule = (modId) => {
+    setActiveTab('inputs');
+    setTimeout(() => {
+      const el = document.getElementById(modId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors font-sans flex flex-col">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm no-print">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
-              <HardHat className="w-5 h-5" />
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors font-sans flex">
+      {/* SIDEBAR NAVIGATION */}
+      <aside
+        className={`no-print fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out lg:static ${
+          sidebarCollapsed ? 'w-20' : 'w-72'
+        } ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Logo & Brand Header */}
+        <div className="h-20 px-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="relative flex-shrink-0 w-12 h-12 rounded-xl bg-white dark:bg-slate-800 p-1.5 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center">
+              <img
+                src={rmcLogo}
+                alt="RMC Group Logo"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-base tracking-tight text-slate-900 dark:text-white">
+
+            {!sidebarCollapsed && (
+              <div className="flex flex-col min-w-0">
+                <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white truncate">
                   RMC Civil Engine
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                  Modules 1 to 7 Audited
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 truncate">
+                  RM Construction & Structural
                 </span>
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                AutoCAD: Area, Footings, Plinth, Basement, Brickwork, Plastering, Sill & Lintel
+            )}
+          </div>
+
+          <button
+            onClick={() => setMobileSidebarOpen(false)}
+            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Sidebar Nav Links */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+          {/* Main Deliverables Navigation */}
+          <div>
+            {!sidebarCollapsed && (
+              <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Deliverable Views
               </div>
+            )}
+            <div className="space-y-1">
+              {allTabs.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setMobileSidebarOpen(false);
+                    }}
+                    title={item.label}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    {!sidebarCollapsed && (
+                      <div className="flex-1 flex items-center justify-between min-w-0">
+                        <span className="truncate">{item.label}</span>
+                        {item.badge && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1.5 ${
+                              isActive
+                                ? 'bg-blue-700/80 text-blue-100'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Quick Header Metric Badges */}
-          <div className="hidden xl:flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
-            <div className="text-right">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Total Built-Up</span>
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                {Math.round(estimate.totalBuiltupArea)} Sq.ft
-              </span>
+          {/* Quick Module Jump Links (1 to 15) */}
+          <div>
+            {!sidebarCollapsed && (
+              <div className="px-3 mb-2 flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Input Modules (1 - 15)
+                </span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+                  Quick Jump ⚡
+                </span>
+              </div>
+            )}
+            <div className="space-y-0.5">
+              {inputModules.map((mod) => {
+                const Icon = mod.icon;
+                return (
+                  <button
+                    key={mod.id}
+                    onClick={() => {
+                      scrollToModule(mod.id);
+                      setMobileSidebarOpen(false);
+                    }}
+                    title={mod.label}
+                    className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-blue-400 transition-all text-left group"
+                  >
+                    <Icon className="w-3.5 h-3.5 flex-shrink-0 text-slate-400 group-hover:text-blue-500" />
+                    {!sidebarCollapsed && (
+                      <div className="flex-1 flex items-center justify-between min-w-0">
+                        <span className="truncate">{mod.label}</span>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 ml-1">
+                          {mod.badge}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-            <div className="text-left">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Basement Flyash</span>
-              <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
-                {Math.round(estimate.basementFlyashBricksNos).toLocaleString()} Bricks
-              </span>
-            </div>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-            <div className="text-left">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Superstructure Bricks</span>
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                {Math.round(estimate.brickwork?.chamberBricksNos || 0).toLocaleString()} Bricks
-              </span>
-            </div>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-            <div className="text-left">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Plastering Total</span>
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                {Math.round(estimate.plastering?.totalPlasteringSqft || 0).toLocaleString()} Sq.ft
-              </span>
-            </div>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-            <div className="text-left">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Sill & Lintel</span>
-              <span className="text-xs font-bold text-teal-600 dark:text-teal-400">
-                {Math.round((estimate.sillLintel?.sillLengthRft || 0) + (estimate.sillLintel?.lintelLengthRft || 0))} RFT
-              </span>
-            </div>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-            <div className="text-left">
-              <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-semibold">Civil Est. Total</span>
-              <span className="text-xs font-black text-slate-900 dark:text-white">
+          </div>
+        </div>
+
+        {/* Sidebar Footer Controls */}
+        <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2">
+          {!sidebarCollapsed && (
+            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 text-xs">
+              <span className="text-[10px] font-bold text-slate-400 uppercase block">Grand Project Total</span>
+              <span className="text-base font-black text-blue-600 dark:text-blue-400">
                 ₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}
               </span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">
+                ₹ {Math.round(estimate.costPerSqft).toLocaleString('en-IN')} / sq.ft
+              </span>
+            </div>
+          )}
+
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex w-full items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            <Menu className="w-4 h-4" />
+            {!sidebarCollapsed && <span>Collapse Sidebar</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile backdrop */}
+      {mobileSidebarOpen && (
+        <div
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
+        />
+      )}
+
+      {/* MAIN VIEWPORT (Header + Main Content Area + Footer) */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+        {/* Top Header Bar */}
+        <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm no-print">
+          <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMobileSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                aria-label="Open Navigation"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white capitalize">
+                  {allTabs.find(t => t.id === activeTab)?.label || 'Project Dashboard'}
+                </span>
+                <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                  Live Audit Sync
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Metrics Bar in Top Bar */}
+            <div className="hidden xl:flex items-center gap-4 bg-slate-50 dark:bg-slate-800/60 px-4 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
+              <div>
+                <span className="text-[9px] text-slate-400 uppercase font-bold block">Built-Up</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{Math.round(estimate.totalBuiltupArea)} Sq.ft</span>
+              </div>
+              <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+              <div>
+                <span className="text-[9px] text-slate-400 uppercase font-bold block">Footing Concrete</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">{Math.round(estimate.totalFootingConcreteCft)} CFT</span>
+              </div>
+              <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+              <div>
+                <span className="text-[9px] text-slate-400 uppercase font-bold block">Plinth M20</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{Math.round(estimate.totalPlinthConcreteCft * 10) / 10} CFT</span>
+              </div>
+              <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+              <div>
+                <span className="text-[9px] text-slate-400 uppercase font-bold block">Chamber Bricks</span>
+                <span className="font-bold text-rose-600 dark:text-rose-400">{Math.round(estimate.brickwork?.chamberBricksNos || 0).toLocaleString()}</span>
+              </div>
+              <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+              <div>
+                <span className="text-[9px] text-slate-400 uppercase font-bold block">Grand Total</span>
+                <span className="font-black text-slate-900 dark:text-white">₹ {Math.round(estimate.grandTotalCost).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsRateModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/80 transition-all"
+                title="Open Rates Configuration"
+              >
+                <Sliders className="w-4 h-4" />
+                <span className="hidden sm:inline">Rate Master</span>
+              </button>
+
+              <button
+                onClick={handleResetToSample}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all"
+                title="Reset Sample Values"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span className="hidden sm:inline">Sample</span>
+              </button>
+
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95"
+                title="Save to LocalStorage"
+              >
+                {saveSuccess ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{saveSuccess ? 'Saved!' : 'Save'}</span>
+              </button>
+
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Toggle Dark / Light Theme"
+              >
+                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+              </button>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsRateModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/80 transition-all"
-              title="Open Rates Configuration"
-            >
-              <Sliders className="w-4 h-4" />
-              <span className="hidden sm:inline">Rate Master</span>
-            </button>
-
-            <button
-              onClick={handleResetToSample}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all"
-              title="Reset Sample Values"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span className="hidden sm:inline">Sample</span>
-            </button>
-
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95"
-              title="Save to LocalStorage"
-            >
-              {saveSuccess ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{saveSuccess ? 'Saved!' : 'Save'}</span>
-            </button>
-
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Toggle Dark / Light Theme"
-            >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Tab Navigation */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 no-print">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto">
-          <nav className="flex space-x-2 py-2">
-            {allTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              const isDisabled = tab.disabled;
-
-              return (
-                <button
-                  key={tab.id}
-                  disabled={isDisabled}
-                  onClick={() => !isDisabled && setActiveTab(tab.id)}
-                  title={isDisabled ? 'Disabled for now (can be enabled later)' : ''}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : isDisabled
-                        ? 'opacity-40 cursor-not-allowed text-slate-400 dark:text-slate-600 bg-slate-50/50 dark:bg-slate-800/30'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                  {tab.badge && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                      isActive 
-                        ? 'bg-blue-700/80 text-blue-100' 
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                    }`}>
-                      {tab.badge}
-                    </span>
-                  )}
-                  {isDisabled && (
-                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider ml-1 bg-slate-200/60 dark:bg-slate-700/60 px-1.5 py-0.5 rounded">
-                      Disabled
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
-
+        </header>
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {/* ACTIVE TAB: All 7 Civil Modules */}
@@ -387,95 +527,123 @@ export default function App() {
             </div>
 
             {/* MODULE 1: Total Built-Up Area */}
-            <TotalAreaModule builtup={data.builtup} updateBuiltup={updateBuiltup} estimate={estimate} />
+            <div id="sec1">
+              <TotalAreaModule builtup={data.builtup} updateBuiltup={updateBuiltup} estimate={estimate} />
+            </div>
 
             {/* MODULE 2: Footing & Column Schedule */}
-            <FootingModule footings={data.footings} updateFootings={updateFootings} estimate={estimate} />
+            <div id="sec2">
+              <FootingModule footings={data.footings} updateFootings={updateFootings} estimate={estimate} />
+            </div>
 
-            {/* MODULE 3: Plinth Beam Calculation (With Dynamic Row Addition) */}
-            <PlinthBeamModule 
-              plinthBeams={data.plinthBeams || [data.plinthBeam]} 
-              updatePlinthBeams={updatePlinthBeams} 
-              estimate={estimate} 
-            />
+            {/* MODULE 3: Plinth Beam Calculation */}
+            <div id="sec3">
+              <PlinthBeamModule
+                plinthBeams={data.plinthBeams || [data.plinthBeam]}
+                updatePlinthBeams={updatePlinthBeams}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 4: Basement Flyash Brickwork Details */}
-            <BasementModule 
-              basement={data.basement} 
-              updateBasement={updateBasement} 
-              estimate={estimate} 
-              builtup={data.builtup}
-            />
+            <div id="sec4">
+              <BasementModule
+                basement={data.basement}
+                updateBasement={updateBasement}
+                estimate={estimate}
+                builtup={data.builtup}
+              />
+            </div>
 
-            {/* MODULE 5: Superstructure Brickwork (9" & 4.5" Walls + Openings Deductions) */}
-            <BrickworkModule 
-              brickwork={data.brickwork} 
-              updateBrickwork={updateBrickwork} 
-              estimate={estimate} 
-            />
+            {/* MODULE 5: Superstructure Brickwork (9" & 4.5" Walls) */}
+            <div id="sec5">
+              <BrickworkModule
+                brickwork={data.brickwork}
+                updateBrickwork={updateBrickwork}
+                estimate={estimate}
+              />
+            </div>
 
-            {/* MODULE 6: Plastering (Ceiling 1:3, Wall Inner 1:6, Wall Outer 1:6) */}
-            <PlasteringModule 
-              plastering={data.plastering} 
-              updatePlastering={updatePlastering} 
-              estimate={estimate} 
-            />
+            {/* MODULE 6: Plastering */}
+            <div id="sec6">
+              <PlasteringModule
+                plastering={data.plastering}
+                updatePlastering={updatePlastering}
+                estimate={estimate}
+              />
+            </div>
 
-            {/* MODULE 7: Sill Beam, Lintel Beam & Lofts/Sunshades RCC */}
-            <SillLintelModule 
-              sillLintel={data.sillLintel} 
-              updateSillLintel={updateSillLintel} 
-              estimate={estimate} 
-            />
+            {/* MODULE 7: Sill, Lintel & Lofts */}
+            <div id="sec7">
+              <SillLintelModule 
+                sillLintel={data.sillLintel} 
+                updateSillLintel={updateSillLintel} 
+                estimate={estimate} 
+              />
+            </div>
 
             {/* MODULE 8: Tiles & Granite Work */}
-            <TilesModule
-              tiles={data.tiles}
-              updateTiles={updateTiles}
-              estimate={estimate}
-            />
+            <div id="sec8">
+              <TilesModule
+                tiles={data.tiles}
+                updateTiles={updateTiles}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 10: Doors & Windows Joinery */}
-            <JoineryModule
-              joinery={data.joinery}
-              updateJoinery={updateJoinery}
-              estimate={estimate}
-            />
+            <div id="sec10">
+              <JoineryModule
+                joinery={data.joinery}
+                updateJoinery={updateJoinery}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 11: Roof Slab & Roof Beams Concrete */}
-            <RoofSlabModule
-              roofSlab={data.roofSlab}
-              updateRoofSlab={updateRoofSlab}
-              estimate={estimate}
-            />
+            <div id="sec11">
+              <RoofSlabModule
+                roofSlab={data.roofSlab}
+                updateRoofSlab={updateRoofSlab}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 12: Painting Work */}
-            <PaintingModule
-              painting={data.painting}
-              updatePainting={updatePainting}
-              estimate={estimate}
-            />
+            <div id="sec12">
+              <PaintingModule
+                painting={data.painting}
+                updatePainting={updatePainting}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 13: Staircase Works */}
-            <StaircaseModule
-              staircase={data.staircase}
-              updateStaircase={updateStaircase}
-              estimate={estimate}
-            />
+            <div id="sec13">
+              <StaircaseModule
+                staircase={data.staircase}
+                updateStaircase={updateStaircase}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 14: Others - Electrical, Plumbing & Terrace Surkhi */}
-            <OthersModule
-              others={data.others}
-              updateOthers={updateOthers}
-              estimate={estimate}
-            />
+            <div id="sec14">
+              <OthersModule
+                others={data.others}
+                updateOthers={updateOthers}
+                estimate={estimate}
+              />
+            </div>
 
             {/* MODULE 15: Additional Works & Site Infrastructure */}
-            <AdditionalWorksModule
-              additionalWorks={data.additionalWorks}
-              updateAdditionalWorks={updateAdditionalWorks}
-              estimate={estimate}
-            />
+            <div id="sec15">
+              <AdditionalWorksModule
+                additionalWorks={data.additionalWorks}
+                updateAdditionalWorks={updateAdditionalWorks}
+                estimate={estimate}
+              />
+            </div>
           </div>
         )}
 
@@ -519,6 +687,7 @@ export default function App() {
           </div>
         </div>
       </footer>
+      </div>
 
       {/* Global Rate Master Modal */}
       <RateMasterModal
