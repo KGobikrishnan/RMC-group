@@ -168,8 +168,10 @@ export function calculateCivilEstimateComplete(data, rates) {
   // -------------------------------------------------------------
   // 4. BASEMENT - FLYASH BRICKWORK & FILLING
   // -------------------------------------------------------------
-  // Outer perimeter auto-links to Ground Floor perimeter 2*(L+B) if not manually overridden
-  const bsmPerimeter = (basement?.outerPerimeter !== undefined && basement?.outerPerimeter !== null && basement?.isPerimeterManual)
+  // Outer perimeter:
+  // 1. If basement.outerPerimeter is explicitly set and different from default, or marked manual, prioritize it
+  // 2. Otherwise auto-link to Ground Floor perimeter 2*(L+B)
+  const bsmPerimeter = (basement?.outerPerimeter !== undefined && basement?.outerPerimeter !== null && (basement?.isPerimeterManual || (Number(basement.outerPerimeter) !== 122 && Number(basement.outerPerimeter) > 0)))
     ? Number(basement.outerPerimeter)
     : (computedGfPerimeter || Number(basement?.outerPerimeter) || 122);
 
@@ -251,11 +253,15 @@ export function calculateCivilEstimateComplete(data, rates) {
   let totalDeductionsVolumeCft = 0;
 
   const itemizedOpenings = rawOpenings.map((op) => {
-    const nos = Number(op.nos) || 1;
+    const nos = Number(op.nos) || 0;
     const w = Number(op.width) || 0;
     const thk = Number(op.thickness) || 0.75;
     const h = Number(op.height) || 0;
-    const deduction = op.deductionCft !== undefined ? Number(op.deductionCft) : (nos * w * thk * h);
+    // Compute dynamic volume nos * w * thk * h
+    const computedVol = nos * w * thk * h;
+    const deduction = op.deductionCft !== undefined && op.deductionCft !== null && !isNaN(op.deductionCft)
+      ? Number(op.deductionCft)
+      : computedVol;
     totalDeductionsVolumeCft += deduction;
     return { ...op, nos, width: w, thickness: thk, height: h, deductionCft: deduction };
   });
@@ -288,7 +294,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   const itemizedRooms = rawRooms.map((r) => {
     const l = Number(r.length) || 0;
     const b = Number(r.breadth) || 0;
-    const h = Number(r.height) || 10;
+    const h = r.height !== undefined && r.height !== null && r.height !== '' ? Number(r.height) : 10;
     const ceilingArea = l * b;
     const wallArea = h > 0 ? (2 * (l + b) * h) : 0;
     totalCeilingSqft += ceilingArea;
@@ -296,17 +302,8 @@ export function calculateCivilEstimateComplete(data, rates) {
     return { ...r, length: l, breadth: b, height: h, ceilingArea, wallArea };
   });
 
-  // Compute opening area deduction dynamically from openings (or plastering.innerDeductionsSqft if specified)
-  const computedOpeningAreaSqft = (brickwork?.openings || []).reduce((acc, op) => {
-    const nos = Number(op.nos) || 1;
-    const w = Number(op.width) || 0;
-    const h = Number(op.height) || 0;
-    return acc + (nos * w * h);
-  }, 0);
-  // Both sides plastered (or door opening jambs deduction = 2 * openings area)
-  const dynamicInnerDeduction = computedOpeningAreaSqft > 0 ? (computedOpeningAreaSqft * 2) : 488.5;
-  const innerDeductionsSqft = Number(plastering?.innerDeductionsSqft) || dynamicInnerDeduction;
-  const netInnerPlasteringSqft = Math.max(0, (totalCeilingSqft + totalInnerWallGrossSqft) - innerDeductionsSqft);
+  // Inner Wall Plaster Area (1:6) = Wall Area (2*(L+B)*H) = 3115 sq.ft
+  const netInnerPlasteringSqft = totalInnerWallGrossSqft;
 
   // Outer Plastering Surfaces (Building outer 122*13.5 + Parapet 132*4 + Sunshade 22.5*2.25*2) = 2276.25 sq.ft
   const rawOuter = plastering?.outerSurfaces || [];
@@ -343,19 +340,24 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 7. SILL BEAM, LINTEL BEAM & LOFTS/SUNSHADES RCC
   // -------------------------------------------------------------
   // From DATA SHEET Section 8 & Sheet 5.SILL & LINTEL
-  // Sill length defaults to computed ground floor perimeter (2*(L+B)) unless isSillManual is true
-  const sillLen = (sillAndLintel?.isSillManual && sillAndLintel?.sillLength !== undefined && sillAndLintel?.sillLength !== '')
-    ? Number(sillAndLintel.sillLength)
-    : (computedGfPerimeter || bsmPerimeter || Number(sillAndLintel?.sillLength) || 122);
-  const sillWidth = Number(sillAndLintel?.sillB) || 0.75;
-  const sillThk = Number(sillAndLintel?.sillD) || 0.25;
+  // Brickwork wall length sum for lintel default (DATA SHEET D116 = +C51+C52+C53+C54 = 245 rft)
+  const totalBrickworkWallLength = (brickwork?.walls || []).reduce((acc, w) => acc + (Number(w.length) || 0), 0) || 245;
 
-  // Lintel length defaults to total Plinth Beam length unless isLintelManual is true
-  const lintelLen = (sillAndLintel?.isLintelManual && sillAndLintel?.lintelLength !== undefined && sillAndLintel?.lintelLength !== '')
-    ? Number(sillAndLintel.lintelLength)
-    : (totalPbLength || Number(sillAndLintel?.lintelLength) || 245);
-  const lintelWidth = Number(sillAndLintel?.lintelB) || 0.75;
-  const lintelThk = Number(sillAndLintel?.lintelD) || 0.5;
+  const currentSillLintel = sillAndLintel || data?.sillLintel || {};
+
+  // Sill length defaults to computed ground floor perimeter (2*(L+B) = 122 RFT) unless isSillManual is true
+  const sillLen = (currentSillLintel?.isSillManual && currentSillLintel?.sillLength !== undefined && currentSillLintel?.sillLength !== '')
+    ? Number(currentSillLintel.sillLength)
+    : (computedGfPerimeter || bsmPerimeter || Number(currentSillLintel?.sillLength) || 122);
+  const sillWidth = Number(currentSillLintel?.sillB) || 0.75;
+  const sillThk = Number(currentSillLintel?.sillD) || 0.25;
+
+  // Lintel length defaults to total superstructure wall runs length (245 RFT) unless isLintelManual is true
+  const lintelLen = (currentSillLintel?.isLintelManual && currentSillLintel?.lintelLength !== undefined && currentSillLintel?.lintelLength !== '')
+    ? Number(currentSillLintel.lintelLength)
+    : (totalBrickworkWallLength || Number(currentSillLintel?.lintelLength) || 245);
+  const lintelWidth = Number(currentSillLintel?.lintelB) || 0.75;
+  const lintelThk = Number(currentSillLintel?.lintelD) || 0.5;
 
   // Sill M15 Concrete: 122 * 0.75 * 0.25 = 22.875 CFT
   // Cement = ((122 * 0.75 * 0.25)/35.314) * 6.336 = 4.104 bags
@@ -380,7 +382,14 @@ export function calculateCivilEstimateComplete(data, rates) {
   const lintelTotalCost = lintelMatCost + lintelLabCost;
 
   // Lofts, Sunshades & Counter Slabs RCC
-  const rawSlabs = sillAndLintel?.slabs || [];
+  const rawSlabs = Array.isArray(currentSillLintel?.slabs) && currentSillLintel.slabs.length > 0
+    ? currentSillLintel.slabs
+    : [
+        { id: 's1', name: 'Kitchen Counter Slab', length: 16, breadth: 3.0, depth: 0.25 },
+        { id: 's2', name: 'Bedrooms & Kitchen Lofts', length: 30, breadth: 1.75, depth: 0.25 },
+        { id: 's3', name: 'Window Sunshades', length: 22.5, breadth: 2.25, depth: 0.25 },
+        { id: 's4', name: 'Paran / Cupboard Slab', length: 6.5, breadth: 4.0, depth: 0.333 },
+      ];
   let totalLoftsVolumeCft = 0;
 
   const itemizedSlabs = rawSlabs.map((s) => {
@@ -555,7 +564,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   // Dynamically linked to plastering unless isManual
   const paintInnerSqft = (paintingInput?.isInnerManual && paintingInput.innerWallArea !== undefined && paintingInput.innerWallArea !== '')
     ? Number(paintingInput.innerWallArea)
-    : (netInnerPlasteringSqft > 0 ? Math.max(0, netInnerPlasteringSqft - totalCeilingSqft) : (Number(paintingInput?.innerWallArea) || 2626.5));
+    : (netInnerPlasteringSqft > 0 ? netInnerPlasteringSqft : (Number(paintingInput?.innerWallArea) || 3115));
 
   const paintOuterSqft = (paintingInput?.isOuterManual && paintingInput.outerWallArea !== undefined && paintingInput.outerWallArea !== '')
     ? Number(paintingInput.outerWallArea)

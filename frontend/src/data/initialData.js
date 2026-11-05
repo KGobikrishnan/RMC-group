@@ -167,11 +167,11 @@ export const INITIAL_PROJECT_DATA = {
       height: 3.0,
     },
     openings: [
-      { id: 'op1', type: 'Main Door Open', nos: 1, width: 3.25, thickness: 0.75, height: 7, deductionCft: 17.06 },
+      { id: 'op1', type: 'Main Door Open', nos: 1, width: 3.25, thickness: 0.75, height: 7, deductionCft: 17.0625 },
       { id: 'op2', type: 'Room Doors Open', nos: 3, width: 3.0, thickness: 0.75, height: 7, deductionCft: 47.25 },
-      { id: 'op3', type: 'Toilet PVC Doors Open', nos: 2, width: 2.5, thickness: 0.375, height: 7, deductionCft: 14.44 },
-      { id: 'op4', type: 'UPVC Windows Open', nos: 5, width: 3.0, thickness: 0.75, height: 4.2, deductionCft: 42.75 },
-      { id: 'op5', type: 'Wall Opening Arch', nos: 1, width: 4.0, thickness: 0.75, height: 7, deductionCft: 42.75 },
+      { id: 'op3', type: 'Toilet PVC Doors Open', nos: 2, width: 2.5, thickness: 0.375, height: 7, deductionCft: 13.125 },
+      { id: 'op4', type: 'UPVC Windows Open', nos: 4, width: 3.0, thickness: 0.75, height: 4.0, deductionCft: 36.0 },
+      { id: 'op5', type: 'Wall Opening Arch', nos: 1, width: 4.0, thickness: 0.75, height: 9.0, deductionCft: 27.0 },
       { id: 'op6', type: 'Ventilators Open', nos: 2, width: 2.0, thickness: 0.75, height: 1.5, deductionCft: 4.5 },
     ]
   },
@@ -205,6 +205,20 @@ export const INITIAL_PROJECT_DATA = {
     sillLength: 122,       // Sill beam along window level (122 rft)
     sillB: 0.75,           // 9" width
     sillD: 0.25,           // 3" depth
+    slabs: [
+      { id: 's1', name: 'Kitchen Counter Slab', length: 16, breadth: 3.0, depth: 0.25 },
+      { id: 's2', name: 'Bedrooms & Kitchen Lofts', length: 30, breadth: 1.75, depth: 0.25 },
+      { id: 's3', name: 'Window Sunshades', length: 22.5, breadth: 2.25, depth: 0.25 },
+      { id: 's4', name: 'Paran / Cupboard Slab', length: 6.5, breadth: 4.0, depth: 0.333 },
+    ]
+  },
+  sillLintel: {
+    lintelLength: 245,
+    lintelB: 0.75,
+    lintelD: 0.5,
+    sillLength: 122,
+    sillB: 0.75,
+    sillD: 0.25,
     slabs: [
       { id: 's1', name: 'Kitchen Counter Slab', length: 16, breadth: 3.0, depth: 0.25 },
       { id: 's2', name: 'Bedrooms & Kitchen Lofts', length: 30, breadth: 1.75, depth: 0.25 },

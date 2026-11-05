@@ -597,9 +597,12 @@ export default function App() {
             {/* MODULE 7: Sill, Lintel & Lofts */}
             <div id="sec7">
               <SillLintelModule 
-                sillLintel={data.sillLintel} 
+                sillLintel={data.sillAndLintel || data.sillLintel} 
+                sillAndLintel={data.sillAndLintel || data.sillLintel}
                 updateSillLintel={updateSillLintel} 
                 estimate={estimate} 
+                builtup={data.builtup}
+                brickwork={data.brickwork}
               />
             </div>
 

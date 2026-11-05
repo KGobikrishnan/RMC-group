@@ -1247,7 +1247,7 @@ export function BrickworkModule({ brickwork, updateBrickwork, estimate }) {
                     />
                   </td>
                   <td className="py-2 px-3 text-right font-bold text-amber-600">
-                    - {Math.round(op.deductionCft * 10) / 10} CFT
+                    - {format2Dec(op.deductionCft)} CFT
                   </td>
                   <td className="py-2 px-3 text-center">
                     <button
@@ -1269,15 +1269,15 @@ export function BrickworkModule({ brickwork, updateBrickwork, estimate }) {
       <div className="p-3.5 rounded-xl bg-gradient-to-r from-rose-500/10 to-red-500/10 border border-rose-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Gross Wall Volume: </span>
-          <span className="font-extrabold text-slate-800 dark:text-slate-200">{Math.round(estimate?.grossWallVolumeCft || 0)} CFT</span>
+          <span className="font-extrabold text-slate-800 dark:text-slate-200">{format2Dec(estimate?.grossWallVolumeCft || 0)} CFT</span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Openings Deductions: </span>
-          <span className="font-extrabold text-amber-600 dark:text-amber-400">- {Math.round((estimate?.totalDeductionsVolumeCft || 0) * 10) / 10} CFT</span>
+          <span className="font-extrabold text-amber-600 dark:text-amber-400">- {format2Dec(estimate?.totalDeductionsVolumeCft || 0)} CFT</span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Net Brickwork Volume: </span>
-          <span className="font-extrabold text-slate-900 dark:text-white">{Math.round((estimate?.netBrickworkCft || 0) * 10) / 10} CFT</span>
+          <span className="font-extrabold text-slate-900 dark:text-white">{format2Dec(estimate?.netBrickworkCft || 0)} CFT</span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Chamber Bricks (Net CFT × 12): </span>
@@ -1421,10 +1421,10 @@ export function PlasteringModule({ plastering, updatePlastering, estimate }) {
             <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 font-bold text-xs">
               <td colSpan="4" className="py-2.5 px-3 text-slate-700 dark:text-slate-300">Total Plastering Areas:</td>
               <td className="py-2.5 px-3 text-right font-black text-blue-600 dark:text-blue-400">
-                {Math.round(estimate.totalCeilingSqft)} Sq.ft (Ceiling)
+                {format2Dec(estimate.totalCeilingSqft)} Sq.ft (Ceiling)
               </td>
               <td className="py-2.5 px-3 text-right font-black text-slate-900 dark:text-white">
-                {Math.round(estimate.netInnerPlasteringSqft)} Sq.ft (Net Inner)
+                {format2Dec(estimate.netInnerPlasteringSqft)} Sq.ft (Wall Area)
               </td>
               <td></td>
             </tr>
@@ -1436,20 +1436,20 @@ export function PlasteringModule({ plastering, updatePlastering, estimate }) {
       <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Ceiling Plaster (1:3): </span>
-          <span className="font-extrabold text-blue-600 dark:text-blue-400">{Math.round(estimate?.totalCeilingSqft || 0)} Sq.ft</span>
+          <span className="font-extrabold text-blue-600 dark:text-blue-400">{format2Dec(estimate?.totalCeilingSqft || 0)} Sq.ft</span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Inner Wall Plaster (1:6): </span>
-          <span className="font-extrabold text-slate-800 dark:text-slate-200">{Math.round(estimate?.netInnerPlasteringSqft || 0)} Sq.ft</span>
+          <span className="font-extrabold text-slate-800 dark:text-slate-200">{format2Dec(estimate?.netInnerPlasteringSqft || 0)} Sq.ft</span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Outer Wall Plaster (1:6): </span>
-          <span className="font-extrabold text-slate-800 dark:text-slate-200">{Math.round(estimate?.totalOuterPlasteringSqft || 0)} Sq.ft</span>
+          <span className="font-extrabold text-slate-800 dark:text-slate-200">{format2Dec(estimate?.totalOuterPlasteringSqft || 0)} Sq.ft</span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Plastering: </span>
           <span className="font-black text-amber-600 dark:text-amber-400 text-sm">
-            {Math.round((estimate?.totalCeilingSqft || 0) + (estimate?.netInnerPlasteringSqft || 0) + (estimate?.totalOuterPlasteringSqft || 0)).toLocaleString()} Sq.ft
+            {format2Dec((estimate?.totalCeilingSqft || 0) + (estimate?.netInnerPlasteringSqft || 0) + (estimate?.totalOuterPlasteringSqft || 0))} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
@@ -1466,26 +1466,56 @@ export function PlasteringModule({ plastering, updatePlastering, estimate }) {
 /**
  * MODULE 7: Sill Beam, Lintel Beam & Lofts/Sunshades RCC (DATA SHEET 8)
  */
-export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel, updateSillLintel, estimate }) {
+export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel, updateSillLintel, estimate, builtup, brickwork }) {
   const currentData = sillLintel || propSillAndLintel || {};
-  const sillLength = currentData.sillLength ?? 122;
+
+  // Auto-linked defaults from Section 1 & Section 5:
+  const gfFloor = builtup?.floors?.[0];
+  const gfLength = gfFloor?.length !== undefined ? Number(gfFloor.length) : 22;
+  const gfBreadth = gfFloor?.breadth !== undefined ? Number(gfFloor.breadth) : 39;
+  const autoSillLength = 2 * (gfLength + gfBreadth); // 2*(22+39) = 122 RFT
+
+  const totalBrickworkWallLength = (brickwork?.walls || []).reduce((acc, w) => acc + (Number(w.length) || 0), 0) || 245;
+  const autoLintelLength = totalBrickworkWallLength; // 111+84+0+50 = 245 RFT
+
+  const isManualSill = Boolean(currentData.isSillManual);
+  const sillLength = isManualSill ? (currentData.sillLength ?? autoSillLength) : (currentData.sillLength ?? autoSillLength);
   const sillB = currentData.sillB ?? 0.75;
   const sillD = currentData.sillD ?? 0.25;
-  const lintelLength = currentData.lintelLength ?? 245;
+
+  const isManualLintel = Boolean(currentData.isLintelManual);
+  const lintelLength = isManualLintel ? (currentData.lintelLength ?? autoLintelLength) : (currentData.lintelLength ?? autoLintelLength);
   const lintelB = currentData.lintelB ?? 0.75;
   const lintelD = currentData.lintelD ?? 0.50;
-  const slabs = Array.isArray(currentData.slabs) ? currentData.slabs : [];
+
+  const DEFAULT_SLABS = [
+    { id: 's1', name: 'Kitchen Counter Slab', length: 16, breadth: 3.0, depth: 0.25 },
+    { id: 's2', name: 'Bedrooms & Kitchen Lofts', length: 30, breadth: 1.75, depth: 0.25 },
+    { id: 's3', name: 'Window Sunshades', length: 22.5, breadth: 2.25, depth: 0.25 },
+    { id: 's4', name: 'Paran / Cupboard Slab', length: 6.5, breadth: 4.0, depth: 0.333 },
+  ];
+
+  const slabs = Array.isArray(currentData.slabs) && currentData.slabs.length > 0 
+    ? currentData.slabs 
+    : DEFAULT_SLABS;
 
   const handleFieldChange = (field, val) => {
+    const parsed = val === '' ? '' : (isNaN(val) ? val : parseFloat(val));
+    const manualFlag = field === 'sillLength' ? { isSillManual: true } : (field === 'lintelLength' ? { isLintelManual: true } : {});
     updateSillLintel({
       ...currentData,
-      [field]: parseFloat(val) || 0
+      slabs,
+      [field]: parsed,
+      ...manualFlag
     });
   };
 
   const handleSlabChange = (idx, field, val) => {
     const newSlabs = [...slabs];
-    newSlabs[idx] = { ...newSlabs[idx], [field]: field === 'name' ? val : (parseFloat(val) || 0) };
+    newSlabs[idx] = { 
+      ...newSlabs[idx], 
+      [field]: field === 'name' ? val : (val === '' ? '' : (isNaN(val) ? val : parseFloat(val)))
+    };
     updateSillLintel({ ...currentData, slabs: newSlabs });
   };
 
@@ -1531,8 +1561,13 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span>Sill Concrete Beam (Window Bottom)</span>
-            <span className="text-blue-600">{sillLength} RFT</span>
+            <span className="flex items-center gap-1.5">
+              <span>Sill Concrete Beam (Window Bottom)</span>
+              <span className="text-[10px] text-blue-600 dark:text-blue-400 bg-blue-100/60 dark:bg-blue-900/40 px-1 rounded font-semibold">
+                Outer Perimeter 🔗
+              </span>
+            </span>
+            <span className="text-blue-600 font-black">{sillLength} RFT</span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
@@ -1565,13 +1600,18 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
               />
             </div>
           </div>
-          <div className="text-[11px] text-slate-400">Rebar: 2 nos 8mm TMT bars (146.4 kg)</div>
+          <div className="text-[11px] text-slate-400">Rebar: 2 nos 8mm TMT bars ({format2Dec(estimate?.sillSteelKg || 146.4)} kg)</div>
         </div>
 
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span>Lintel Concrete Beam (Throughout)</span>
-            <span className="text-indigo-600">{lintelLength} RFT</span>
+            <span className="flex items-center gap-1.5">
+              <span>Lintel Concrete Beam (Throughout)</span>
+              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 bg-indigo-100/60 dark:bg-indigo-900/40 px-1 rounded font-semibold">
+                Superstructure Walls 🔗
+              </span>
+            </span>
+            <span className="text-indigo-600 font-black">{lintelLength} RFT</span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
@@ -1604,7 +1644,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
               />
             </div>
           </div>
-          <div className="text-[11px] text-slate-400">Rebar: 10mm TMT bars (349.1 kg)</div>
+          <div className="text-[11px] text-slate-400">Rebar: 10mm TMT bars ({format2Dec(estimate?.lintelSteelKg || 349.1)} kg)</div>
         </div>
       </div>
 
@@ -1683,7 +1723,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
               <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 font-bold text-xs">
                 <td colSpan="4" className="py-2 px-3 text-slate-700 dark:text-slate-300">Total Slabs/Lofts RCC Volume:</td>
                 <td className="py-2 px-3 text-right font-black text-indigo-600">
-                  {Math.round(estimate?.totalLoftsVolumeCft || 0 * 10) / 10} CFT
+                  {format2Dec(estimate?.totalLoftsVolumeCft || 0)} CFT
                 </td>
                 <td></td>
               </tr>
