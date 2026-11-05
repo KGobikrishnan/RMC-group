@@ -172,7 +172,15 @@ export function calculateCivilEstimateComplete(data, rates) {
   const bsmPerimeter = (basement?.outerPerimeter !== undefined && basement?.outerPerimeter !== null && basement?.isPerimeterManual)
     ? Number(basement.outerPerimeter)
     : (Number(basement?.outerPerimeter) || computedGfPerimeter || 122);
-  const bsmFlyashL = Number(basement?.flyashLength) || totalPbLength || 201;
+
+  // In Excel DATA SHEET C42: =+F32 (links to PB1 length or total plinth beam length).
+  // If user explicitly modified flyashLength in basement, use it; otherwise auto-link to totalPbLength
+  const bsmFlyashL = (basement?.flyashLength !== undefined && basement?.flyashLength !== null && basement?.isFlyashLengthManual)
+    ? Number(basement.flyashLength)
+    : (basement?.flyashLength !== undefined && basement?.flyashLength !== null && Number(basement.flyashLength) !== 201)
+      ? Number(basement.flyashLength)
+      : (totalPbLength || Number(basement?.flyashLength) || 201);
+
   const bsmFlyashB = Number(basement?.flyashBreadth) || 0.75;
   const bsmFlyashD = Number(basement?.flyashDepth) || 1.25;
   const bsmHeight = Number(basement?.height) || 3.0;
@@ -193,7 +201,13 @@ export function calculateCivilEstimateComplete(data, rates) {
   const basementPlasterLabCost = basementPlasteringSqft * rates.labourBasementPlasterPerSqft;
   const basementPlasterTotalCost = basementPlasterMatCost + basementPlasterLabCost;
 
-  const plinthBeamDeductionArea = totalPlinthAreaDeduction || (bsmFlyashL * bsmFlyashB);
+  // In Excel DATA SHEET L42 = SUM(F32:F35)*G32 (Plinth beam deduction area)
+  // If user manually changed Masonry Length in Section 4, the deduction area follows bsmFlyashL * bsmFlyashB;
+  // otherwise it links directly to Section 3's totalPlinthAreaDeduction
+  const plinthBeamDeductionArea = (basement?.flyashLength !== undefined && basement?.flyashLength !== null && basement?.isFlyashLengthManual)
+    ? (bsmFlyashL * bsmFlyashB)
+    : (totalPlinthAreaDeduction > 0 ? totalPlinthAreaDeduction : (bsmFlyashL * bsmFlyashB));
+
   const netBasementArea = Math.max(0, gfArea - plinthBeamDeductionArea);
   const basementGravelCft = netBasementArea * bsmHeight;
   const basementGravelMatCost = basementGravelCft * rates.gravel;

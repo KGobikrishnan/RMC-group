@@ -721,17 +721,25 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
 /**
  * MODULE 4: Basement - Flyash Brickwork Details
  */
-export function BasementModule({ basement, updateBasement, estimate, builtup }) {
+export function BasementModule({ basement, updateBasement, estimate, builtup, plinthBeams }) {
   // Ground floor perimeter calculated as 2*(L+B) from Section 1
   const gfFloor = builtup?.floors?.[0];
   const gfLength = gfFloor?.length !== undefined ? Number(gfFloor.length) : 22;
   const gfBreadth = gfFloor?.breadth !== undefined ? Number(gfFloor.breadth) : 39;
   const autoGfPerimeter = Math.round(2 * (gfLength + gfBreadth) * 100) / 100; // e.g. 2*(22+39) = 122
 
+  // Auto-linked plinth beam length from Section 3
+  const autoPbLength = estimate?.totalPbLength !== undefined ? estimate.totalPbLength : 201;
+
   const isManualPerimeter = Boolean(basement?.isPerimeterManual);
   const currentPerimeter = isManualPerimeter 
     ? (basement.outerPerimeter ?? autoGfPerimeter)
     : autoGfPerimeter;
+
+  const isManualFlyashLength = Boolean(basement?.isFlyashLengthManual);
+  const currentFlyashLength = isManualFlyashLength
+    ? (basement.flyashLength ?? autoPbLength)
+    : (basement.flyashLength !== undefined && basement.flyashLength !== null ? basement.flyashLength : autoPbLength);
 
   const handleChange = (field, val) => {
     const parsed = val === '' ? '' : (isNaN(val) ? val : parseFloat(val));
@@ -740,6 +748,12 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
         ...basement,
         outerPerimeter: parsed,
         isPerimeterManual: true
+      });
+    } else if (field === 'flyashLength') {
+      updateBasement({
+        ...basement,
+        flyashLength: parsed,
+        isFlyashLengthManual: true
       });
     } else {
       updateBasement({
@@ -754,6 +768,14 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
       ...basement,
       outerPerimeter: autoGfPerimeter,
       isPerimeterManual: false
+    });
+  };
+
+  const handleResetFlyashLengthToPb = () => {
+    updateBasement({
+      ...basement,
+      flyashLength: autoPbLength,
+      isFlyashLengthManual: false
     });
   };
 
@@ -776,12 +798,32 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
         <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-          <label className="text-slate-500 font-semibold block mb-1">Masonry Length (ft)</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-slate-500 font-semibold block">Masonry Length (ft)</label>
+            {!isManualFlyashLength ? (
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded" title="Auto-linked from Section 3 Plinth Beams">
+                Auto 🔗
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResetFlyashLengthToPb}
+                className="text-[10px] font-bold text-slate-400 hover:text-emerald-500 underline"
+                title="Reset to Section 3 auto-link"
+              >
+                Reset 🔗
+              </button>
+            )}
+          </div>
           <input
             type="number"
-            value={basement.flyashLength}
+            value={currentFlyashLength}
             onChange={(e) => handleChange('flyashLength', e.target.value)}
-            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold"
+            className={`w-full px-2.5 py-1.5 rounded-lg border font-bold ${
+              !isManualFlyashLength
+                ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
+                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'
+            }`}
           />
         </div>
 
@@ -906,7 +948,7 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
               </span>
             </div>
             <div className="text-base font-black text-purple-700 dark:text-purple-300">
-              {Math.round((estimate?.netBasementArea || 0) * 10) / 10} <span className="text-xs font-semibold">Sq.ft</span>
+              {format2Dec(estimate?.netBasementArea)} <span className="text-xs font-semibold">Sq.ft</span>
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
               Net Gravel, Sand & PCC Area
@@ -922,10 +964,10 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
               </span>
             </div>
             <div className="text-base font-black text-amber-700 dark:text-amber-300">
-              {basement.height || 3.0} <span className="text-xs font-semibold">ft</span>
+              {format2Dec(basement.height || 3.0)} <span className="text-xs font-semibold">ft</span>
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
-              Gravel Vol: <b>{Math.round(estimate?.basementGravelCft || 0)} CFT</b>
+              Gravel Vol: <b>{format2Dec(estimate?.basementGravelCft || 0)} CFT</b>
             </div>
           </div>
         </div>
@@ -936,37 +978,37 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Flyash Bricks (1:6): </span>
           <span className="font-extrabold text-purple-600 dark:text-purple-400">
-            {Math.round(estimate?.basementFlyashBricksNos || 0).toLocaleString()} Nos
+            {format2Dec(estimate?.basementFlyashBricksNos || 0)} Nos
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Basement Plaster (2 sides): </span>
           <span className="font-extrabold text-slate-700 dark:text-slate-300">
-            {Math.round(estimate?.basementPlasteringSqft || 0)} Sq.ft
+            {format2Dec(estimate?.basementPlasteringSqft || 0)} Sq.ft
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Gravel Filling: </span>
           <span className="font-extrabold text-amber-600 dark:text-amber-400">
-            {Math.round(estimate?.basementGravelCft || 0)} CFT
+            {format2Dec(estimate?.basementGravelCft || 0)} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">4" M-Sand Bed: </span>
           <span className="font-extrabold text-teal-600 dark:text-teal-400">
-            {Math.round(estimate?.basementMsandLayerCft || 0)} CFT
+            {format2Dec(estimate?.basementMsandLayerCft || 0)} CFT
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Flooring PCC: </span>
-          <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
-            {Math.round(estimate?.flooringPccSqft || 0)} Sq.ft
+          <span className="font-extrabold text-blue-600 dark:text-blue-400">
+            {format2Dec(estimate?.flooringPccSqft || 0)} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
           <span className="text-slate-500 uppercase text-[11px]">Basement Total:</span>
           <span className="text-sm font-black text-slate-900 dark:text-white">
-            ₹ {Math.round((estimate?.basementBrickworkTotalCost || 0) + (estimate?.basementPlasterTotalCost || 0) + (estimate?.basementGravelTotalCost || 0) + (estimate?.basementMsandMatCost || 0) + (estimate?.flooringPccTotalCost || 0)).toLocaleString('en-IN')}
+            ₹ {format2Dec(estimate?.basementGrandTotalCost || 0)}
           </span>
         </div>
       </div>
