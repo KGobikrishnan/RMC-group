@@ -346,10 +346,10 @@ export default function App() {
             </div>
 
             {/* MODULE 1: Total Built-Up Area */}
-            <TotalAreaModule builtup={data.builtup} updateBuiltup={updateBuiltup} />
+            <TotalAreaModule builtup={data.builtup} updateBuiltup={updateBuiltup} estimate={estimate} />
 
             {/* MODULE 2: Footing & Column Schedule */}
-            <FootingModule footings={data.footings} updateFootings={updateFootings} />
+            <FootingModule footings={data.footings} updateFootings={updateFootings} estimate={estimate} />
 
             {/* MODULE 3: Plinth Beam Calculation (With Dynamic Row Addition) */}
             <PlinthBeamModule 
@@ -363,6 +363,7 @@ export default function App() {
               basement={data.basement} 
               updateBasement={updateBasement} 
               estimate={estimate} 
+              builtup={data.builtup}
             />
 
             {/* MODULE 5: Superstructure Brickwork (9" & 4.5" Walls + Openings Deductions) */}

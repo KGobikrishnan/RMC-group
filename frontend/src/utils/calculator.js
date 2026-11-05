@@ -33,9 +33,12 @@ export function calculateCivilEstimateComplete(data, rates) {
   });
 
   const totalBuiltupArea = floorItems.reduce((acc, f) => acc + (f.computedArea || 0), 0);
-  const gfArea = floorItems[0]?.computedArea || 858;
-  const gfLength = floorItems[0]?.length || 22;
-  const gfBreadth = floorItems[0]?.breadth || 39;
+  // Ground floor outer dimensions & perimeter (DATA SHEET G42 = 2 * (B5 + C5))
+  const gfFloor = floorItems[0] || {};
+  const gfArea = gfFloor.computedArea !== undefined ? gfFloor.computedArea : 858;
+  const gfLength = Number(gfFloor.length) || 22;
+  const gfBreadth = Number(gfFloor.breadth) || 39;
+  const computedGfPerimeter = 2 * (gfLength + gfBreadth); // e.g. 2*(22+39) = 122 RFT
 
   // -------------------------------------------------------------
   // 2. FOOTINGS & COLUMNS SCHEDULE
@@ -123,21 +126,33 @@ export function calculateCivilEstimateComplete(data, rates) {
 
   const itemizedPlinthBeams = rawBeams.map((b) => {
     const l = Number(b.length) || 0;
+    const concL = b.concreteLength !== undefined ? Number(b.concreteLength) : l;
     const excB = Number(b.excavationB) || 1.0;
     const excD = Number(b.excavationD) || 0.5;
     const concB = Number(b.concreteB) || 0.75;
     const concD = Number(b.concreteD) || 1.25;
 
     const excCft = l * excB * excD;
-    const concCft = l * concB * concD;
-    const beamPlanArea = l * concB;
+    const concCft = concL * concB * concD;
+    const beamPlanArea = concL * concB;
 
     totalPbLength += l;
     totalPlinthExcavationCft += excCft;
     totalPlinthConcreteCft += concCft;
     totalPlinthAreaDeduction += beamPlanArea;
 
-    return { ...b, length: l, excavationB: excB, excavationD: excD, concreteB: concB, concreteD: concD, excCft, concCft, beamPlanArea };
+    return { 
+      ...b, 
+      length: l, 
+      concreteLength: concL,
+      excavationB: excB, 
+      excavationD: excD, 
+      concreteB: concB, 
+      concreteD: concD, 
+      excCft, 
+      concCft, 
+      beamPlanArea 
+    };
   });
 
   const plinthExcavationLabCost = totalPlinthExcavationCft * rates.labourPlinthExcavationPerCft;
@@ -153,10 +168,13 @@ export function calculateCivilEstimateComplete(data, rates) {
   // -------------------------------------------------------------
   // 4. BASEMENT - FLYASH BRICKWORK & FILLING
   // -------------------------------------------------------------
+  // Outer perimeter auto-links to Ground Floor perimeter 2*(L+B) if not manually overridden
+  const bsmPerimeter = (basement?.outerPerimeter !== undefined && basement?.outerPerimeter !== null && basement?.isPerimeterManual)
+    ? Number(basement.outerPerimeter)
+    : (Number(basement?.outerPerimeter) || computedGfPerimeter || 122);
   const bsmFlyashL = Number(basement?.flyashLength) || totalPbLength || 201;
   const bsmFlyashB = Number(basement?.flyashBreadth) || 0.75;
   const bsmFlyashD = Number(basement?.flyashDepth) || 1.25;
-  const bsmPerimeter = Number(basement?.outerPerimeter) || (2 * (gfLength + gfBreadth)) || 122;
   const bsmHeight = Number(basement?.height) || 3.0;
 
   const basementBrickworkCft = bsmFlyashL * bsmFlyashB * bsmFlyashD;
@@ -469,6 +487,8 @@ export function calculateCivilEstimateComplete(data, rates) {
     basementFlyashBricksNos,
     basementPlasteringSqft,
     plinthBeamDeductionArea,
+    gfArea,
+    computedGfPerimeter,
     netBasementArea,
     basementGravelCft,
     basementMsandLayerCft,
