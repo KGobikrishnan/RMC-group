@@ -28,7 +28,14 @@ import {
   BasementModule,
   BrickworkModule,
   PlasteringModule,
-  SillLintelModule
+  SillLintelModule,
+  TilesModule,
+  JoineryModule,
+  RoofSlabModule,
+  PaintingModule,
+  StaircaseModule,
+  OthersModule,
+  AdditionalWorksModule
 } from './components/StepperForms';
 import {
   FoundationDashboard,
@@ -117,7 +124,35 @@ export default function App() {
   };
 
   const updateSillLintel = (newSillLintel) => {
-    setData(prev => ({ ...prev, sillLintel: newSillLintel }));
+    setData(prev => ({ ...prev, sillLintel: newSillLintel, sillAndLintel: newSillLintel }));
+  };
+
+  const updateTiles = (newTiles) => {
+    setData(prev => ({ ...prev, tiles: newTiles }));
+  };
+
+  const updateJoinery = (newJoinery) => {
+    setData(prev => ({ ...prev, joinery: newJoinery }));
+  };
+
+  const updateRoofSlab = (newRoofSlab) => {
+    setData(prev => ({ ...prev, roofSlab: newRoofSlab }));
+  };
+
+  const updatePainting = (newPainting) => {
+    setData(prev => ({ ...prev, painting: newPainting }));
+  };
+
+  const updateStaircase = (newStaircase) => {
+    setData(prev => ({ ...prev, staircase: newStaircase }));
+  };
+
+  const updateOthers = (newOthers) => {
+    setData(prev => ({ ...prev, others: newOthers }));
+  };
+
+  const updateAdditionalWorks = (newAdditionalWorks) => {
+    setData(prev => ({ ...prev, additionalWorks: newAdditionalWorks }));
   };
 
   const handleSave = () => {
@@ -137,7 +172,7 @@ export default function App() {
   };
 
   const allTabs = [
-    { id: 'inputs', label: 'Civil Inputs (Modules 1 to 7)', icon: Layers, badge: 'Active', disabled: false },
+    { id: 'inputs', label: 'Project Inputs (Modules 1 to 15)', icon: Layers, badge: 'Active', disabled: false },
     { id: 'dashboard', label: 'Foundation Summary', icon: PieChart, disabled: false },
     { id: 'boq', label: 'Civil BOQ', icon: FileSpreadsheet, badge: `${estimate.boqSchedule?.length || 18} Items`, disabled: false },
     { id: 'bom', label: 'Materials BOM', icon: Box, badge: 'Procurement', disabled: false },
@@ -391,6 +426,55 @@ export default function App() {
               sillLintel={data.sillLintel} 
               updateSillLintel={updateSillLintel} 
               estimate={estimate} 
+            />
+
+            {/* MODULE 8: Tiles & Granite Work */}
+            <TilesModule
+              tiles={data.tiles}
+              updateTiles={updateTiles}
+              estimate={estimate}
+            />
+
+            {/* MODULE 10: Doors & Windows Joinery */}
+            <JoineryModule
+              joinery={data.joinery}
+              updateJoinery={updateJoinery}
+              estimate={estimate}
+            />
+
+            {/* MODULE 11: Roof Slab & Roof Beams Concrete */}
+            <RoofSlabModule
+              roofSlab={data.roofSlab}
+              updateRoofSlab={updateRoofSlab}
+              estimate={estimate}
+            />
+
+            {/* MODULE 12: Painting Work */}
+            <PaintingModule
+              painting={data.painting}
+              updatePainting={updatePainting}
+              estimate={estimate}
+            />
+
+            {/* MODULE 13: Staircase Works */}
+            <StaircaseModule
+              staircase={data.staircase}
+              updateStaircase={updateStaircase}
+              estimate={estimate}
+            />
+
+            {/* MODULE 14: Others - Electrical, Plumbing & Terrace Surkhi */}
+            <OthersModule
+              others={data.others}
+              updateOthers={updateOthers}
+              estimate={estimate}
+            />
+
+            {/* MODULE 15: Additional Works & Site Infrastructure */}
+            <AdditionalWorksModule
+              additionalWorks={data.additionalWorks}
+              updateAdditionalWorks={updateAdditionalWorks}
+              estimate={estimate}
             />
           </div>
         )}

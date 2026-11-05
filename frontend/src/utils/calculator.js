@@ -374,7 +374,195 @@ export function calculateCivilEstimateComplete(data, rates) {
   const loftsLabCost = totalLoftsVolumeCft * rates.labourLoftsSunshadesPerCft;
   const loftsTotalCost = loftsMatCost + loftsLabCost;
 
+    // -------------------------------------------------------------
+  // 8. TILES & GRANITE WORK (Sheet 6.TILES WORK & BOQ Items 30-38)
   // -------------------------------------------------------------
+  const tilesInput = data?.tiles || {};
+  const tileFlooringSqft = Number(tilesInput.flooringArea) || 532.5;
+  const tileBathroomFloorSqft = Number(tilesInput.bathroomFloorArea) || 60;
+  const tileParkingSqft = Number(tilesInput.parkingArea) || 123;
+  const tileKitchenWallSqft = Number(tilesInput.kitchenWallArea) || 64;
+  const tileBathroomWallSqft = Number(tilesInput.bathroomWallArea) || 520;
+  const tileSkirtingRft = Number(tilesInput.skirtingLength) || 86.28;
+  const tileCountertopSqft = Number(tilesInput.countertopArea) || 60;
+
+  // Tile Material Costs (Supply)
+  const tileFlooringMatCost = tileFlooringSqft * (rates.tileFlooringRate || 60);
+  const tileBathroomFloorMatCost = tileBathroomFloorSqft * (rates.tileBathroomFloorRate || 50);
+  const tileParkingMatCost = tileParkingSqft * (rates.tileParkingRate || 50);
+  const tileKitchenWallMatCost = tileKitchenWallSqft * (rates.tileKitchenWallRate || 50);
+  const tileBathroomWallMatCost = tileBathroomWallSqft * (rates.tileBathroomWallRate || 50);
+  const tileSkirtingMatCost = tileSkirtingRft * (rates.tileSkirtingRate || 60);
+  const tileCountertopMatCost = tileCountertopSqft * (rates.graniteCountertopRate || 160);
+
+  // Tile Laying Labour Costs
+  const tileFlooringLabCost = tileFlooringSqft * (rates.tileFlooringLabour || 24);
+  const tileBathroomFloorLabCost = tileBathroomFloorSqft * (rates.tileBathroomFloorLabour || 24);
+  const tileParkingLabCost = tileParkingSqft * (rates.tileParkingLabour || 24);
+  const tileKitchenWallLabCost = tileKitchenWallSqft * (rates.tileKitchenWallLabour || 24);
+  const tileBathroomWallLabCost = tileBathroomWallSqft * (rates.tileBathroomWallLabour || 30);
+  const tileSkirtingLabCost = (tileSkirtingRft / 8) * 6 * 4 * (rates.tileFlooringLabour || 24); // Excel formula: D45/8*6*4*24
+  const tileCountertopLabCost = tileCountertopSqft * (rates.graniteCountertopLabour || 160);
+
+  // Araldite & Tile Paste (Paste for wall tiles, skirting & countertops)
+  // Area = kitchen wall (64) + bath wall (520) + countertop (60) + skirting (86.28) + steps granite (171.5) = 901.78 sq.ft
+  const tilePasteAreaSqft = tileKitchenWallSqft + tileBathroomWallSqft + tileCountertopSqft + tileSkirtingRft + 171.5;
+  const tilePasteCost = tilePasteAreaSqft * (rates.aralditePasteRate || 15);
+
+  // Tile Underbed Mortar (2.5" thick mortar bed = 0.21 ft)
+  // Area = flooring (532.5) + bath floor (60) + parking (123) + countertop (60) + steps (171.5) = 947 sq.ft
+  const tileMortarAreaSqft = tileFlooringSqft + tileBathroomFloorSqft + tileParkingSqft + tileCountertopSqft + 171.5;
+  const tileMortarVolumeCft = tileMortarAreaSqft * 0.21;
+  const tileMortarCementBags = (tileMortarVolumeCft / 35.314) * 7.5; // Mortar cement
+  const tileMortarSandCft = tileMortarVolumeCft * 1.155;
+  const tileMortarCost = (tileMortarCementBags * rates.cement) + (tileMortarSandCft * rates.msand);
+
+  // Total Tiles Material & Labour
+  const totalTilesMatCost = tileFlooringMatCost + tileBathroomFloorMatCost + tileParkingMatCost + 
+    tileKitchenWallMatCost + tileBathroomWallMatCost + tileSkirtingMatCost + tileCountertopMatCost + 
+    tilePasteCost + tileMortarCost;
+  const totalTilesLabCost = tileFlooringLabCost + tileBathroomFloorLabCost + tileParkingLabCost + 
+    tileKitchenWallLabCost + tileBathroomWallLabCost + tileSkirtingLabCost + tileCountertopLabCost;
+  const totalTilesCost = totalTilesMatCost + totalTilesLabCost;
+
+  // -------------------------------------------------------------
+  // 10. DOORS & WINDOWS JOINERY (Sheet 7.DOOR & WINDOW & BOQ Items 25-29)
+  // -------------------------------------------------------------
+  const rawJoinery = data?.joinery?.items || [
+    { id: 'j1', name: 'Main Door (Kinza Teak Wood)', length: 3.25, height: 7, nos: 1, rate: 1071, spec: 'Teak frame & carved panel shutter' },
+    { id: 'j2', name: 'Room & Outer Doors', length: 3.0, height: 7, nos: 3, rate: 428, spec: 'Sal / Mahogany frame with flush door' },
+    { id: 'j3', name: 'Pooja Door (Teak Wood)', length: 3.0, height: 7, nos: 1, rate: 500, spec: 'Teak frame & CNC pooja design shutter' },
+    { id: 'j4', name: 'Bathroom PVC Doors', length: 2.5, height: 7, nos: 2, rate: 142, spec: 'FRP / PVC water-resistant door' },
+    { id: 'j5', name: 'UPVC Windows with Safety MS Grill', length: 3.0, height: 4.2, nos: 5, rate: 600, spec: '3-track UPVC sliding with mosquito mesh & grill' }
+  ];
+
+  let totalJoineryCost = 0;
+  let totalJoineryAreaSqft = 0;
+  const itemizedJoinery = rawJoinery.map(j => {
+    const l = Number(j.length) || 0;
+    const h = Number(j.height) || 0;
+    const nos = Number(j.nos) || 1;
+    const area = l * h * nos;
+    const rate = Number(j.rate) || 0;
+    const cost = area * rate;
+    totalJoineryCost += cost;
+    totalJoineryAreaSqft += area;
+    return { ...j, length: l, height: h, nos, area, rate, cost };
+  });
+
+  // -------------------------------------------------------------
+  // 11. ROOF SLAB & ROOF BEAM CONCRETE (Sheet 8.SLAB CONCRETE & BOQ Item 20)
+  // -------------------------------------------------------------
+  const roofSlabInput = data?.roofSlab || {};
+  // Plinth beam length defaults to 201 RFT
+  const roofBeamLength = Number(roofSlabInput.beamLength) || totalPbLength || 201;
+  const roofBeamBreadth = Number(roofSlabInput.beamBreadth) || 0.75;
+  const roofBeamDepth = Number(roofSlabInput.beamDepth) || 0.583;
+  const roofBeamVolumeCft = roofBeamLength * roofBeamBreadth * roofBeamDepth; // 87.89 CFT
+  const roofBeamCost = roofBeamVolumeCft * (rates.roofBeamConcreteRate || 748.1);
+
+  // Roof Slab Area defaults to Ground Floor Area (858 sq.ft)
+  const roofSlabArea = Number(roofSlabInput.slabArea) || gfArea || 858;
+  const roofSlabThickness = Number(roofSlabInput.slabThickness) || 0.416; // 5 inches
+  const roofSlabVolumeCft = roofSlabArea * roofSlabThickness; // 356.93 CFT
+  const roofSlabCost = roofSlabVolumeCft * (rates.roofSlabConcreteRate || 523.8);
+
+  const totalRoofConcreteVolumeCft = roofBeamVolumeCft + roofSlabVolumeCft; // 444.82 CFT
+  const totalRoofConcreteCost = roofBeamCost + roofSlabCost;
+
+  // Roof Concrete BOM Breakdown (M20 grade: 8.064 bags/m3, 3.2 kg steel/cft)
+  const roofCementBags = (totalRoofConcreteVolumeCft / 35.314) * 8.064;
+  const roofSteelKg = totalRoofConcreteVolumeCft * 3.5; // Beam + slab reinforcement
+  const roofSandCft = roofCementBags * (8.0 / 3.0);
+  const roofAggCft = roofCementBags * (10.0 / 3.0);
+
+  // -------------------------------------------------------------
+  // 12. PAINTING WORK (Sheet 9.PAINTING & BOQ Items 39-41)
+  // -------------------------------------------------------------
+  const paintingInput = data?.painting || {};
+  const paintInnerSqft = Number(paintingInput.innerWallArea) || (netInnerPlasteringSqft || 2626.5);
+  const paintOuterSqft = Number(paintingInput.outerWallArea) || (totalOuterPlasteringSqft || 2276.25);
+  const paintCeilingSqft = Number(paintingInput.ceilingArea) || (totalCeilingSqft || 808);
+
+  const paintInnerCost = paintInnerSqft * (rates.paintInnerRate || 28);
+  const paintOuterCost = paintOuterSqft * (rates.paintOuterRate || 34);
+  const paintCeilingCost = paintCeilingSqft * (rates.paintCeilingRate || 25);
+  const totalPaintingCost = paintInnerCost + paintOuterCost + paintCeilingCost;
+
+  // -------------------------------------------------------------
+  // 13. STAIRCASE WORKS (Sheet 10.STAIRCASE & BOQ Items 21, 23)
+  // -------------------------------------------------------------
+  const scInput = data?.staircase || {};
+  const scWidth = Number(scInput.width) || 3.5;
+  const scTread = Number(scInput.tread) || 1.0;
+  const scRiser = Number(scInput.riser) || 0.583;
+  const scStepsCount = Number(scInput.stepsCount) || 21;
+  const scLandingArea = Number(scInput.landingArea) || 24.5;
+  const scHandrailLength = Number(scInput.handrailLength) || 21;
+
+  // Brick Steps: Width * Tread * Riser * No. of steps
+  const scBrickworkVolumeCft = scWidth * scTread * scRiser * scStepsCount; // 42.85 CFT
+  const scBrickworkCost = scBrickworkVolumeCft * (rates.staircaseBrickRate || 250);
+
+  // Steps Granite: ((Width * Tread) + (Width * Riser)) * Steps + Landing
+  const scStepGraniteArea = ((scWidth * scTread) + (scWidth * scRiser)) * scStepsCount + scLandingArea; // 171.5 sq.ft
+  const scGraniteCost = scStepGraniteArea * (rates.staircaseGraniteRate || 320);
+
+  // Handrail
+  const scHandrailCost = scHandrailLength * (rates.staircaseHandrailRate || 1000);
+
+  // Waist Slab Concrete: L * B * D
+  const scWaistL = Number(scInput.waistSlabLength) || 21;
+  const scWaistB = Number(scInput.waistSlabBreadth) || 6;
+  const scWaistD = Number(scInput.waistSlabDepth) || 0.5;
+  const scConcreteVolumeCft = scWaistL * scWaistB * scWaistD; // 63 CFT
+  const scConcreteCost = scConcreteVolumeCft * (rates.roofSlabConcreteRate || 523.8);
+
+  const totalStaircaseCost = scBrickworkCost + scGraniteCost + scHandrailCost + scConcreteCost;
+
+  // Staircase Concrete BOM (M20)
+  const scCementBags = (scConcreteVolumeCft / 35.314) * 8.064;
+  const scSteelKg = scConcreteVolumeCft * 3.2;
+  const scSandCft = scCementBags * (8.0 / 3.0);
+  const scAggCft = scCementBags * (10.0 / 3.0);
+
+  // -------------------------------------------------------------
+  // 14. OTHERS: ELECTRICAL, PLUMBING & TERRACE SURKHI (DATA SHEET Row 167)
+  // -------------------------------------------------------------
+  const othersInput = data?.others || {};
+  const electricalSqft = Number(othersInput.electricalArea) || gfArea || 858;
+  const terraceSurkhiSqft = Number(othersInput.terraceSurkhiArea) || (gfArea - (bsmPerimeter * 0.75)) || 766.5;
+
+  const electricalTotalCost = electricalSqft * (rates.electricalPlumbingRate || 200);
+  const terraceSurkhiVolumeCft = terraceSurkhiSqft * 0.25; // 3 inches chips concrete bed
+  const terraceSurkhiTotalCost = terraceSurkhiVolumeCft * (rates.terraceSurkhiRate || 98.2);
+
+  const totalOthersCost = electricalTotalCost + terraceSurkhiTotalCost;
+
+  // -------------------------------------------------------------
+  // 15. ADDITIONAL WORKS (DATA SHEET Row 173 & Sheet 12.Breakup)
+  // -------------------------------------------------------------
+  const rawAdditional = data?.additionalWorks || [
+    { id: 'add1', name: 'Underground Water Sump', unit: 'Litres', qty: 2500, rate: 12, spec: 'Flyash brickwork sump with waterproof plaster & RCC cover' },
+    { id: 'add2', name: 'Septic Tank (3-Chamber Partition)', unit: 'Litres', qty: 10200, rate: 17, spec: 'Heavy duty brickwork septic tank with baffles & slabs' },
+    { id: 'add3', name: 'Overhead Tank (OHT) with MS Stand', unit: 'Litres', qty: 1000, rate: 17, spec: 'PVC 3-layer tank on 4ft height MS fabricated stand' },
+    { id: 'add4', name: 'Compound Wall (Solid Block Masonry)', unit: 'RFT', qty: 80, rate: 2000, spec: '5ft height solid blocks with plinth belt & RCC columns' },
+    { id: 'add5', name: 'Rainwater Soakpit', unit: 'Nos', qty: 1, rate: 10000, spec: 'RCC precast rings (2ft dia x 6ft depth) with cover' },
+    { id: 'add6', name: 'Ramp for Car Parking & Street', unit: 'Unit', qty: 1, rate: 1000, spec: 'Backfilling, PCC & cement finish up to road level' },
+    { id: 'add7', name: 'Setback Flooring PCC', unit: 'Sq.ft', qty: 250, rate: 70, spec: '3" thick PCC bed with neat cement trowel finish' },
+    { id: 'add8', name: 'Architectural Main MS Gate', unit: 'Sq.ft', qty: 60, rate: 800, spec: 'Heavy square tube MS gate with primer & synthetic enamel' }
+  ];
+
+  let totalAdditionalCost = 0;
+  const itemizedAdditional = rawAdditional.map(item => {
+    const qty = Number(item.qty) || 0;
+    const rate = Number(item.rate) || 0;
+    const cost = qty * rate;
+    totalAdditionalCost += cost;
+    return { ...item, qty, rate, cost };
+  });
+
+// -------------------------------------------------------------
   // TOTAL MATERIAL AGGREGATION (BOM)
   // -------------------------------------------------------------
   const totalCementBags = 
@@ -390,7 +578,10 @@ export function calculateCivilEstimateComplete(data, rates) {
     wallPlasterCementBags +
     sillCementBags +
     lintelCementBags +
-    loftsCementBags;
+    loftsCementBags +
+    roofCementBags +
+    scCementBags +
+    tileMortarCementBags;
 
   const totalSteelKg = 
     footingSteelKg +
@@ -398,7 +589,9 @@ export function calculateCivilEstimateComplete(data, rates) {
     plinthSteelKg +
     sillSteelKg +
     lintelSteelKg +
-    loftsSteelKg;
+    loftsSteelKg +
+    roofSteelKg +
+    scSteelKg;
 
   const totalSteelTons = totalSteelKg / 1000;
 
@@ -449,7 +642,21 @@ export function calculateCivilEstimateComplete(data, rates) {
     // 6. Plastering
     ceilingPlasterTotalCost + wallPlasterTotalCost +
     // 7. Sill & Lintel
-    sillTotalCost + lintelTotalCost + loftsTotalCost;
+    sillTotalCost + lintelTotalCost + loftsTotalCost +
+    // 8. Tiles & Granite
+    totalTilesCost +
+    // 10. Joinery
+    totalJoineryCost +
+    // 11. Roof Slab & Beams
+    totalRoofConcreteCost +
+    // 12. Painting
+    totalPaintingCost +
+    // 13. Staircase
+    totalStaircaseCost +
+    // 14. Others (Electrical, Plumbing, Terrace Surkhi)
+    totalOthersCost +
+    // 15. Additional Works
+    totalAdditionalCost;
 
   const contractorMarkup = (totalDirectCost * rates.contractorMarginPct) / 100;
   const grandTotalCost = totalDirectCost + contractorMarkup;
@@ -638,6 +845,86 @@ export function calculateCivilEstimateComplete(data, rates) {
       labourCost: (loftsTotalCost * 0.35),
       totalCost: loftsTotalCost,
       spec: 'Cantilever sunshades, kitchen lofts and cupboard slabs'
+    },
+    {
+      sno: 19,
+      item: 'Roof Beams & Roof Slab Concrete (M20)',
+      unit: 'CFT',
+      qty: Math.round(totalRoofConcreteVolumeCft * 10) / 10,
+      materialCost: (totalRoofConcreteCost * 0.65),
+      labourCost: (totalRoofConcreteCost * 0.35),
+      totalCost: totalRoofConcreteCost,
+      spec: 'RCC M20 mix roof slab (5" depth) and monolithic roof beams'
+    },
+    {
+      sno: 20,
+      item: 'Staircase Works (Brick Steps, Waist Slab & Granite)',
+      unit: 'Unit',
+      qty: scStepsCount,
+      materialCost: (totalStaircaseCost * 0.65),
+      labourCost: (totalStaircaseCost * 0.35),
+      totalCost: totalStaircaseCost,
+      spec: 'Brick masonry steps, 6" RCC waist slab, granite treads and SS handrail'
+    },
+    {
+      sno: 21,
+      item: 'Terrace Surkhi & Weathering Course',
+      unit: 'CFT',
+      qty: Math.round(terraceSurkhiVolumeCft * 10) / 10,
+      materialCost: (terraceSurkhiTotalCost * 0.60),
+      labourCost: (terraceSurkhiTotalCost * 0.40),
+      totalCost: terraceSurkhiTotalCost,
+      spec: 'Brickbat surkhi concrete with terracotta tiles / lime mortar slope'
+    },
+    {
+      sno: 22,
+      item: 'Doors & Windows Joinery',
+      unit: 'Sq.ft',
+      qty: Math.round(totalJoineryAreaSqft * 10) / 10,
+      materialCost: (totalJoineryCost * 0.85),
+      labourCost: (totalJoineryCost * 0.15),
+      totalCost: totalJoineryCost,
+      spec: 'Main teak door, flush room doors, PVC bathroom doors & UPVC windows'
+    },
+    {
+      sno: 23,
+      item: 'Tiles & Granite Flooring & Dadoing',
+      unit: 'Sq.ft',
+      qty: Math.round((tileFlooringSqft + tileBathroomFloorSqft + tileParkingSqft + tileKitchenWallSqft + tileBathroomWallSqft) * 10) / 10,
+      materialCost: totalTilesMatCost,
+      labourCost: totalTilesLabCost,
+      totalCost: totalTilesCost,
+      spec: 'Vitrified tiles, anti-skid bathroom tiles, wall dadoing & granite counters'
+    },
+    {
+      sno: 24,
+      item: 'Painting Work (Internal & External)',
+      unit: 'Sq.ft',
+      qty: Math.round((paintInnerSqft + paintOuterSqft + paintCeilingSqft) * 10) / 10,
+      materialCost: (totalPaintingCost * 0.45),
+      labourCost: (totalPaintingCost * 0.55),
+      totalCost: totalPaintingCost,
+      spec: 'Asian Paints Apex / Premium emulsion with primer and putty'
+    },
+    {
+      sno: 25,
+      item: 'Electrical & Plumbing Works',
+      unit: 'Sq.ft',
+      qty: Math.round(electricalSqft * 10) / 10,
+      materialCost: (electricalTotalCost * 0.70),
+      labourCost: (electricalTotalCost * 0.30),
+      totalCost: electricalTotalCost,
+      spec: 'Concealed wiring, modular switches, PVC conduits, CPVC plumbing & sanitary'
+    },
+    {
+      sno: 26,
+      item: 'Additional External Infrastructure Works',
+      unit: 'LS',
+      qty: itemizedAdditional.length,
+      materialCost: (totalAdditionalCost * 0.70),
+      labourCost: (totalAdditionalCost * 0.30),
+      totalCost: totalAdditionalCost,
+      spec: 'UG Sump, Septic Tank, OHT Stand, Compound Wall, Soakpit, Ramp, Setback PCC & Gate'
     }
   ];
 
@@ -730,6 +1017,68 @@ export function calculateCivilEstimateComplete(data, rates) {
     sillTotalCost,
     lintelTotalCost,
     loftsTotalCost,
+    // 8. Tiles & Granite Work
+    tileFlooringSqft,
+    tileBathroomFloorSqft,
+    tileParkingSqft,
+    tileKitchenWallSqft,
+    tileBathroomWallSqft,
+    tileSkirtingRft,
+    tileCountertopSqft,
+    tilePasteAreaSqft,
+    tileMortarAreaSqft,
+    totalTilesMatCost,
+    totalTilesLabCost,
+    totalTilesCost,
+    // 10. Doors & Windows Joinery
+    itemizedJoinery,
+    totalJoineryAreaSqft,
+    totalJoineryCost,
+    // 11. Roof Slab & Beams Concrete
+    roofBeamLength,
+    roofBeamBreadth,
+    roofBeamDepth,
+    roofBeamVolumeCft,
+    roofBeamCost,
+    roofSlabArea,
+    roofSlabThickness,
+    roofSlabVolumeCft,
+    roofSlabCost,
+    totalRoofConcreteVolumeCft,
+    totalRoofConcreteCost,
+    roofSteelKg,
+    // 12. Painting Work
+    paintInnerSqft,
+    paintOuterSqft,
+    paintCeilingSqft,
+    paintInnerCost,
+    paintOuterCost,
+    paintCeilingCost,
+    totalPaintingCost,
+    // 13. Staircase Works
+    scWidth,
+    scTread,
+    scRiser,
+    scStepsCount,
+    scBrickworkVolumeCft,
+    scBrickworkCost,
+    scStepGraniteArea,
+    scGraniteCost,
+    scHandrailLength,
+    scHandrailCost,
+    scConcreteVolumeCft,
+    scConcreteCost,
+    totalStaircaseCost,
+    // 14. Others (Electrical, Plumbing, Terrace Surkhi)
+    electricalSqft,
+    electricalTotalCost,
+    terraceSurkhiSqft,
+    terraceSurkhiVolumeCft,
+    terraceSurkhiTotalCost,
+    totalOthersCost,
+    // 15. Additional Works
+    itemizedAdditional,
+    totalAdditionalCost,
     // BOM & Financials
     totalCementBags,
     totalSteelKg,

@@ -1685,3 +1685,972 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
     </div>
   );
 }
+
+// =============================================================================
+// SECTION 8: TILES & GRANITE WORK (Sheet 6.TILES WORK)
+// =============================================================================
+export function TilesModule({ tiles, updateTiles, estimate }) {
+  const currentData = tiles || {};
+
+  const handleChange = (field, val) => {
+    updateTiles({
+      ...currentData,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              Section 08
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Tiles & Granite Works
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Vitrified flooring, bathroom anti-skid, wall dadoing, granite countertops, skirting and underbed mortar
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            General Flooring Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.flooringArea ?? 532.5}
+            onChange={(e) => handleChange('flooringArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Vitrified tiles @ ₹60/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Bathroom Flooring Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.bathroomFloorArea ?? 60}
+            onChange={(e) => handleChange('bathroomFloorArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Anti-skid ceramic @ ₹50/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Parking / Balcony Tiles (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.parkingArea ?? 123}
+            onChange={(e) => handleChange('parkingArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Heavy-duty exterior tiles @ ₹50/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Kitchen Wall Dadoing (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.kitchenWallArea ?? 64}
+            onChange={(e) => handleChange('kitchenWallArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Glazed ceramic dadoing @ ₹50/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Bathroom Wall Dadoing (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.bathroomWallArea ?? 520}
+            onChange={(e) => handleChange('bathroomWallArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Full 7ft wall dadoing @ ₹50/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Tile Skirting (RFT)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.skirtingLength ?? 86.28}
+            onChange={(e) => handleChange('skirtingLength', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">4" border skirting @ ₹60/rft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Kitchen Granite Countertop (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.countertopArea ?? 60}
+            onChange={(e) => handleChange('countertopArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Polished Jet Black Granite @ ₹160/sq.ft</span>
+        </div>
+      </div>
+
+      {/* Module 8 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Tiles Flooring: </span>
+          <span className="font-extrabold text-amber-600 dark:text-amber-400">
+            {Math.round((currentData.flooringArea ?? 532.5) + (currentData.bathroomFloorArea ?? 60) + (currentData.parkingArea ?? 123))} Sq.ft
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Wall Dadoing: </span>
+          <span className="font-extrabold text-orange-600 dark:text-orange-400">
+            {Math.round((currentData.kitchenWallArea ?? 64) + (currentData.bathroomWallArea ?? 520))} Sq.ft
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Araldite Paste Area: </span>
+          <span className="font-extrabold text-slate-800 dark:text-slate-200">
+            {Math.round(estimate?.tilePasteAreaSqft || 901.8)} Sq.ft
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total Tiles & Granite Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalTilesCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SECTION 10: DOORS & WINDOWS JOINERY (Sheet 7.DOOR & WINDOW)
+// =============================================================================
+export function JoineryModule({ joinery, updateJoinery, estimate }) {
+  const items = Array.isArray(joinery?.items) ? joinery.items : [];
+
+  const handleItemChange = (idx, field, val) => {
+    const newItems = [...items];
+    newItems[idx] = {
+      ...newItems[idx],
+      [field]: field === 'name' || field === 'spec' ? val : (parseFloat(val) || 0)
+    };
+    updateJoinery({ items: newItems });
+  };
+
+  const handleAddItem = () => {
+    const newItem = {
+      id: 'j_' + Date.now(),
+      name: 'Custom Window / Door',
+      length: 3.0,
+      height: 4.0,
+      nos: 1,
+      rate: 450,
+      spec: 'Fabricated hardwood / aluminium with glazing'
+    };
+    updateJoinery({ items: [...items, newItem] });
+  };
+
+  const handleRemoveItem = (idx) => {
+    if (items.length <= 1) return;
+    const newItems = items.filter((_, i) => i !== idx);
+    updateJoinery({ items: newItems });
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">
+              Section 10
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Doors & Windows Joinery
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Kinza teak main door, mahogany room doors, PVC bathroom doors, UPVC windows & safety grills
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddItem}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white transition-colors shadow-sm"
+        >
+          <span>+ Add Door / Window</span>
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th className="py-2.5 px-3">Joinery Description</th>
+              <th className="py-2.5 px-3">Spec / Frame</th>
+              <th className="py-2.5 px-2 w-20">Length (ft)</th>
+              <th className="py-2.5 px-2 w-20">Height (ft)</th>
+              <th className="py-2.5 px-2 w-16">Nos</th>
+              <th className="py-2.5 px-2 text-right">Area (Sq.ft)</th>
+              <th className="py-2.5 px-2 w-24">Rate (₹/sqft)</th>
+              <th className="py-2.5 px-3 text-right">Amount (₹)</th>
+              <th className="py-2.5 px-2 text-center w-10"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {items.map((item, idx) => {
+              const l = Number(item.length) || 0;
+              const h = Number(item.height) || 0;
+              const nos = Number(item.nos) || 1;
+              const area = l * h * nos;
+              const rate = Number(item.rate) || 0;
+              const cost = area * rate;
+
+              return (
+                <tr key={item.id || idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                  <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-100">
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 bg-transparent text-xs font-semibold focus:border-cyan-500 focus:bg-white dark:focus:bg-slate-900 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-slate-500 dark:text-slate-400">
+                    <input
+                      type="text"
+                      value={item.spec || ''}
+                      onChange={(e) => handleItemChange(idx, 'spec', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 bg-transparent text-[11px] focus:border-cyan-500 focus:bg-white dark:focus:bg-slate-900 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={item.length}
+                      onChange={(e) => handleItemChange(idx, 'length', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-center focus:ring-1 focus:ring-cyan-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={item.height}
+                      onChange={(e) => handleItemChange(idx, 'height', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-center focus:ring-1 focus:ring-cyan-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      step="1"
+                      value={item.nos}
+                      onChange={(e) => handleItemChange(idx, 'nos', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-center focus:ring-1 focus:ring-cyan-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2 text-right font-black text-cyan-600 dark:text-cyan-400">
+                    {Math.round(area * 100) / 100}
+                  </td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      step="1"
+                      value={item.rate}
+                      onChange={(e) => handleItemChange(idx, 'rate', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-right focus:ring-1 focus:ring-cyan-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-right font-black text-slate-800 dark:text-slate-100">
+                    ₹ {Math.round(cost).toLocaleString('en-IN')}
+                  </td>
+                  <td className="py-2 px-2 text-center">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem(idx)}
+                      disabled={items.length <= 1}
+                      className="p-1 rounded text-slate-400 hover:text-red-500 transition-colors disabled:opacity-30"
+                    >
+                      ✕
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Module 10 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Joinery Items: </span>
+          <span className="font-extrabold text-cyan-600 dark:text-cyan-400">
+            {items.reduce((acc, it) => acc + (Number(it.nos) || 1), 0)} Nos
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Joinery Opening Area: </span>
+          <span className="font-extrabold text-blue-600 dark:text-blue-400">
+            {Math.round(estimate?.totalJoineryAreaSqft || 0)} Sq.ft
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total Doors & Windows Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalJoineryCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SECTION 11: ROOF SLAB & ROOF BEAMS CONCRETE (Sheet 8.SLAB CONCRETE)
+// =============================================================================
+export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
+  const currentData = roofSlab || {};
+
+  const handleChange = (field, val) => {
+    updateRoofSlab({
+      ...currentData,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/10 text-violet-600 dark:text-violet-400 uppercase tracking-wider">
+              Section 11
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Roof Slab & Roof Beams (M20 Concrete)
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Monolithic roof beams, 5-inch RCC roof slab, shuttering, steel reinforcement and pump placing
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Roof Beams Card */}
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-3">
+          <h3 className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400 flex items-center justify-between">
+            <span>Roof Beams Schedule</span>
+            <span className="text-[10px] font-medium text-slate-400">(Linked to Plinth Beam length: 201 RFT)</span>
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-500 block mb-1">Length (RFT)</label>
+              <input
+                type="number"
+                step="0.1"
+                value={currentData.beamLength ?? 201}
+                onChange={(e) => handleChange('beamLength', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-500 block mb-1">Width (ft)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={currentData.beamBreadth ?? 0.75}
+                onChange={(e) => handleChange('beamBreadth', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-500 block mb-1">Depth (ft)</label>
+              <input
+                type="number"
+                step="0.001"
+                value={currentData.beamDepth ?? 0.583}
+                onChange={(e) => handleChange('beamDepth', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+              />
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-xs">
+            <span className="text-slate-500">Beam Concrete Volume:</span>
+            <span className="font-bold text-violet-600 dark:text-violet-400">
+              {Math.round((estimate?.roofBeamVolumeCft || 87.89) * 100) / 100} CFT
+            </span>
+          </div>
+        </div>
+
+        {/* Roof Slab Card */}
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-3">
+          <h3 className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400 flex items-center justify-between">
+            <span>Roof Slab Concrete</span>
+            <span className="text-[10px] font-medium text-slate-400">(Linked to GF Area: 858 sq.ft)</span>
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-500 block mb-1">Built-Up Area (Sq.ft)</label>
+              <input
+                type="number"
+                step="0.1"
+                value={currentData.slabArea ?? 858}
+                onChange={(e) => handleChange('slabArea', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-500 block mb-1">Slab Thickness (ft)</label>
+              <input
+                type="number"
+                step="0.001"
+                value={currentData.slabThickness ?? 0.416}
+                onChange={(e) => handleChange('slabThickness', e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+              />
+              <span className="text-[10px] text-slate-400 block mt-0.5">5 inches = 0.416 ft</span>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-xs">
+            <span className="text-slate-500">Slab Concrete Volume:</span>
+            <span className="font-bold text-violet-600 dark:text-violet-400">
+              {Math.round((estimate?.roofSlabVolumeCft || 356.93) * 100) / 100} CFT
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Module 11 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Slab Concrete Volume: </span>
+          <span className="font-extrabold text-violet-600 dark:text-violet-400">
+            {Math.round((estimate?.totalRoofConcreteVolumeCft || 444.82) * 10) / 10} CFT
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Roof Steel Rebar: </span>
+          <span className="font-extrabold text-purple-600 dark:text-purple-400">
+            {Math.round(estimate?.roofSteelKg || 1557)} kg
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total Roof Concrete Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalRoofConcreteCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SECTION 12: PAINTING WORK (Sheet 9.PAINTING)
+// =============================================================================
+export function PaintingModule({ painting, updatePainting, estimate }) {
+  const currentData = painting || {};
+
+  const handleChange = (field, val) => {
+    updatePainting({
+      ...currentData,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-pink-500/10 text-pink-600 dark:text-pink-400 uppercase tracking-wider">
+              Section 12
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Painting & Wall Finishes
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Asian Paints Apex internal emulsion, premium exterior weather-shield, 2 coats putty and ceiling finishes
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Internal Wall Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.innerWallArea ?? 2626.5}
+            onChange={(e) => handleChange('innerWallArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-pink-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">1 White Cement + 1 Primer + 2 Coats Apex @ ₹28/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            External Wall Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.outerWallArea ?? 2276.25}
+            onChange={(e) => handleChange('outerWallArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-pink-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">1 White Cement + 2 Putty + 1 Primer + 2 Coats @ ₹34/sq.ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Ceiling Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.ceilingArea ?? 808}
+            onChange={(e) => handleChange('ceilingArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-pink-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">1 White Cement + 1 Putty + 1 Primer + 2 Coats @ ₹25/sq.ft</span>
+        </div>
+      </div>
+
+      {/* Module 12 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-pink-500/10 to-rose-500/10 border border-pink-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Total Paint Surface Area: </span>
+          <span className="font-extrabold text-pink-600 dark:text-pink-400">
+            {Math.round((currentData.innerWallArea ?? 2626.5) + (currentData.outerWallArea ?? 2276.25) + (currentData.ceilingArea ?? 808))} Sq.ft
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total Painting Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalPaintingCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SECTION 13: STAIRCASE WORKS (Sheet 10.STAIRCASE)
+// =============================================================================
+export function StaircaseModule({ staircase, updateStaircase, estimate }) {
+  const currentData = staircase || {};
+
+  const handleChange = (field, val) => {
+    updateStaircase({
+      ...currentData,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+              Section 13
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Staircase Works & Finishes
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Brick steps masonry, 6-inch RCC waist slab, polished granite treads & SS 304 architectural handrail
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Step Width (ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.width ?? 3.5}
+            onChange={(e) => handleChange('width', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">Flight width: 3.5 ft</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Tread (ft) & Riser (ft)
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="number"
+              step="0.01"
+              value={currentData.tread ?? 1.0}
+              onChange={(e) => handleChange('tread', e.target.value)}
+              className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500 outline-none"
+              placeholder="Tread (1 ft)"
+            />
+            <input
+              type="number"
+              step="0.001"
+              value={currentData.riser ?? 0.583}
+              onChange={(e) => handleChange('riser', e.target.value)}
+              className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500 outline-none"
+              placeholder="Riser (0.583 ft)"
+            />
+          </div>
+          <span className="text-[10px] text-slate-400 block mt-1">12" Tread / 7" Riser</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Number of Steps
+          </label>
+          <input
+            type="number"
+            step="1"
+            value={currentData.stepsCount ?? 21}
+            onChange={(e) => handleChange('stepsCount', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">21 steps brick masonry</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            SS Handrail Length (RFT)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.handrailLength ?? 21}
+            onChange={(e) => handleChange('handrailLength', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">SS 304 Grade @ ₹1,000/rft</span>
+        </div>
+      </div>
+
+      {/* Module 13 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Steps Brickwork Volume: </span>
+          <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+            {Math.round((estimate?.scBrickworkVolumeCft || 42.85) * 10) / 10} CFT
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Granite Surface Area: </span>
+          <span className="font-extrabold text-teal-600 dark:text-teal-400">
+            {Math.round(estimate?.scStepGraniteArea || 171.5)} Sq.ft
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Waist Slab Concrete: </span>
+          <span className="font-extrabold text-slate-800 dark:text-slate-200">
+            {Math.round(estimate?.scConcreteVolumeCft || 63)} CFT
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total Staircase Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalStaircaseCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SECTION 14: OTHERS - ELECTRICAL, PLUMBING & TERRACE SURKHI (DATA SHEET Row 167)
+// =============================================================================
+export function OthersModule({ others, updateOthers, estimate }) {
+  const currentData = others || {};
+
+  const handleChange = (field, val) => {
+    updateOthers({
+      ...currentData,
+      [field]: parseFloat(val) || 0
+    });
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+              Section 14
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Electrical, Plumbing & Terrace Surkhi
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Complete concealed electrical wiring, modular fixtures, CPVC/PVC plumbing lines and terrace brickbat surkhi
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Electrical & Plumbing Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.electricalArea ?? 858}
+            onChange={(e) => handleChange('electricalArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">
+            Linked to Built-Up Area: 858 sq.ft @ ₹200/sq.ft (₹150 material + ₹50 labour)
+          </span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1">
+            Terrace Surkhi Weathering Area (Sq.ft)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={currentData.terraceSurkhiArea ?? 766.5}
+            onChange={(e) => handleChange('terraceSurkhiArea', e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">
+            Roof area minus parapet outer wall = 766.5 sq.ft (3" chips concrete bed)
+          </span>
+        </div>
+      </div>
+
+      {/* Module 14 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Electrical & Plumbing Cost: </span>
+          <span className="font-extrabold text-blue-600 dark:text-blue-400">
+            ₹ {Math.round(estimate?.electricalTotalCost || 171600).toLocaleString('en-IN')}
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Terrace Surkhi Volume: </span>
+          <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
+            {Math.round((estimate?.terraceSurkhiVolumeCft || 191.6) * 10) / 10} CFT
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total MEP & Terrace Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalOthersCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SECTION 15: ADDITIONAL WORKS (DATA SHEET Row 173 & Sheet 12.Breakup)
+// =============================================================================
+export function AdditionalWorksModule({ additionalWorks, updateAdditionalWorks, estimate }) {
+  const items = Array.isArray(additionalWorks) ? additionalWorks : [];
+
+  const handleItemChange = (idx, field, val) => {
+    const newItems = [...items];
+    newItems[idx] = {
+      ...newItems[idx],
+      [field]: field === 'name' || field === 'unit' || field === 'spec' ? val : (parseFloat(val) || 0)
+    };
+    updateAdditionalWorks(newItems);
+  };
+
+  const handleAddItem = () => {
+    const newItem = {
+      id: 'add_' + Date.now(),
+      name: 'Custom Site Work',
+      unit: 'LS',
+      qty: 1,
+      rate: 15000,
+      spec: 'Custom extra site infrastructure item'
+    };
+    updateAdditionalWorks([...items, newItem]);
+  };
+
+  const handleRemoveItem = (idx) => {
+    if (items.length <= 1) return;
+    const newItems = items.filter((_, i) => i !== idx);
+    updateAdditionalWorks(newItems);
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+              Section 15
+            </span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              Additional Works & Site Infrastructure
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            UG Sump, septic tank, overhead tank stand, compound wall, rainwater soakpit, car ramp, setback PCC & MS gate
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddItem}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors shadow-sm"
+        >
+          <span>+ Add Work Item</span>
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th className="py-2.5 px-3">Work Item</th>
+              <th className="py-2.5 px-3">Specification / Description</th>
+              <th className="py-2.5 px-2 w-20">Unit</th>
+              <th className="py-2.5 px-2 w-24">Quantity</th>
+              <th className="py-2.5 px-2 w-24">Rate (₹)</th>
+              <th className="py-2.5 px-3 text-right">Amount (₹)</th>
+              <th className="py-2.5 px-2 text-center w-10"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {items.map((item, idx) => {
+              const qty = Number(item.qty) || 0;
+              const rate = Number(item.rate) || 0;
+              const cost = qty * rate;
+
+              return (
+                <tr key={item.id || idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                  <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-100">
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 bg-transparent text-xs font-semibold focus:border-rose-500 focus:bg-white dark:focus:bg-slate-900 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-slate-500 dark:text-slate-400">
+                    <input
+                      type="text"
+                      value={item.spec || ''}
+                      onChange={(e) => handleItemChange(idx, 'spec', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 bg-transparent text-[11px] focus:border-rose-500 focus:bg-white dark:focus:bg-slate-900 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2 text-slate-500 dark:text-slate-400">
+                    <input
+                      type="text"
+                      value={item.unit || ''}
+                      onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
+                      className="w-full px-1.5 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-center focus:ring-1 focus:ring-rose-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      step="1"
+                      value={item.qty}
+                      onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-center focus:ring-1 focus:ring-rose-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-2">
+                    <input
+                      type="number"
+                      step="1"
+                      value={item.rate}
+                      onChange={(e) => handleItemChange(idx, 'rate', e.target.value)}
+                      className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-right focus:ring-1 focus:ring-rose-500 outline-none"
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-right font-black text-slate-800 dark:text-slate-100">
+                    ₹ {Math.round(cost).toLocaleString('en-IN')}
+                  </td>
+                  <td className="py-2 px-2 text-center">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem(idx)}
+                      disabled={items.length <= 1}
+                      className="p-1 rounded text-slate-400 hover:text-red-500 transition-colors disabled:opacity-30"
+                    >
+                      ✕
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Module 15 Results Strip */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-rose-500/10 to-pink-500/10 border border-rose-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">UG Sump (2,500 L): </span>
+          <span className="font-extrabold text-rose-600 dark:text-rose-400">
+            ₹ 30,000
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Septic Tank (10,200 L): </span>
+          <span className="font-extrabold text-pink-600 dark:text-pink-400">
+            ₹ 1,73,400
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-slate-500 uppercase text-[11px]">Total Additional Works Cost:</span>
+          <span className="text-sm font-black text-slate-900 dark:text-white">
+            ₹ {Math.round(estimate?.totalAdditionalCost || 0).toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

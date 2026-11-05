@@ -34,6 +34,54 @@ export const DEFAULT_RATES = {
   labourLintelBeamPerRft: 65,      // Lintel beam RCC
   labourLoftsSunshadesPerCft: 35,  // Lofts, sunshades & counter slab
 
+  // Sections 8 to 15 Trade Unit Rates (From Excel sheets 6 to 10 & DATA SHEET)
+  // 8. Tiles & Granite Work (Sheet 6.TILES WORK)
+  rateFlooringTile: 60,            // Rs/sq.ft (Flooring 2x2 vitrified tiles)
+  rateBathroomFloorTile: 50,       // Rs/sq.ft (Anti-skid floor tiles)
+  rateParkingTile: 50,             // Rs/sq.ft (Heavy-duty parking tiles)
+  rateKitchenWallTile: 50,         // Rs/sq.ft (Glazed ceramic dadoing)
+  rateBathroomWallTile: 50,        // Rs/sq.ft (Wall tiles up to 7ft)
+  rateSkirtingTile: 60,            // Rs/sq.ft (Matching wall skirting)
+  rateCountertopGranite: 160,      // Rs/sq.ft (Jet Black Granite slab)
+  rateStaircaseGranite: 160,       // Rs/sq.ft (Moulded step granite)
+  rateTilePasteAraldite: 15,       // Rs/sq.ft (Adhesive paste)
+  rateTileMortarBed: 32.5,         // Rs/sq.ft (2.5" CM 1:5 underbed)
+
+  // 10. Doors & Windows (Sheet 7.DOOR & WINDOW)
+  rateMainDoor: 1071,              // Rs/sq.ft (Teak wood frame & ornate panel door)
+  rateRoomDoor: 428,               // Rs/sq.ft (Sal / Mahogany frame + flush door)
+  ratePoojaDoor: 500,              // Rs/sq.ft (Teak frame & pooja shutters)
+  ratePvcDoor: 142,                // Rs/sq.ft (PVC water-resistant bathroom door)
+  rateUpvcWindows: 600,            // Rs/sq.ft (UPVC sliding windows + safety MS grill)
+
+  // 11. Roof Slab & Beams Concrete (Sheet 8.SLAB CONCRETE)
+  rateRoofBeamConcretePerCft: 748.1,// Rs/CFT (M20 concrete + steel + shuttering)
+  rateRoofSlabConcretePerCft: 523.8,// Rs/CFT (M20 concrete + steel + prop staging)
+
+  // 12. Painting Work (Sheet 9.PAINTING)
+  rateInnerWallPainting: 28,       // Rs/sq.ft (1 coat white cement + 1 primer + 2 coats Apex Emulsion)
+  rateOuterWallPainting: 34,       // Rs/sq.ft (1 coat white cement + 2 putty + 1 primer + 2 coats Premium)
+  rateCeilingPainting: 25,         // Rs/sq.ft (1 coat white cement + 1 putty + 1 primer + 2 coats Premium)
+
+  // 13. Staircase Work (Sheet 10.STAIRCASE)
+  rateStaircaseBrickSteps: 250,    // Rs/CFT (Brick masonry steps)
+  rateStaircaseConcrete: 523.8,    // Rs/CFT (Waist slab M20 RCC)
+  rateStaircaseHandrail: 1000,     // Rs/RFT (SS 304 Grade architectural handrail)
+
+  // 14. Others (Electrical, Plumbing, Terrace Surkhi)
+  rateElectricalPlumbing: 200,     // Rs/sq.ft (Material 150 + Labour 50)
+  rateTerraceSurkhiPerCft: 98.2,   // Rs/CFT (Waterproofing chips concrete & surkhi)
+
+  // 15. Additional Works (DATA SHEET Row 173-183)
+  rateUgSumpPerLitre: 12,          // Rs/Litre (UG Sump Flyash Brickwork + Plastering)
+  rateSepticTankPerLitre: 17,      // Rs/Litre (3 Chamber Septic Tank)
+  rateOhtPerLitre: 17,             // Rs/Litre (PVC 3 layer tank + 4ft MS Stand)
+  rateCompoundWallPerRft: 2000,    // Rs/RFT (5ft height solid block + belt beam + columns)
+  rateSoakpitEach: 10000,          // Rs/Each (RCC precast rings 2' dia 6' depth)
+  rateRampEach: 1000,              // Rs/Unit (PCC, backfilling, mortar finish)
+  rateSetbackPccPerSqft: 70,       // Rs/sq.ft (Setback PCC & mortar finish)
+  rateMsGatePerSqft: 800,          // Rs/sq.ft (Architectural MS gate + painting)
+
   // Contractor Margin / Markup
   contractorMarginPct: 12,        // 10% Profit + 2% Wastage
 };
@@ -162,5 +210,68 @@ export const INITIAL_PROJECT_DATA = {
       { id: 's3', name: 'Window Sunshades', length: 22.5, breadth: 2.25, depth: 0.25 },
       { id: 's4', name: 'Paran / Cupboard Slab', length: 6.5, breadth: 4.0, depth: 0.333 },
     ]
-  }
+  },
+  // 8. Tiles & Granite Work (Sheet 6.TILES WORK)
+  tiles: {
+    flooringArea: 532.5,
+    bathroomFloorArea: 60,
+    parkingArea: 123,
+    kitchenWallArea: 64,
+    bathroomWallArea: 520,
+    skirtingLength: 86.28,
+    countertopArea: 60,
+  },
+  // 10. Doors & Windows Joinery (Sheet 7.DOOR & WINDOW & DATA SHEET Row 123)
+  joinery: {
+    items: [
+      { id: 'j1', name: 'Main Door (Kinza Teak Wood)', length: 3.25, height: 7, nos: 1, rate: 1071, spec: 'Teak frame & carved panel shutter' },
+      { id: 'j2', name: 'Room & Outer Doors', length: 3.0, height: 7, nos: 3, rate: 428, spec: 'Sal / Mahogany frame with flush door' },
+      { id: 'j3', name: 'Pooja Door (Teak Wood)', length: 3.0, height: 7, nos: 1, rate: 500, spec: 'Teak frame & CNC pooja design shutter' },
+      { id: 'j4', name: 'Bathroom PVC Doors', length: 2.5, height: 7, nos: 2, rate: 142, spec: 'FRP / PVC water-resistant door' },
+      { id: 'j5', name: 'UPVC Windows with Safety MS Grill', length: 3.0, height: 4.2, nos: 5, rate: 600, spec: '3-track UPVC sliding with mosquito mesh & grill' },
+    ]
+  },
+  // 11. Roof Slab & Roof Beams Concrete (Sheet 8.SLAB CONCRETE & DATA SHEET Row 135)
+  roofSlab: {
+    beamLength: 201,       // Auto-linked from Section 3 Plinth Beams (201 rft)
+    beamBreadth: 0.75,     // 9" width
+    beamDepth: 0.583,      // 7" projection below slab
+    slabArea: 858,         // Auto-linked from Ground Floor area (858 sq.ft)
+    slabThickness: 0.416,  // 5" slab thickness (0.416 ft)
+  },
+  // 12. Painting Work (Sheet 9.PAINTING & DATA SHEET Row 148)
+  painting: {
+    innerWallArea: 2626.5, // Inner wall plaster area minus deductions
+    outerWallArea: 2276.25,// Auto-linked from plastering outer surfaces
+    ceilingArea: 808,      // Auto-linked from rooms ceiling area
+  },
+  // 13. Staircase Work (Sheet 10.STAIRCASE & DATA SHEET Row 153)
+  staircase: {
+    width: 3.5,            // Width of flight (3.5 ft)
+    tread: 1.0,            // Tread (12 inches)
+    riser: 0.583,          // Riser (7 inches)
+    stepsCount: 21,        // 21 steps
+    landingArea: 24.5,     // 3.5ft x 7ft landing slab
+    handrailLength: 21,    // 21 RFT SS 304 handrail
+    waistSlabLength: 21,   // Waist slab length (21 ft)
+    waistSlabBreadth: 6.0, // Waist slab breadth (6 ft)
+    waistSlabDepth: 0.5,   // 6" waist slab concrete
+  },
+  // 14. Others (Electrical, Plumbing, Terrace Surkhi - DATA SHEET Row 167)
+  others: {
+    electricalArea: 858,   // Auto-linked from total builtup area
+    terraceSurkhiArea: 766.5, // Built-up area minus parapet thickness
+    surkhiThickness: 0.25, // 3" thickness chips concrete & surkhi
+  },
+  // 15. Additional Works (DATA SHEET Row 173-183)
+  additionalWorks: [
+    { id: 'add1', name: 'Underground Water Sump', unit: 'Litres', qty: 2500, rate: 12, spec: 'Flyash brickwork + waterproof plastering (Capacity in Litres)' },
+    { id: 'add2', name: 'Septic Tank (3-Chamber Partition)', unit: 'Litres', qty: 10200, rate: 17, spec: 'Flyash brickwork with 3 chambers (Capacity in Litres)' },
+    { id: 'add3', name: 'Overhead Tank (OHT) with MS Stand', unit: 'Litres', qty: 1000, rate: 17, spec: 'PVC 3-layer tank with 4ft height MS frame stand' },
+    { id: 'add4', name: 'Compound Wall (Solid Block)', unit: 'RFT', qty: 80, rate: 2000, spec: '5ft height solid blocks + bottom belt beam + RCC columns @ 10ft' },
+    { id: 'add5', name: 'Rainwater Soakpit', unit: 'Each', qty: 1, rate: 10000, spec: 'RCC precast rings 2ft dia x 6ft depth with heavy cover' },
+    { id: 'add6', name: 'Ramp for Car Parking & Steps', unit: 'Unit', qty: 1, rate: 1000, spec: 'Backfilling, PCC, and grooved mortar finish' },
+    { id: 'add7', name: 'Setback Flooring PCC', unit: 'Sq.ft', qty: 250, rate: 70, spec: 'PCC bed & smooth mortar finish around villa' },
+    { id: 'add8', name: 'Architectural Main MS Gate', unit: 'Sq.ft', qty: 60, rate: 800, spec: 'MS gate fabrication + primer + polyurethane enamel paint' },
+  ]
 };
