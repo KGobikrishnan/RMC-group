@@ -30,12 +30,18 @@ import {
   PlasteringModule,
   SillLintelModule
 } from './components/StepperForms';
+import {
+  FoundationDashboard,
+  FoundationBOQView,
+  FoundationBOMView,
+  FoundationQuotationView
+} from './components/DeliverablesViews';
 
-const STORAGE_KEY_DATA = 'rmc_substructure_audit_v7';
-const STORAGE_KEY_RATES = 'rmc_substructure_rates_v7';
+const STORAGE_KEY_DATA = 'rmc_substructure_audit_v8';
+const STORAGE_KEY_RATES = 'rmc_substructure_rates_v8';
 
-// Deliverables tabs (disabled for now, can be toggled on anytime)
-const ENABLE_DELIVERABLES_TABS = false;
+// Deliverables tabs (now fully unlocked!)
+const ENABLE_DELIVERABLES_TABS = true;
 
 export default function App() {
   // Theme State
@@ -132,10 +138,10 @@ export default function App() {
 
   const allTabs = [
     { id: 'inputs', label: 'Civil Inputs (Modules 1 to 7)', icon: Layers, badge: 'Active', disabled: false },
-    { id: 'dashboard', label: 'Foundation Summary', icon: PieChart, disabled: !ENABLE_DELIVERABLES_TABS },
-    { id: 'boq', label: 'Foundation BOQ', icon: FileSpreadsheet, badge: '12 Items', disabled: !ENABLE_DELIVERABLES_TABS },
-    { id: 'bom', label: 'Materials BOM', icon: Box, badge: 'Procurement', disabled: !ENABLE_DELIVERABLES_TABS },
-    { id: 'quotation', label: 'Client Quotation', icon: FileText, badge: 'Print PDF', disabled: !ENABLE_DELIVERABLES_TABS },
+    { id: 'dashboard', label: 'Foundation Summary', icon: PieChart, disabled: false },
+    { id: 'boq', label: 'Civil BOQ', icon: FileSpreadsheet, badge: `${estimate.boqSchedule?.length || 18} Items`, disabled: false },
+    { id: 'bom', label: 'Materials BOM', icon: Box, badge: 'Procurement', disabled: false },
+    { id: 'quotation', label: 'Client Quotation', icon: FileText, badge: 'Print PDF', disabled: false },
   ];
 
   return (
@@ -387,6 +393,34 @@ export default function App() {
               estimate={estimate} 
             />
           </div>
+        )}
+
+        {/* TAB 2: Foundation Summary Dashboard */}
+        {activeTab === 'dashboard' && (
+          <FoundationDashboard estimate={estimate} rates={rates} />
+        )}
+
+        {/* TAB 3: Civil BOQ View */}
+        {activeTab === 'boq' && (
+          <FoundationBOQView estimate={estimate} rates={rates} />
+        )}
+
+        {/* TAB 4: Materials BOM Requisition */}
+        {activeTab === 'bom' && (
+          <FoundationBOMView bomSummary={estimate.bomSummary || []} />
+        )}
+
+        {/* TAB 5: Formal Client Quotation */}
+        {activeTab === 'quotation' && (
+          <FoundationQuotationView 
+            estimate={estimate} 
+            rates={rates} 
+            projectInfo={{
+              clientName: data.builtup?.clientName || 'Er. Client Project',
+              siteLocation: data.builtup?.siteLocation || 'Residential Site',
+              quoteDate: '05-Nov-2026'
+            }} 
+          />
         )}
       </main>
 

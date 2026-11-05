@@ -455,6 +455,208 @@ export function calculateCivilEstimateComplete(data, rates) {
   const grandTotalCost = totalDirectCost + contractorMarkup;
   const costPerSqft = totalBuiltupArea > 0 ? (grandTotalCost / totalBuiltupArea) : 0;
 
+  // -------------------------------------------------------------
+  // ITEMIZED CIVIL BOQ SCHEDULE (Excel 11.BOQ Sheet Items 1 to 19)
+  // -------------------------------------------------------------
+  const boqSchedule = [
+    {
+      sno: 1,
+      item: 'Earth excavation for footing',
+      unit: 'CFT',
+      qty: Math.round(totalExcavationCft * 10) / 10,
+      materialCost: 0,
+      labourCost: excavationLabCost,
+      totalCost: excavationLabCost,
+      spec: 'Manual/JCB excavation up to hard stratum'
+    },
+    {
+      sno: 2,
+      item: 'PCC 1:4:8 in foundation',
+      unit: 'CFT',
+      qty: Math.round(totalPccCft * 10) / 10,
+      materialCost: pccMatCost,
+      labourCost: pccLabCost,
+      totalCost: pccTotalCost,
+      spec: 'Plain cement concrete bed for footings'
+    },
+    {
+      sno: 3,
+      item: 'Footing Concrete M20 (1:1.5:3)',
+      unit: 'CFT',
+      qty: Math.round(totalFootingConcreteCft * 10) / 10,
+      materialCost: footingMatCost,
+      labourCost: footingLabCost,
+      totalCost: footingTotalCost,
+      spec: 'M20 RCC isolated footing sloped/box concrete'
+    },
+    {
+      sno: 4,
+      item: 'Column Concrete M20 (Stub)',
+      unit: 'CFT',
+      qty: Math.round(totalColumnConcreteCft * 100) / 100,
+      materialCost: colMatCost,
+      labourCost: colLabCost,
+      totalCost: colTotalCost,
+      spec: 'Column stubs from footing bed to plinth beam level'
+    },
+    {
+      sno: 5,
+      item: 'Back-Filling in Foundation',
+      unit: 'CFT',
+      qty: Math.round(totalFootingBackfillingCft * 10) / 10,
+      materialCost: 0,
+      labourCost: backfillingLabCost,
+      totalCost: backfillingLabCost,
+      spec: 'Refilling excavated pits with selected earth'
+    },
+    {
+      sno: 6,
+      item: 'Plinth Beam Excavation',
+      unit: 'CFT',
+      qty: Math.round(totalPlinthExcavationCft * 10) / 10,
+      materialCost: 0,
+      labourCost: plinthExcavationLabCost,
+      totalCost: plinthExcavationLabCost,
+      spec: 'Trench excavation for plinth tie beams'
+    },
+    {
+      sno: 7,
+      item: 'Plinth Beam Concrete M20',
+      unit: 'CFT',
+      qty: Math.round(totalPlinthConcreteCft * 100) / 100,
+      materialCost: plinthMaterialCost,
+      labourCost: plinthConcreteLabCost,
+      totalCost: plinthConcreteTotalCost,
+      spec: 'Reinforced cement concrete for plinth tie beams'
+    },
+    {
+      sno: 8,
+      item: 'Basement Brickwork (Flyash 1:6)',
+      unit: 'CFT',
+      qty: Math.round(basementBrickworkCft * 10) / 10,
+      materialCost: basementBrickworkMatCost,
+      labourCost: basementBrickworkLabCost,
+      totalCost: basementBrickworkTotalCost,
+      spec: 'Flyash brick masonry in CM 1:6 up to basement level'
+    },
+    {
+      sno: 9,
+      item: 'Basement Plastering (1:6 Both Sides)',
+      unit: 'Sq.ft',
+      qty: Math.round(basementPlasteringSqft * 10) / 10,
+      materialCost: basementPlasterMatCost,
+      labourCost: basementPlasterLabCost,
+      totalCost: basementPlasterTotalCost,
+      spec: 'Cement plastering for basement inner & outer faces'
+    },
+    {
+      sno: 10,
+      item: 'Basement Gravel Filling',
+      unit: 'CFT',
+      qty: Math.round(basementGravelCft * 10) / 10,
+      materialCost: basementGravelMatCost,
+      labourCost: basementGravelLabCost,
+      totalCost: basementGravelTotalCost,
+      spec: 'Selected quarry gravel filling in layers and consolidation'
+    },
+    {
+      sno: 11,
+      item: 'M-Sand 4" Cushion Layer above Gravel',
+      unit: 'CFT',
+      qty: Math.round(basementMsandLayerCft * 10) / 10,
+      materialCost: basementMsandMatCost,
+      labourCost: 0,
+      totalCost: basementMsandMatCost,
+      spec: 'Uniform 4 inch M-sand bedding layer'
+    },
+    {
+      sno: 12,
+      item: 'Flooring PCC 1:4:8',
+      unit: 'Sq.ft',
+      qty: Math.round(flooringPccSqft * 10) / 10,
+      materialCost: flooringPccMatCost,
+      labourCost: flooringPccLabCost,
+      totalCost: flooringPccTotalCost,
+      spec: 'PCC bed for ground floor tile/granite underbed'
+    },
+    {
+      sno: 13,
+      item: 'Superstructure Brickwork (Red Chamber 9" & 4.5")',
+      unit: 'CFT',
+      qty: Math.round(netBrickworkCft * 10) / 10,
+      materialCost: chamberBrickworkMatCost,
+      labourCost: chamberBrickworkLabCost,
+      totalCost: chamberBrickworkTotalCost,
+      spec: 'First class red chamber bricks in CM 1:6 after openings deduction'
+    },
+    {
+      sno: 14,
+      item: 'Ceiling Plastering (1:3 mix)',
+      unit: 'Sq.ft',
+      qty: Math.round(totalCeilingSqft * 10) / 10,
+      materialCost: (ceilingPlasterTotalCost * 0.45),
+      labourCost: (ceilingPlasterTotalCost * 0.55),
+      totalCost: ceilingPlasterTotalCost,
+      spec: 'Smooth ceiling plastering with CM 1:3 ratio'
+    },
+    {
+      sno: 15,
+      item: 'Wall Plastering (Inner & Outer 1:6)',
+      unit: 'Sq.ft',
+      qty: Math.round((netInnerPlasteringSqft + totalOuterPlasteringSqft) * 10) / 10,
+      materialCost: (wallPlasterTotalCost * 0.45),
+      labourCost: (wallPlasterTotalCost * 0.55),
+      totalCost: wallPlasterTotalCost,
+      spec: 'Internal smooth sponge finish & external sand face plastering'
+    },
+    {
+      sno: 16,
+      item: 'Sill Concrete Beam (M15)',
+      unit: 'RFT',
+      qty: Math.round(sillLen * 10) / 10,
+      materialCost: (sillTotalCost * 0.65),
+      labourCost: (sillTotalCost * 0.35),
+      totalCost: sillTotalCost,
+      spec: 'Continuous sill band concrete with 2 nos 8mm steel bars'
+    },
+    {
+      sno: 17,
+      item: 'Lintel Concrete Beam (M15)',
+      unit: 'RFT',
+      qty: Math.round(lintelLen * 10) / 10,
+      materialCost: (lintelTotalCost * 0.65),
+      labourCost: (lintelTotalCost * 0.35),
+      totalCost: lintelTotalCost,
+      spec: 'Continuous lintel beam throughout building with 10mm rebar'
+    },
+    {
+      sno: 18,
+      item: 'Lofts, Sunshades & RCC Slabs (M20)',
+      unit: 'CFT',
+      qty: Math.round(totalLoftsVolumeCft * 10) / 10,
+      materialCost: (loftsTotalCost * 0.65),
+      labourCost: (loftsTotalCost * 0.35),
+      totalCost: loftsTotalCost,
+      spec: 'Cantilever sunshades, kitchen lofts and cupboard slabs'
+    }
+  ];
+
+  const foundationSchedule = boqSchedule.slice(0, 5);
+  const totalDirectFoundationCost = foundationSchedule.reduce((a, b) => a + b.totalCost, 0);
+  const grandTotalFoundationCost = totalDirectFoundationCost * (1 + rates.contractorMarginPct / 100);
+
+  // Bill of Materials Summary (All trades raw requirements)
+  const bomSummary = [
+    { name: 'OPC / PPC 53 Grade Cement', spec: 'Dalmia / UltraTech', unit: 'Bags', qty: Math.round(totalCementBags), rate: rates.cement, amount: totalCementBags * rates.cement },
+    { name: 'Fe550D TMT Reinforcement Steel', spec: 'ARS / Tata Tiscon / JSW', unit: 'Kg', qty: Math.round(totalSteelKg), rate: rates.steel, amount: totalSteelKg * rates.steel, subNote: `${totalSteelTons.toFixed(2)} Metric Tons` },
+    { name: 'First Class Red Chamber Bricks', spec: 'Superstructure Walls (9" & 4.5")', unit: 'Pieces', qty: Math.round(totalChamberBricksNos), rate: rates.brickRed, amount: totalChamberBricksNos * rates.brickRed },
+    { name: 'Flyash Masonry Bricks', spec: 'Basement Wall Masonry', unit: 'Pieces', qty: Math.round(totalFlyashBricksNos), rate: rates.brickFlyash, amount: totalFlyashBricksNos * rates.brickFlyash },
+    { name: 'Manufactured Sand (M-Sand)', spec: 'Zone II for RCC Concrete & Masonry', unit: 'CFT', qty: Math.round(totalMsandCft), rate: rates.msand, amount: totalMsandCft * rates.msand, subNote: `${(totalMsandCft / 100).toFixed(2)} Units` },
+    { name: 'Plastering Sand (P-Sand)', spec: 'Fine Sifted Sand for Plastering', unit: 'CFT', qty: Math.round(totalPsandCft), rate: rates.psand, amount: totalPsandCft * rates.psand, subNote: `${(totalPsandCft / 100).toFixed(2)} Units` },
+    { name: '20mm Graded Blue Metal Aggregate', spec: 'Hard Granite Metal for Concrete', unit: 'CFT', qty: Math.round(totalAggregateCft), rate: rates.aggregate, amount: totalAggregateCft * rates.aggregate, subNote: `${(totalAggregateCft / 100).toFixed(2)} Units` },
+    { name: 'Quarry Gravel / Morrum', spec: 'Basement Backfilling & Consolidation', unit: 'CFT', qty: Math.round(totalGravelCft), rate: rates.gravel, amount: totalGravelCft * rates.gravel, subNote: `${(totalGravelCft / 100).toFixed(2)} Units` }
+  ];
+
   return {
     totalBuiltupArea,
     gfArea,
@@ -542,5 +744,10 @@ export function calculateCivilEstimateComplete(data, rates) {
     contractorMarkup,
     grandTotalCost,
     costPerSqft,
+    boqSchedule,
+    foundationSchedule,
+    totalDirectFoundationCost,
+    grandTotalFoundationCost,
+    bomSummary,
   };
 }

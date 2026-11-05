@@ -104,13 +104,15 @@ export function FoundationDashboard({ estimate, rates }) {
 }
 
 export function FoundationBOQView({ estimate, rates }) {
+  const scheduleToRender = estimate.boqSchedule || estimate.foundationSchedule || [];
+
   return (
     <div className="space-y-6 text-left">
       <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">Foundation Bill of Quantities (BOQ Schedule)</h3>
-            <p className="text-xs text-slate-500">Excavation, PCC Bed, Footing Concrete, Column Stubs, and Backfilling</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Civil Bill of Quantities (BOQ Schedule)</h3>
+            <p className="text-xs text-slate-500">Excel 11.BOQ Sheet: Foundation, Plinth Beams, Basement, Superstructure Brickwork, Plastering, Sill & Lintel</p>
           </div>
           <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-lg">
             {rates.contractorMarginPct}% Contractor Markup Incl.
@@ -131,7 +133,7 @@ export function FoundationBOQView({ estimate, rates }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-              {estimate.foundationSchedule.map((row) => (
+              {scheduleToRender.map((row) => (
                 <tr key={row.sno} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
                   <td className="py-3 px-3 text-center font-bold text-slate-400">{row.sno}</td>
                   <td className="py-3 px-4">
@@ -155,10 +157,10 @@ export function FoundationBOQView({ estimate, rates }) {
             <tfoot>
               <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 font-bold text-xs">
                 <td colSpan="6" className="py-2.5 px-4 text-right text-slate-700 dark:text-slate-300">
-                  Direct Foundation Cost:
+                  Total Direct Civil Cost:
                 </td>
                 <td className="py-2.5 px-4 text-right font-black text-slate-900 dark:text-white">
-                  ₹ {Math.round(estimate.totalDirectFoundationCost).toLocaleString('en-IN')}
+                  ₹ {Math.round(estimate.totalDirectCost || estimate.totalDirectFoundationCost).toLocaleString('en-IN')}
                 </td>
               </tr>
               <tr className="bg-slate-50/80 dark:bg-slate-800/80 font-bold text-xs">
@@ -171,10 +173,10 @@ export function FoundationBOQView({ estimate, rates }) {
               </tr>
               <tr className="border-t border-slate-200 dark:border-slate-700 bg-blue-50/50 dark:bg-blue-950/40 font-extrabold text-sm">
                 <td colSpan="6" className="py-3 px-4 text-right text-blue-900 dark:text-blue-200">
-                  Grand Total Foundation Estimate:
+                  Grand Total Project Estimate:
                 </td>
                 <td className="py-3 px-4 text-right text-blue-700 dark:text-blue-400 text-base">
-                  ₹ {Math.round(estimate.grandTotalFoundationCost).toLocaleString('en-IN')}
+                  ₹ {Math.round(estimate.grandTotalCost || estimate.grandTotalFoundationCost).toLocaleString('en-IN')}
                 </td>
               </tr>
             </tfoot>
@@ -319,23 +321,23 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
         {/* Total Cost Highlight */}
         <div className="mb-6 p-5 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-between">
           <div>
-            <div className="text-xs font-bold uppercase text-blue-900">Total Foundation & Footing Quote</div>
+            <div className="text-xs font-bold uppercase text-blue-900">Total Civil Construction Quote</div>
             <div className="text-2xl font-black text-blue-950">
-              ₹ {Math.round(estimate.grandTotalFoundationCost).toLocaleString('en-IN')}
+              ₹ {Math.round(estimate.grandTotalCost || estimate.grandTotalFoundationCost).toLocaleString('en-IN')}
             </div>
             <div className="text-xs text-blue-800">
               Includes Material, Labour, and {rates.contractorMarginPct}% Contractor Markup
             </div>
           </div>
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white">
-            Substructure Spec
+            Audited Spec (Modules 1 to 7)
           </span>
         </div>
 
         {/* Schedule Table */}
         <div className="space-y-4">
           <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1">
-            Scope of Foundation Works
+            Scope of Civil Construction Works (BOQ Schedule)
           </h4>
 
           <div className="overflow-x-auto text-xs">
@@ -350,7 +352,7 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-800">
-                {estimate.foundationSchedule.map((row) => (
+                {(estimate.boqSchedule || estimate.foundationSchedule || []).map((row) => (
                   <tr key={row.sno}>
                     <td className="py-2 px-2 font-bold">{row.sno}</td>
                     <td className="py-2 px-3 font-semibold">{row.item}</td>
