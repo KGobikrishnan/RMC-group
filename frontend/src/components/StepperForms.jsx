@@ -867,16 +867,16 @@ export function BasementModule({ basement, updateBasement, estimate, builtup }) 
           {/* Total Plinth Area linked from Section 1 Ground Floor */}
           <div className="p-3 rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/30">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-slate-500 font-semibold text-[11px]">Total Plinth Area</span>
+              <span className="text-slate-500 font-semibold text-[11px]">GF Plinth Area (Ground Floor Only)</span>
               <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-100/60 dark:bg-blue-900/40 px-1 rounded">
-                Section 1 🔗
+                GF Only 🔗
               </span>
             </div>
             <div className="text-base font-black text-blue-700 dark:text-blue-300">
               {Math.round(estimate?.gfArea ?? (gfLength * gfBreadth))} <span className="text-xs font-semibold">Sq.ft</span>
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
-              Ground Floor ({gfLength} × {gfBreadth})
+              Ground Floor ({gfLength} × {gfBreadth}) • Upper floors excluded
             </div>
           </div>
 

@@ -65,8 +65,8 @@ export function calculateCivilEstimateComplete(data, rates) {
     const pccCft = footingL * footingB * pccDepth * nos;
     const footingConcreteCft = footingL * footingB * footingD * nos;
     const colConcreteCft = colL * colB * colD * nos;
-    const colDeductionInExcavation = nos * colL * colB * depth;
-    const backfillingCft = Math.max(0, excavationCft - (pccCft + footingConcreteCft + colDeductionInExcavation));
+    // Backfilling = Excavation Volume - (PCC Volume + Footing Concrete Volume + Column Concrete Volume)
+    const backfillingCft = Math.max(0, excavationCft - (pccCft + footingConcreteCft + colConcreteCft));
 
     totalColumnsCount += nos;
     totalExcavationCft += excavationCft;
