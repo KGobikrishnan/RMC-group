@@ -171,7 +171,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   // Outer perimeter auto-links to Ground Floor perimeter 2*(L+B) if not manually overridden
   const bsmPerimeter = (basement?.outerPerimeter !== undefined && basement?.outerPerimeter !== null && basement?.isPerimeterManual)
     ? Number(basement.outerPerimeter)
-    : (Number(basement?.outerPerimeter) || computedGfPerimeter || 122);
+    : (computedGfPerimeter || Number(basement?.outerPerimeter) || 122);
 
   // In Excel DATA SHEET C42: =+F32 (links to PB1 length or total plinth beam length).
   // If user explicitly modified flyashLength in basement, use it; otherwise auto-link to totalPbLength

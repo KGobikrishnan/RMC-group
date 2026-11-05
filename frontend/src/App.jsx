@@ -524,7 +524,7 @@ export default function App() {
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-400 uppercase block">Basement Flyash</span>
                 <span className="text-lg font-black text-purple-600 dark:text-purple-400">
-                  {(estimate.basementFlyashBricksNos || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Nos
+                  {(estimate.basementFlyashBricksNos || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">

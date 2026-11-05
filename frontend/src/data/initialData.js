@@ -149,7 +149,8 @@ export const INITIAL_PROJECT_DATA = {
     flyashLength: 201,
     flyashBreadth: 0.75,
     flyashDepth: 1.25,
-    outerPerimeter: 122,
+    outerPerimeter: null,
+    isPerimeterManual: false,
     height: 3.0,
   },
   // 5. Superstructure Brickwork (Red Chamber Bricks 9" & 4.5" Walls) & Openings

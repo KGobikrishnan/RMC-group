@@ -978,7 +978,7 @@ export function BasementModule({ basement, updateBasement, estimate, builtup, pl
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Flyash Bricks (1:6): </span>
           <span className="font-extrabold text-purple-600 dark:text-purple-400">
-            {format2Dec(estimate?.basementFlyashBricksNos || 0)} Nos
+            {format2Dec(estimate?.basementFlyashBricksNos || 0)}
           </span>
         </div>
         <div>
