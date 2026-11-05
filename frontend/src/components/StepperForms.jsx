@@ -230,11 +230,28 @@ export function FootingModule({ footings, updateFootings, estimate }) {
               <th className="py-2.5 px-2">Footing D</th>
               <th className="py-2.5 px-2">Excv Depth</th>
               <th className="py-2.5 px-2">PCC D</th>
+              <th className="py-2.5 px-2 text-right">Backfilling (CFT)</th>
               <th className="py-2.5 px-2 text-center">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-            {footings.map((f, idx) => (
+            {footings.map((f, idx) => {
+              const itemCalculated = estimate?.itemizedFootings?.[idx];
+              const rowBackfill = itemCalculated?.backfillingCft !== undefined
+                ? Math.round(itemCalculated.backfillingCft * 10) / 10
+                : Math.round(
+                    Math.max(
+                      0,
+                      (f.footingL * f.footingB * f.depth * f.nos) -
+                      (
+                        (f.footingL * f.footingB * f.pccDepth * f.nos) +
+                        (f.footingL * f.footingB * f.footingD * f.nos) +
+                        (f.nos * f.colL * f.colB * f.depth)
+                      )
+                    ) * 10
+                  ) / 10;
+
+              return (
               <tr key={f.id || idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
                 <td className="py-2 px-2">
                   <input
@@ -332,6 +349,9 @@ export function FootingModule({ footings, updateFootings, estimate }) {
                     className="w-14 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
                   />
                 </td>
+                <td className="py-2 px-2 text-right font-extrabold text-amber-600 dark:text-amber-400">
+                  {rowBackfill} CFT
+                </td>
                 <td className="py-2 px-2 text-center">
                   <button
                     onClick={() => removeFootingRow(idx)}
@@ -342,12 +362,13 @@ export function FootingModule({ footings, updateFootings, estimate }) {
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      {/* Module 2 Results Strip (Footing & Column Totals) */}
+      {/* Module 2 Results Strip (Footing & Column Totals + Backfilling Volume) */}
       <div className="p-3.5 rounded-xl bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Earthwork Excavation: </span>
@@ -371,6 +392,12 @@ export function FootingModule({ footings, updateFootings, estimate }) {
           <span className="text-slate-500 dark:text-slate-400 font-medium">Column Stub (M20): </span>
           <span className="font-extrabold text-blue-600 dark:text-blue-400">
             {Math.round(estimate?.totalColumnConcreteCft || 0)} CFT
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-500 dark:text-slate-400 font-medium">Column Backfilling Vol: </span>
+          <span className="font-black text-amber-600 dark:text-amber-400">
+            {Math.round((estimate?.totalFootingBackfillingCft || 0) * 10) / 10} CFT
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
