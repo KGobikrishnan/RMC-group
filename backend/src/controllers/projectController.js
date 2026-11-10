@@ -8,14 +8,21 @@ export async function getAllProjects(req, res) {
       SELECT 
         p.id, 
         p.client_id, 
-        c.name as client_name,
+        COALESCE(c.name, p.estimate_data->'builtup'->>'clientName', 'Unassigned Client') as client_name,
         p.title, 
         p.project_code, 
+        p.project_type,
         p.site_address, 
         p.status,
+        p.stage,
         p.total_builtup_sqft, 
+        p.gf_plinth_sqft,
+        p.floors,
+        p.columns_count,
         p.total_cost, 
+        p.direct_cost,
         p.rate_per_sqft, 
+        p.completion_date,
         p.created_at, 
         p.updated_at
       FROM projects p
@@ -64,8 +71,13 @@ export async function saveProject(req, res) {
       clientId,
       title,
       projectCode,
+      projectType,
       siteAddress,
       status,
+      stage,
+      floors,
+      columnsCount,
+      completionDate,
       estimateData,
       scheduleRates
     } = req.body;
@@ -82,25 +94,35 @@ export async function saveProject(req, res) {
     // Server-side calculation verification using audited calculator engine
     const calcResults = calculateCivilEstimateComplete(estimateData, scheduleRates);
     const totalSqft = calcResults?.totalBuiltupArea || 0;
+    const gfPlinthSqft = calcResults?.gfArea || 0;
     const totalCost = calcResults?.grandTotalCost || 0;
+    const directCost = calcResults?.totalDirectCost || 0;
     const ratePerSqft = totalSqft > 0 ? (totalCost / totalSqft) : 0;
 
     const queryText = `
       INSERT INTO projects (
-        id, client_id, title, project_code, site_address, status,
-        total_builtup_sqft, total_cost, rate_per_sqft,
+        id, client_id, title, project_code, project_type, site_address, status, stage,
+        total_builtup_sqft, gf_plinth_sqft, floors, columns_count,
+        total_cost, direct_cost, rate_per_sqft, completion_date,
         estimate_data, schedule_rates, calculation_results, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, CURRENT_TIMESTAMP)
       ON CONFLICT (id) DO UPDATE SET
         client_id = EXCLUDED.client_id,
         title = EXCLUDED.title,
         project_code = EXCLUDED.project_code,
+        project_type = EXCLUDED.project_type,
         site_address = EXCLUDED.site_address,
         status = EXCLUDED.status,
+        stage = EXCLUDED.stage,
         total_builtup_sqft = EXCLUDED.total_builtup_sqft,
+        gf_plinth_sqft = EXCLUDED.gf_plinth_sqft,
+        floors = EXCLUDED.floors,
+        columns_count = EXCLUDED.columns_count,
         total_cost = EXCLUDED.total_cost,
+        direct_cost = EXCLUDED.direct_cost,
         rate_per_sqft = EXCLUDED.rate_per_sqft,
+        completion_date = EXCLUDED.completion_date,
         estimate_data = EXCLUDED.estimate_data,
         schedule_rates = EXCLUDED.schedule_rates,
         calculation_results = EXCLUDED.calculation_results,
@@ -113,11 +135,18 @@ export async function saveProject(req, res) {
       clientId || null,
       title,
       projectCode || `RMC-${Date.now().toString().slice(-4)}`,
+      projectType || 'Residential Villa (Framed RCC)',
       siteAddress || '',
-      status || 'Draft',
+      status || 'In Estimation',
+      stage || 'Quotation Ready',
       totalSqft,
+      gfPlinthSqft,
+      floors || 'G + 1 Floors',
+      columnsCount || 8,
       totalCost,
+      directCost,
       ratePerSqft,
+      completionDate || 'Target: 2027',
       JSON.stringify(estimateData),
       JSON.stringify(scheduleRates),
       JSON.stringify(calcResults)

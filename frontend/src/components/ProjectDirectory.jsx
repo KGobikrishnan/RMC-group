@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FolderGit2, 
   Search, 
@@ -16,136 +16,126 @@ import {
   Eye, 
   BarChart3,
   HardHat,
-  Building2
+  Building2,
+  Trash2,
+  Loader2,
+  Database
 } from 'lucide-react';
-
-const INITIAL_PROJECTS = [
-  {
-    id: 'prj-001',
-    code: 'RMC/2026/VIL-01',
-    name: 'Residential Villa G+2 (Benchmark Model)',
-    clientName: 'Er. M. Jahir Hussain',
-    type: 'Residential Villa (Framed RCC)',
-    siteLocation: 'Building Doctor Complex, Uthamapalayam - 625533',
-    builtupArea: '1,758 Sq.ft',
-    gfPlinth: '858 Sq.ft',
-    floors: 'G + 2 Floors',
-    columns: 8,
-    status: 'In Estimation',
-    stage: 'Quotation Ready',
-    directCost: '₹ 21,78,767',
-    totalQuote: '₹ 26,43,619',
-    ratePerSqft: '₹ 3,081 / sq.ft',
-    marginPct: 12,
-    completionDate: 'Target: Dec 2027',
-    isCurrent: true
-  },
-  {
-    id: 'prj-002',
-    code: 'RMC/2026/COM-02',
-    name: 'Sri Meenakshi Commercial Clinic & Residence',
-    clientName: 'Dr. K. Senthil Kumar',
-    type: 'Commercial + Residential (Mixed)',
-    siteLocation: 'Bypass Road, Opp Bus Stand, Periyakulam',
-    builtupArea: '3,200 Sq.ft',
-    gfPlinth: '1,600 Sq.ft',
-    floors: 'G + 1 Floors',
-    columns: 16,
-    status: 'Foundation Ongoing',
-    stage: 'Plinth Beam Level',
-    directCost: '₹ 41,20,000',
-    totalQuote: '₹ 48,20,000',
-    ratePerSqft: '₹ 3,012 / sq.ft',
-    marginPct: 10,
-    completionDate: 'Target: Oct 2027',
-    isCurrent: false
-  },
-  {
-    id: 'prj-003',
-    code: 'RMC/2025/BUN-03',
-    name: 'Star Agro Modern Duplex Bungalow',
-    clientName: 'Alhaj. Mohamed Ibrahim',
-    type: 'Luxury Duplex Villa',
-    siteLocation: 'Main Bazaar, Chinnamanur',
-    builtupArea: '2,450 Sq.ft',
-    gfPlinth: '1,225 Sq.ft',
-    floors: 'G + 1 Floors',
-    columns: 12,
-    status: 'Roof Slab Cast',
-    stage: 'Finishing & Plastering',
-    directCost: '₹ 33,50,000',
-    totalQuote: '₹ 38,90,000',
-    ratePerSqft: '₹ 3,175 / sq.ft',
-    marginPct: 12,
-    completionDate: 'Target: Jun 2027',
-    isCurrent: false
-  },
-  {
-    id: 'prj-004',
-    code: 'RMC/2026/IND-04',
-    name: 'Anand Tex 3BHK Independent Villa',
-    clientName: 'Mrs. Jayalakshmi Anand',
-    type: 'Single Floor Independent',
-    siteLocation: 'Near Cotton Market, Cumbum',
-    builtupArea: '1,450 Sq.ft',
-    gfPlinth: '1,450 Sq.ft',
-    floors: 'Ground Floor Only',
-    columns: 10,
-    status: 'Drafting Plan',
-    stage: 'Initial Takeoff',
-    directCost: '₹ 28,10,000',
-    totalQuote: '₹ 32,50,000',
-    ratePerSqft: '₹ 2,241 / sq.ft',
-    marginPct: 10,
-    completionDate: 'Target: Jan 2028',
-    isCurrent: false
-  }
-];
+import { fetchProjects, saveProjectToBackend, deleteProjectFromBackend } from '../api/rmcApi';
+import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from '../data/initialData';
 
 export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEstimate }) {
-  const [projects, setProjects] = useState(INITIAL_PROJECTS);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [newProject, setNewProject] = useState({
-    name: '',
-    clientName: 'Er. Client',
-    type: 'Residential Villa (Framed RCC)',
-    siteLocation: 'Theni District',
-    builtupArea: '1,500 Sq.ft',
-    gfPlinth: '800 Sq.ft',
-    floors: 'G + 1',
-    columns: 10,
-    totalQuote: '₹ 28,00,000',
-    ratePerSqft: '₹ 2,850 / sq.ft'
+    title: '',
+    clientName: 'Er. Client Project',
+    projectCode: '',
+    projectType: 'Residential Villa (Framed RCC)',
+    siteAddress: 'Theni District',
+    builtupArea: 1758,
+    status: 'In Estimation',
+    stage: 'Quotation Ready',
+    completionDate: 'Target: 2027'
   });
 
+  // Load real projects from PostgreSQL database RMC
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const res = await fetchProjects();
+      if (res.success) {
+        setProjects(res.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching projects from PostgreSQL:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
   const filteredProjects = projects.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.clientName.toLowerCase().includes(search.toLowerCase()) ||
-      p.siteLocation.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase());
-    const matchesType = typeFilter === 'ALL' || p.type.includes(typeFilter);
+    const title = p.title || '';
+    const client = p.client_name || '';
+    const site = p.site_address || '';
+    const code = p.project_code || '';
+    const pType = p.project_type || '';
+
+    const matchesSearch = title.toLowerCase().includes(search.toLowerCase()) ||
+      client.toLowerCase().includes(search.toLowerCase()) ||
+      site.toLowerCase().includes(search.toLowerCase()) ||
+      code.toLowerCase().includes(search.toLowerCase());
+    const matchesType = typeFilter === 'ALL' || pType.toLowerCase().includes(typeFilter.toLowerCase());
     return matchesSearch && matchesType;
   });
 
-  const handleAddProject = (e) => {
+  const handleAddProject = async (e) => {
     e.preventDefault();
-    if (!newProject.name) return;
-    const added = {
-      ...newProject,
-      id: `prj-${Date.now().toString().slice(-4)}`,
-      code: `RMC/2026/VIL-${(projects.length + 1).toString().padStart(2, '0')}`,
-      status: 'In Estimation',
-      stage: 'Quotation Ready',
-      directCost: '₹ 24,00,000',
-      marginPct: 12,
-      completionDate: 'Target: 2027',
-      isCurrent: false
-    };
-    setProjects([added, ...projects]);
-    setShowAddModal(false);
+    if (!newProject.title) return;
+    try {
+      setIsSubmitting(true);
+      const payload = {
+        title: newProject.title,
+        projectCode: newProject.projectCode || `RMC-${Date.now().toString().slice(-4)}`,
+        projectType: newProject.projectType,
+        siteAddress: newProject.siteAddress,
+        status: newProject.status,
+        stage: newProject.stage,
+        completionDate: newProject.completionDate,
+        estimateData: {
+          ...INITIAL_PROJECT_DATA,
+          builtup: {
+            ...INITIAL_PROJECT_DATA.builtup,
+            clientName: newProject.clientName,
+            siteLocation: newProject.siteAddress
+          }
+        },
+        scheduleRates: DEFAULT_RATES
+      };
+
+      const res = await saveProjectToBackend(payload);
+      if (res.success) {
+        await loadProjects();
+        setShowAddModal(false);
+        setNewProject({
+          title: '',
+          clientName: 'Er. Client Project',
+          projectCode: '',
+          projectType: 'Residential Villa (Framed RCC)',
+          siteAddress: 'Theni District',
+          builtupArea: 1758,
+          status: 'In Estimation',
+          stage: 'Quotation Ready',
+          completionDate: 'Target: 2027'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to save project:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteProject = async (id, e) => {
+    e.stopPropagation();
+    if (!window.confirm('Delete this project from database?')) return;
+    try {
+      const res = await deleteProjectFromBackend(id);
+      if (res.success) {
+        setProjects(projects.filter(p => p.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+    }
   };
 
   return (
@@ -160,7 +150,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">Project Portfolio Directory</h2>
           </div>
           <p className="text-xs text-indigo-200/80">
-            Track site estimations, structural models, built-up areas, and quotation values across client sites
+            Real-time project estimates stored in PostgreSQL Database <span className="font-mono font-bold text-amber-300">RMC</span>
           </p>
         </div>
 
@@ -173,153 +163,197 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
         </button>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+      {/* Search & Category Filter */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full sm:w-96">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search by project title, code, client, site..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-medium outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <span className="text-slate-400 font-semibold mr-1">Category:</span>
-          {['ALL', 'Residential', 'Commercial', 'Duplex', 'Independent'].map((t) => (
+        {/* Filter Badges */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 text-xs font-bold">
+          <span className="text-slate-400 text-[11px] mr-1 hidden md:inline">Category:</span>
+          {['ALL', 'Residential', 'Commercial', 'Duplex', 'Independent'].map((cat) => (
             <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                typeFilter === t
+              key={cat}
+              onClick={() => setTypeFilter(cat)}
+              className={`px-3 py-1.5 rounded-xl transition-all whitespace-nowrap text-[11px] ${
+                typeFilter === cat
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              {t}
+              {cat}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Project Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredProjects.map((p) => (
-          <div
-            key={p.id}
-            className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border transition-all flex flex-col justify-between space-y-4 ${
-              p.isCurrent
-                ? 'border-blue-500/60 ring-2 ring-blue-500/20 shadow-md'
-                : 'border-slate-200 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700'
-            }`}
-          >
-            <div>
-              {/* Header with Project Code & Current Badge */}
-              <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                      {p.code}
-                    </span>
-                    {p.isCurrent && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-black bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        ACTIVE IN ENGINE
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-white mt-1.5 leading-snug">
-                    {p.name}
-                  </h3>
-                  <div className="text-xs text-slate-500 font-medium mt-0.5">
-                    Client: <span className="font-bold text-slate-800 dark:text-slate-200">{p.clientName}</span>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Budget</span>
-                  <span className="text-base font-black text-blue-600 dark:text-blue-400">
-                    {p.totalQuote}
-                  </span>
-                  <span className="text-[10px] text-slate-400 block">{p.ratePerSqft}</span>
-                </div>
-              </div>
-
-              {/* Technical Specifications */}
-              <div className="pt-3 grid grid-cols-2 gap-2.5 text-xs text-slate-600 dark:text-slate-300">
-                <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Built-Up Area</span>
-                  <span className="font-extrabold text-slate-900 dark:text-white">{p.builtupArea}</span>
-                  <span className="text-[10px] text-slate-400 block">GF: {p.gfPlinth}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Structure & Floors</span>
-                  <span className="font-extrabold text-slate-900 dark:text-white">{p.floors}</span>
-                  <span className="text-[10px] text-slate-400 block">{p.columns} Columns Isolated</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Site Location</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span className="truncate">{p.siteLocation}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Stage Progress Bar & Actions */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-semibold">Current Milestone:</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">{p.stage}</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] text-slate-400 font-medium">
-                  {p.completionDate}
-                </span>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      if (onSelectProject) onSelectProject(p);
-                      setActiveTab('breakup');
-                    }}
-                    className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/60 text-slate-700 dark:text-slate-300 hover:text-amber-600 font-bold transition-colors flex items-center gap-1 text-[11px]"
-                    title="Profit Margin Breakup"
-                  >
-                    <Sliders className="w-3.5 h-3.5" />
-                    <span>Margin</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      if (onSelectProject) onSelectProject(p);
-                      setActiveTab('inputs');
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors flex items-center gap-1 text-[11px]"
-                    title="Load Project into Engine"
-                  >
-                    <span>{p.isCurrent ? 'Active Engine' : 'Load Project'}</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
+      {/* Loading State */}
+      {loading ? (
+        <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-xs font-semibold">Loading projects from PostgreSQL database RMC...</p>
+        </div>
+      ) : filteredProjects.length === 0 ? (
+        /* Empty State */
+        <div className="py-16 px-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-500">
+            <FolderGit2 className="w-8 h-8" />
           </div>
-        ))}
-      </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">No Projects Found in Database</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              All static mock projects have been removed. Create a new estimate or click "Save" on any active model to store it in PostgreSQL.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create New Estimate</span>
+          </button>
+        </div>
+      ) : (
+        /* Project Cards Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredProjects.map((p) => {
+            const totalCost = Number(p.total_cost) || 0;
+            const rateSqft = Number(p.rate_per_sqft) || 0;
+            const builtupSqft = Number(p.total_builtup_sqft) || 0;
+            const gfPlinth = Number(p.gf_plinth_sqft) || 0;
 
-      {/* Add Project Modal */}
+            return (
+              <div
+                key={p.id}
+                className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all space-y-4 relative group"
+              >
+                {/* Header Strip */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {p.project_code || 'RMC-EST'}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        p.status === 'Completed'
+                          ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300'
+                          : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                      }`}>
+                        {p.status || 'Active'}
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white truncate">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-500">
+                      Client: <span className="font-semibold text-slate-700 dark:text-slate-300">{p.client_name || 'Client Project'}</span>
+                    </p>
+                  </div>
+
+                  {/* Budget Badge */}
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Budget</span>
+                    <span className="text-base font-black text-blue-600 dark:text-blue-400">
+                      ₹ {totalCost.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    </span>
+                    <span className="text-[10px] text-slate-500 block">
+                      ₹ {Math.round(rateSqft).toLocaleString('en-IN')} / sq.ft
+                    </span>
+                  </div>
+                </div>
+
+                {/* Specs Matrix */}
+                <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-semibold">Built-Up Area</span>
+                    <span className="font-black text-slate-800 dark:text-slate-200">
+                      {builtupSqft.toLocaleString()} Sq.ft
+                    </span>
+                    {gfPlinth > 0 && <span className="text-[10px] text-slate-400 block">GF: {gfPlinth} Sq.ft</span>}
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-semibold">Structure & Floors</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {p.floors || 'G + 1 Floors'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block">{p.columns_count || 8} Columns Isolated</span>
+                  </div>
+                </div>
+
+                {/* Location */}
+                {p.site_address && (
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{p.site_address}</span>
+                  </div>
+                )}
+
+                {/* Milestone & Load Actions */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] text-slate-400 block">Current Milestone:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                      {p.stage || 'Quotation Ready'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => handleDeleteProject(p.id, e)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                      title="Delete Project"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (onSelectProject) {
+                          onSelectProject({
+                            clientName: p.client_name,
+                            siteLocation: p.site_address
+                          });
+                        }
+                        if (setActiveTab) setActiveTab('inputs');
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all"
+                    >
+                      <span>Load Project</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add New Project Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 text-left space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 text-left animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Create New Site Project</h3>
+              <div className="flex items-center gap-2">
+                <span className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-600 rounded-xl">
+                  <FolderGit2 className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">New Project Estimate</h3>
+                  <p className="text-xs text-slate-400">Creates record in PostgreSQL Database RMC</p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 ✕
               </button>
@@ -331,9 +365,9 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Modern Residential Villa G+1"
-                  value={newProject.name}
-                  onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                  placeholder="e.g. Modern Residential Villa G+2"
+                  value={newProject.title}
+                  onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
                 />
               </div>
@@ -343,57 +377,19 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                   <label className="text-slate-500 font-semibold block mb-1">Client Name</label>
                   <input
                     type="text"
+                    placeholder="e.g. Er. M. Jahir Hussain"
                     value={newProject.clientName}
                     onChange={(e) => setNewProject({ ...newProject, clientName: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
                   />
                 </div>
                 <div>
-                  <label className="text-slate-500 font-semibold block mb-1">Building Type</label>
+                  <label className="text-slate-500 font-semibold block mb-1">Project Code</label>
                   <input
                     type="text"
-                    value={newProject.type}
-                    onChange={(e) => setNewProject({ ...newProject, type: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-slate-500 font-semibold block mb-1">Site Location & Survey Number</label>
-                <input
-                  type="text"
-                  value={newProject.siteLocation}
-                  onChange={(e) => setNewProject({ ...newProject, siteLocation: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-slate-500 font-semibold block mb-1">Total Built-Up Area</label>
-                  <input
-                    type="text"
-                    value={newProject.builtupArea}
-                    onChange={(e) => setNewProject({ ...newProject, builtupArea: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                  />
-                </div>
-                <div>
-                  <label className="text-slate-500 font-semibold block mb-1">GF Plinth Area</label>
-                  <input
-                    type="text"
-                    value={newProject.gfPlinth}
-                    onChange={(e) => setNewProject({ ...newProject, gfPlinth: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                  />
-                </div>
-                <div>
-                  <label className="text-slate-500 font-semibold block mb-1">Floors</label>
-                  <input
-                    type="text"
-                    value={newProject.floors}
-                    onChange={(e) => setNewProject({ ...newProject, floors: e.target.value })}
+                    placeholder="e.g. RMC/2026/VIL-01"
+                    value={newProject.projectCode}
+                    onChange={(e) => setNewProject({ ...newProject, projectCode: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
                   />
                 </div>
@@ -401,21 +397,26 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-slate-500 font-semibold block mb-1">Estimated Budget (₹)</label>
-                  <input
-                    type="text"
-                    value={newProject.totalQuote}
-                    onChange={(e) => setNewProject({ ...newProject, totalQuote: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
-                  />
+                  <label className="text-slate-500 font-semibold block mb-1">Project Type</label>
+                  <select
+                    value={newProject.projectType}
+                    onChange={(e) => setNewProject({ ...newProject, projectType: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                  >
+                    <option value="Residential Villa (Framed RCC)">Residential Villa</option>
+                    <option value="Commercial Clinic & Residence">Commercial</option>
+                    <option value="Luxury Duplex Villa">Duplex Villa</option>
+                    <option value="Independent House">Independent House</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="text-slate-500 font-semibold block mb-1">Target Rate / Sq.ft</label>
+                  <label className="text-slate-500 font-semibold block mb-1">Site Location</label>
                   <input
                     type="text"
-                    value={newProject.ratePerSqft}
-                    onChange={(e) => setNewProject({ ...newProject, ratePerSqft: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
+                    placeholder="e.g. Anna Nagar, Theni"
+                    value={newProject.siteAddress}
+                    onChange={(e) => setNewProject({ ...newProject, siteAddress: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
                   />
                 </div>
               </div>
@@ -430,9 +431,10 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-md transition-colors"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-md transition-colors disabled:opacity-50"
                 >
-                  Create Project
+                  {isSubmitting ? 'Saving to DB...' : 'Save to PostgreSQL'}
                 </button>
               </div>
             </form>
@@ -442,4 +444,3 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
     </div>
   );
 }
-

@@ -23,20 +23,25 @@ export async function getAllClients(req, res) {
 // CREATE or UPDATE client
 export async function saveClient(req, res) {
   try {
-    const { id, name, phone, email, location, address } = req.body;
+    const { id, name, company, role, phone, altPhone, email, location, city, status, address } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, error: 'Client name is required' });
     }
 
     const clientId = id || `client_${Date.now()}`;
     const queryText = `
-      INSERT INTO clients (id, name, phone, email, location, address, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+      INSERT INTO clients (id, name, company, role, phone, alt_phone, email, location, city, status, address, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP)
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
+        company = EXCLUDED.company,
+        role = EXCLUDED.role,
         phone = EXCLUDED.phone,
+        alt_phone = EXCLUDED.alt_phone,
         email = EXCLUDED.email,
         location = EXCLUDED.location,
+        city = EXCLUDED.city,
+        status = EXCLUDED.status,
         address = EXCLUDED.address,
         updated_at = CURRENT_TIMESTAMP
       RETURNING *;
@@ -45,9 +50,14 @@ export async function saveClient(req, res) {
     const result = await pool.query(queryText, [
       clientId, 
       name, 
+      company || '',
+      role || '',
       phone || '', 
+      altPhone || '',
       email || '', 
       location || '', 
+      city || '',
+      status || 'Active',
       address || ''
     ]);
 
