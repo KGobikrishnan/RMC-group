@@ -5,6 +5,7 @@ import { pool } from './config/db.js';
 import { initDatabase } from './config/schema.js';
 import projectRoutes from './routes/projectRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/clients', clientRoutes);
 

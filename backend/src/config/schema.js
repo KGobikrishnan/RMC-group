@@ -1,7 +1,19 @@
 import { pool } from './db.js';
+import bcrypt from 'bcryptjs';
 
 export async function initDatabase() {
   const queryText = `
+    -- Users table for authentication
+    CREATE TABLE IF NOT EXISTS users (
+      id VARCHAR(100) PRIMARY KEY,
+      username VARCHAR(100) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      full_name VARCHAR(255) DEFAULT 'System Administrator',
+      role VARCHAR(50) DEFAULT 'admin',
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Clients table
     CREATE TABLE IF NOT EXISTS clients (
       id VARCHAR(100) PRIMARY KEY,
@@ -50,6 +62,18 @@ export async function initDatabase() {
   try {
     await pool.query(queryText);
     console.log('PostgreSQL: Schema initialized successfully in database RMC');
+
+    // Seed default admin user (admin / admin123) if not present
+    const checkUser = await pool.query('SELECT id FROM users WHERE username = $1', ['admin']);
+    if (checkUser.rows.length === 0) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('admin123', salt);
+      await pool.query(`
+        INSERT INTO users (id, username, password_hash, full_name, role)
+        VALUES ($1, $2, $3, $4, $5)
+      `, ['user_admin_01', 'admin', hashedPassword, 'Er. M. Jahir Hussain', 'admin']);
+      console.log('PostgreSQL: Seeded default admin user (admin / admin123) into database RMC');
+    }
   } catch (err) {
     console.error('PostgreSQL: Error initializing schema:', err);
     throw err;
