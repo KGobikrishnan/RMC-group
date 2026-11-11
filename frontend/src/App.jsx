@@ -257,12 +257,11 @@ export default function App() {
     navigate('/dashboard');
   };
 
-  // Navigation Items
+  // Navigation Items (Project inputs is now fully integrated inside Project Directory estimation popup)
   const navTabs = [
     { path: '/dashboard', label: 'Main Dashboard', icon: Home, badge: 'Overview' },
     { path: '/projects', label: 'Project Directory', icon: FolderGit2, badge: 'Portfolio' },
     { path: '/clients', label: 'Client Directory', icon: Users, badge: 'CRM' },
-    { path: '/inputs', label: 'Project Inputs (15 Modules)', icon: Layers, badge: '15 Modules' },
     { path: '/breakup', label: 'Profit & Rate/Sq.ft', icon: Sliders, badge: `${rates.contractorMarginPct || 10}% Margin` },
     { path: '/foundation-summary', label: 'Foundation Summary', icon: PieChart },
     { path: '/boq', label: 'Civil BOQ', icon: FileSpreadsheet, badge: `${estimate.boqSchedule?.length || 18} Items` },
@@ -548,16 +547,25 @@ export default function App() {
             <Route path="/projects" element={
               <ProjectDirectoryPage
                 setActiveTab={(tab) => {
-                  if (tab === 'inputs') navigate('/inputs');
+                  if (tab === 'quotation') navigate('/quotation');
+                  else if (tab === 'breakup') navigate('/breakup');
                   else navigate('/dashboard');
                 }}
                 onSelectProject={(prj) => {
-                  updateProjectInfo({
-                    clientName: prj.clientName,
-                    siteLocation: prj.siteLocation
-                  });
+                  if (prj.estimateData) {
+                    setData(prj.estimateData);
+                  } else {
+                    updateProjectInfo({
+                      clientName: prj.clientName || prj.client_name,
+                      siteLocation: prj.siteLocation || prj.site_address,
+                      title: prj.title,
+                      projectCode: prj.projectCode || prj.project_code,
+                      clientId: prj.clientId || prj.client_id
+                    });
+                  }
                 }}
                 currentEstimate={estimate}
+                appRates={rates}
               />
             } />
 
@@ -582,6 +590,44 @@ export default function App() {
             {/* /inputs (Modules 1 to 15) */}
             <Route path="/inputs" element={
               <div className="space-y-6">
+                {/* Active Project & Client Header Banner */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900 border border-blue-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left">
+                  <div className="flex items-center gap-3">
+                    <span className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400">
+                      <FolderGit2 className="w-5 h-5" />
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Active Estimate</span>
+                        <span className="text-xs font-mono font-bold text-amber-300">
+                          {data.builtup?.projectCode || 'RMC/2026/ACTIVE'}
+                        </span>
+                      </div>
+                      <h2 className="text-base font-extrabold text-white">
+                        {data.builtup?.title || `${data.builtup?.clientName || 'Standard'} Residence Estimate`}
+                      </h2>
+                      <p className="text-xs text-slate-300">
+                        Client: <b className="text-blue-300">{data.builtup?.clientName || 'Not linked'}</b> • Site: {data.builtup?.siteLocation || 'Theni District'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+                    <button
+                      onClick={() => navigate('/projects')}
+                      className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                    >
+                      Change Project
+                    </button>
+                    <button
+                      onClick={() => navigate('/quotation')}
+                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition-all active:scale-95"
+                    >
+                      View Quotation →
+                    </button>
+                  </div>
+                </div>
+
                 {/* Live Substructure Quantities Ribbon */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 text-left">
                   <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">

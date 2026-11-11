@@ -27,6 +27,8 @@ export async function initDatabase() {
       city VARCHAR(255),
       status VARCHAR(50) DEFAULT 'Active',
       address TEXT,
+      basic_info JSONB DEFAULT '{}'::jsonb,
+      site_assessment JSONB DEFAULT '{}'::jsonb,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );

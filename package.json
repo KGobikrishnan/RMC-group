@@ -1,0 +1,15 @@
+{
+  "name": "rmc-group-suite",
+  "version": "1.0.0",
+  "description": "Enterprise Civil Estimation & ERP Suite for RMC Group",
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"cyan.bold,magenta.bold\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev -- --host --port 5173",
+    "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"cyan.bold,magenta.bold\" \"cd backend && npm start\" \"cd frontend && npm run preview\"",
+    "build": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
