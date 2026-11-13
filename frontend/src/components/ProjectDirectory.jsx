@@ -14,6 +14,7 @@ import {
   FileText, 
   ArrowUpRight, 
   Eye, 
+  Edit3,
   BarChart3,
   HardHat,
   Building2,
@@ -56,6 +57,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState(null);
 
   // Selected project for comprehensive single-page details view
   const [viewingProject, setViewingProject] = useState(null);
@@ -276,6 +278,59 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
     return matchesSearch && matchesType;
   });
 
+  // Handle open project in edit mode inside the full 15-module modal
+  const handleEditProject = async (proj, e) => {
+    if (e) e.stopPropagation();
+    try {
+      setLoadingDetails(true);
+      const res = await fetchProjectById(proj.id);
+      const fullProj = (res.success && res.data) ? res.data : proj;
+
+      const loadedEstimateData = fullProj.estimate_data 
+        ? (typeof fullProj.estimate_data === 'string' ? JSON.parse(fullProj.estimate_data) : fullProj.estimate_data)
+        : JSON.parse(JSON.stringify(BLANK_PROJECT_DATA));
+
+      setEditingProjectId(fullProj.id);
+      setNewProject({
+        id: fullProj.id,
+        title: fullProj.title || '',
+        clientId: fullProj.client_id || '',
+        clientName: fullProj.client_name || '',
+        projectCode: fullProj.project_code || '',
+        projectType: fullProj.project_type || 'Residential Villa (Framed RCC)',
+        siteAddress: fullProj.site_address || '',
+        status: fullProj.status || 'In Estimation',
+        stage: fullProj.stage || 'Quotation Ready',
+        completionDate: fullProj.completion_date || 'Target: 2027',
+        estimateData: loadedEstimateData
+      });
+      setActiveStepTab('meta');
+      setShowAddModal(true);
+    } catch (err) {
+      console.error('Error loading project for edit:', err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleOpenNewProject = () => {
+    setEditingProjectId(null);
+    setNewProject({
+      title: '',
+      clientId: '',
+      clientName: '',
+      projectCode: '',
+      projectType: 'Residential Villa (Framed RCC)',
+      siteAddress: '',
+      status: 'In Estimation',
+      stage: 'Quotation Ready',
+      completionDate: 'Target: 2027',
+      estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
+    });
+    setActiveStepTab('meta');
+    setShowAddModal(true);
+  };
+
   const handleAddProject = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!newProject.title) {
@@ -296,6 +351,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
       };
 
       const payload = {
+        id: editingProjectId || undefined,
         title: newProject.title,
         clientId: newProject.clientId || null,
         projectCode: generatedCode,
@@ -312,6 +368,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
       if (res.success) {
         await loadData();
         setShowAddModal(false);
+        setEditingProjectId(null);
         
         // Pass to active calculation engine and navigate to quotation / dashboard immediately
         if (onSelectProject) {
@@ -338,7 +395,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
           status: 'In Estimation',
           stage: 'Quotation Ready',
           completionDate: 'Target: 2027',
-          estimateData: JSON.parse(JSON.stringify(INITIAL_PROJECT_DATA))
+          estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
         });
       }
     } catch (err) {
@@ -386,6 +443,10 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
       <ProjectDetailView
         project={viewingProject}
         onBack={() => setViewingProject(null)}
+        onEditProject={(p) => {
+          setViewingProject(null);
+          handleOpenEditProject(p);
+        }}
         onOpenQuotation={(p) => {
           if (onSelectProject) {
             onSelectProject({
@@ -420,7 +481,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleOpenNewProject}
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
@@ -580,6 +641,14 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                     <button
+                      onClick={(e) => handleEditProject(p, e)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30 transition-all shadow-sm"
+                      title="Edit project inputs in the 15-module estimation calculator"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit Project</span>
+                    </button>
+                    <button
                       onClick={() => handleViewProjectDetails(p)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
                       title="View all inputs & computed outputs in a clean page"
@@ -624,14 +693,14 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                      New Project Estimation & Client Linking
+                      {editingProjectId ? 'Edit Project Estimation & Specifications' : 'New Project Estimation & Client Linking'}
                     </h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
                       PostgreSQL: RMC
                     </span>
                   </div>
                   <p className="text-xs text-slate-500">
-                    Complete 15-Module Civil Estimation inside modal with live BOQ/BOM cost calculation
+                    {editingProjectId ? 'Update 15-module civil inputs and live recalculate BOQ/BOM' : 'Complete 15-Module Civil Estimation inside modal with live BOQ/BOM cost calculation'}
                   </p>
                 </div>
               </div>
@@ -1041,7 +1110,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                   className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-lg shadow-blue-500/25 transition-all active:scale-95 disabled:opacity-50"
                 >
                   <Check className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Saving to PostgreSQL...' : 'Save Estimate & Open Quotation'}</span>
+                  <span>{isSubmitting ? 'Saving to PostgreSQL...' : (editingProjectId ? 'Update Project & Recalculate' : 'Save Estimate & Open Quotation')}</span>
                 </button>
               </div>
             </div>
