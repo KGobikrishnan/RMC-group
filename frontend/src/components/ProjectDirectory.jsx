@@ -26,9 +26,11 @@ import {
   ArrowRight,
   X
 } from 'lucide-react';
-import { fetchProjects, fetchClients, saveProjectToBackend, deleteProjectFromBackend } from '../api/rmcApi';
+import { fetchProjects, fetchClients, fetchProjectById, saveProjectToBackend, deleteProjectFromBackend } from '../api/rmcApi';
 import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from '../data/initialData';
+import { BLANK_PROJECT_DATA } from '../data/blankProjectData';
 import { calculateCivilEstimateComplete } from '../utils/calculator';
+import { ProjectDetailView } from './ProjectDetailView';
 import { 
   TotalAreaModule, 
   FootingModule, 
@@ -55,10 +57,14 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Selected project for comprehensive single-page details view
+  const [viewingProject, setViewingProject] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
   // Stepper active tab in full estimation modal: 'meta' | 'substructure' | 'superstructure' | 'finishes' | 'infra'
   const [activeStepTab, setActiveStepTab] = useState('meta');
 
-  // New Project State with integrated complete 15-module estimate inputs
+  // New Project State with integrated complete 15-module estimate inputs (Defaults to clean Blank template)
   const [newProject, setNewProject] = useState({
     title: '',
     clientId: '',
@@ -69,8 +75,25 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
     status: 'In Estimation',
     stage: 'Quotation Ready',
     completionDate: 'Target: 2027',
-    estimateData: JSON.parse(JSON.stringify(INITIAL_PROJECT_DATA))
+    estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
   });
+
+  const handleResetToBlank = () => {
+    setNewProject(prev => ({
+      ...prev,
+      estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
+    }));
+  };
+
+  const handleLoadSampleBenchmark = () => {
+    setNewProject(prev => ({
+      ...prev,
+      title: prev.title || 'Residential Villa G+2 (Benchmark Model)',
+      clientName: prev.clientName || 'Er. M. Jahir Hussain',
+      siteAddress: prev.siteAddress || 'Building Doctor Complex, Uthamapalayam - 625533',
+      estimateData: JSON.parse(JSON.stringify(INITIAL_PROJECT_DATA))
+    }));
+  };
 
   // Rates for this modal calculation
   const rates = appRates || DEFAULT_RATES;
@@ -338,6 +361,48 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
     }
   };
 
+  // Handle open project details in single clean page view
+  const handleViewProjectDetails = async (proj) => {
+    try {
+      setLoadingDetails(true);
+      // Fetch full project payload with estimate_data & schedule_rates from DB
+      const res = await fetchProjectById(proj.id);
+      if (res.success && res.data) {
+        setViewingProject(res.data);
+      } else {
+        setViewingProject(proj);
+      }
+    } catch (err) {
+      console.error('Error fetching project full details:', err);
+      setViewingProject(proj);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  // If a project is selected for single page detailed viewing, render ProjectDetailView
+  if (viewingProject) {
+    return (
+      <ProjectDetailView
+        project={viewingProject}
+        onBack={() => setViewingProject(null)}
+        onOpenQuotation={(p) => {
+          if (onSelectProject) {
+            onSelectProject({
+              id: p.id,
+              clientId: p.client_id,
+              clientName: p.client_name,
+              siteLocation: p.site_address,
+              title: p.title,
+              estimateData: p.estimate_data || p.estimateData
+            });
+          }
+          if (setActiveTab) setActiveTab('quotation');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 text-left">
       {/* Top Banner */}
@@ -515,18 +580,27 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                     <button
+                      onClick={() => handleViewProjectDetails(p)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
+                      title="View all inputs & computed outputs in a clean page"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-blue-500" />
+                      <span>View Details</span>
+                    </button>
+                    <button
                       onClick={() => {
                         if (onSelectProject) {
                           onSelectProject({
                             clientName: p.client_name,
-                            siteLocation: p.site_address
+                            siteLocation: p.site_address,
+                            id: p.id
                           });
                         }
-                        if (setActiveTab) setActiveTab('inputs');
+                        if (setActiveTab) setActiveTab('quotation');
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all"
                     >
-                      <span>Load Project</span>
+                      <span>Quotation</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -562,8 +636,27 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                 </div>
               </div>
 
-              {/* Live Cost Summary Pill in Header */}
+              {/* Live Cost Summary Pill & Mode Toggle in Header */}
               <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={handleResetToBlank}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:shadow-xs transition-all"
+                    title="Clear all fields to start fresh with custom site measurements"
+                  >
+                    Clear to Blank
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLoadSampleBenchmark}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-all flex items-center gap-1"
+                    title="Load sample villa model from 03-11-2026_BRICK_ESTIMATE.xlsm"
+                  >
+                    <span>⚡ Sample Model</span>
+                  </button>
+                </div>
+
                 <div className="hidden sm:block text-right px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl">
                   <span className="text-[10px] font-bold text-slate-400 block uppercase">Estimate Total</span>
                   <span className="text-sm font-black text-blue-600 dark:text-blue-400">
@@ -846,6 +939,8 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                     roofSlab={newProject.estimateData.roofSlab} 
                     updateRoofSlab={updateRoofSlab} 
                     estimate={liveEstimate} 
+                    builtup={newProject.estimateData.builtup} 
+                    plinthBeams={newProject.estimateData.plinthBeams} 
                   />
                   <PaintingModule 
                     painting={newProject.estimateData.painting} 

@@ -291,67 +291,75 @@ export default function App() {
 
   // When authenticated, render enterprise application shell
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors font-sans flex">
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans flex antialiased selection:bg-amber-500/30 selection:text-amber-200">
       {/* SIDEBAR NAVIGATION */}
       <aside
-        className={`no-print fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out lg:static ${
+        className={`no-print fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0f172a]/95 backdrop-blur-2xl border-r border-slate-800/80 transition-all duration-300 ease-in-out lg:static ${
           sidebarCollapsed ? 'w-20' : 'w-72'
         } ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Logo & Brand Header */}
-        <div className="h-20 px-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => navigate('/dashboard')}>
-            <div className="relative flex-shrink-0 w-12 h-12 rounded-xl bg-white dark:bg-slate-800 p-1.5 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center">
+        <div className="h-20 px-5 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40">
+          <div className="flex items-center gap-3.5 overflow-hidden cursor-pointer group" onClick={() => navigate('/dashboard')}>
+            <div className="relative flex-shrink-0 w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500/20 via-slate-800 to-slate-900 p-2 border border-amber-500/30 shadow-lg shadow-amber-500/10 flex items-center justify-center group-hover:border-amber-400/50 transition-all">
               <img
                 src={rmcLogo}
                 alt="RMC Group Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain filter drop-shadow"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400 absolute" style={{ display: 'none' }} />
+              <HardHat className="w-5 h-5 text-amber-400 absolute" style={{ display: 'none' }} />
             </div>
             {!sidebarCollapsed && (
               <div className="text-left min-w-0">
-                <h1 className="text-sm font-black tracking-tight text-slate-900 dark:text-white truncate">
-                  RMC GROUP
-                </h1>
-                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase">
-                  Civil Estimation
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-sm font-extrabold tracking-tight text-white group-hover:text-amber-300 transition-colors">
+                    RMC GROUP
+                  </h1>
+                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+                    PRO
+                  </span>
+                </div>
+                <p className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase font-mono">
+                  Civil Engineering Suite
                 </p>
               </div>
             )}
           </div>
           <button
             onClick={() => setMobileSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Database & User Status Badge */}
+        {/* System Core Badge */}
         {!sidebarCollapsed && (
-          <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/80 dark:bg-slate-950/40 flex items-center justify-between text-[11px]">
-            <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${backendStatus === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-              <span className="font-semibold text-slate-600 dark:text-slate-300">
-                {backendStatus === 'online' ? 'PostgreSQL: RMC' : 'Offline Mode'}
+          <div className="px-5 py-2.5 border-b border-slate-800/60 bg-slate-950/40 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${backendStatus === 'online' ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${backendStatus === 'online' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+              </span>
+              <span className="font-mono text-[11px] font-semibold text-slate-300">
+                {backendStatus === 'online' ? 'PostgreSQL: RMC' : 'Local Storage Mode'}
               </span>
             </div>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
-              Admin
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              AUDITED
             </span>
           </div>
         )}
 
         {/* Navigation Routes List */}
-        <div className="flex-1 overflow-y-auto py-3 px-3 space-y-6 text-left">
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 text-left">
           <div>
             {!sidebarCollapsed && (
-              <div className="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Application Navigation
+              <div className="px-3 pb-2 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
+                Navigation Matrix
               </div>
             )}
             <div className="space-y-1">
@@ -366,22 +374,22 @@ export default function App() {
                       setMobileSidebarOpen(false);
                     }}
                     title={item.label}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left relative ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-slate-100'
+                        ? 'bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent text-amber-300 border-l-2 border-amber-400 font-extrabold shadow-sm'
+                        : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                     }`}
                   >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-500'}`} />
                     {!sidebarCollapsed && (
                       <div className="flex-1 flex items-center justify-between min-w-0">
                         <span className="truncate">{item.label}</span>
                         {item.badge && (
                           <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1.5 ${
+                            className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-semibold ml-1.5 ${
                               isActive
-                                ? 'bg-blue-700/80 text-blue-100'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+                                : 'bg-slate-800/80 text-slate-400'
                             }`}
                           >
                             {item.badge}
@@ -397,32 +405,36 @@ export default function App() {
         </div>
 
         {/* Sidebar Footer Controls */}
-        <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2">
+        <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 space-y-3">
           {!sidebarCollapsed && (
-            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 text-xs text-left">
-              <span className="text-[10px] font-bold text-slate-400 uppercase block">Grand Project Total</span>
-              <span className="text-base font-black text-blue-600 dark:text-blue-400">
-                ₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 border border-amber-500/20 text-xs text-left shadow-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">Live Estimate</span>
+                <span className="text-[10px] font-mono font-bold text-amber-400">12% MARGIN</span>
+              </div>
+              <span className="text-lg font-black text-white font-mono tracking-tight block">
+                ₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </span>
-              <span className="text-[10px] text-slate-500 block mt-0.5">
-                ₹ {Math.round(estimate.costPerSqft).toLocaleString('en-IN')} / sq.ft
-              </span>
+              <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 pt-1.5 border-t border-slate-800 font-mono">
+                <span>{(estimate.totalBuiltupArea || 0).toLocaleString()} Sq.ft</span>
+                <span className="text-amber-400/90 font-bold">₹ {Math.round(estimate.costPerSqft).toLocaleString('en-IN')}/sq.ft</span>
+              </div>
             </div>
           )}
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleLogout}
-              className="flex-1 flex items-center justify-center gap-2 py-2 px-2.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-colors"
               title="Sign Out"
             >
               <LogOut className="w-3.5 h-3.5" />
-              {!sidebarCollapsed && <span>Logout</span>}
+              {!sidebarCollapsed && <span>Sign Out</span>}
             </button>
 
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex items-center justify-center p-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="hidden lg:flex items-center justify-center p-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
               title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             >
               <Menu className="w-4 h-4" />
@@ -435,25 +447,25 @@ export default function App() {
       {mobileSidebarOpen && (
         <div
           onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md lg:hidden"
         />
       )}
 
       {/* MAIN VIEWPORT */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Sticky App Header */}
-        <header className="no-print sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 h-16 px-4 sm:px-6 flex items-center justify-between">
+        <header className="no-print sticky top-0 z-30 bg-[#0b0f19]/80 backdrop-blur-xl border-b border-slate-800/80 h-16 px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="font-semibold text-slate-500 hidden sm:inline">Route:</span>
-              <span className="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-900/60">
+              <span className="font-mono text-slate-500 hidden sm:inline text-[11px]">ACTIVE WORKSPACE /</span>
+              <span className="font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
                 {location.pathname === '/' ? '/dashboard' : location.pathname}
               </span>
             </div>
@@ -461,15 +473,15 @@ export default function App() {
 
           {/* Quick Metrics Bar in Header */}
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-4 text-xs">
-              <div className="text-left">
-                <span className="text-[9px] text-slate-400 uppercase font-bold block">Plinth Area</span>
-                <span className="font-bold text-slate-900 dark:text-white">{(estimate.totalBuiltupArea || 0).toLocaleString()} Sq.ft</span>
+            <div className="hidden md:flex items-center gap-5 text-xs">
+              <div className="text-left font-mono">
+                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">Contract Area</span>
+                <span className="font-extrabold text-white">{(estimate.totalBuiltupArea || 0).toLocaleString()} Sq.ft</span>
               </div>
-              <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
-              <div className="text-left">
-                <span className="text-[9px] text-slate-400 uppercase font-bold block">Grand Total</span>
-                <span className="font-black text-slate-900 dark:text-white">₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+              <div className="h-5 w-px bg-slate-800" />
+              <div className="text-left font-mono">
+                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">Total Quotation</span>
+                <span className="font-black text-amber-400">₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               </div>
             </div>
 
@@ -477,37 +489,29 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsRateModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/80 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/60 shadow-sm transition-all"
                 title="Open Rates Configuration"
               >
-                <Sliders className="w-4 h-4" />
+                <Sliders className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Rate Master</span>
               </button>
 
               <button
                 onClick={handleResetToSample}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 border border-slate-800 transition-all"
                 title="Reset Sample Values"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span className="hidden sm:inline">Sample</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Sample Villa</span>
               </button>
 
               <button
                 onClick={handleSave}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 transition-all active:scale-95"
                 title="Save to PostgreSQL & LocalStorage"
               >
                 {saveSuccess ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{saveSuccess ? 'Saved to DB!' : 'Save'}</span>
-              </button>
-
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Toggle Dark / Light Theme"
-              >
-                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                <span className="hidden sm:inline">{saveSuccess ? 'Saved' : 'Save Plan'}</span>
               </button>
             </div>
           </div>

@@ -2119,13 +2119,57 @@ export function JoineryModule({ joinery, updateJoinery, estimate }) {
 // =============================================================================
 // SECTION 11: ROOF SLAB & ROOF BEAMS CONCRETE (Sheet 8.SLAB CONCRETE)
 // =============================================================================
-export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
+export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate, builtup, plinthBeams }) {
   const currentData = roofSlab || {};
 
+  // Auto-linked plinth beam length from Section 3
+  const autoPbLength = estimate?.totalPbLength !== undefined ? estimate.totalPbLength : (plinthBeams?.[0]?.length ?? 201);
+  const isManualBeam = Boolean(currentData?.isBeamManual);
+  const currentBeamLength = isManualBeam ? (currentData.beamLength ?? autoPbLength) : autoPbLength;
+
+  // Auto-linked Ground floor area from Section 1
+  const gfFloor = builtup?.floors?.[0];
+  const gfArea = gfFloor?.area !== undefined && gfFloor?.area > 0 
+    ? Number(gfFloor.area) 
+    : (gfFloor?.length && gfFloor?.breadth ? Number(gfFloor.length) * Number(gfFloor.breadth) : (estimate?.gfArea ?? 858));
+  const isManualSlab = Boolean(currentData?.isSlabManual);
+  const currentSlabArea = isManualSlab ? (currentData.slabArea ?? gfArea) : gfArea;
+
   const handleChange = (field, val) => {
+    const parsed = val === '' ? '' : (isNaN(val) ? val : parseFloat(val));
+    if (field === 'beamLength') {
+      updateRoofSlab({
+        ...currentData,
+        beamLength: parsed,
+        isBeamManual: true
+      });
+    } else if (field === 'slabArea') {
+      updateRoofSlab({
+        ...currentData,
+        slabArea: parsed,
+        isSlabManual: true
+      });
+    } else {
+      updateRoofSlab({
+        ...currentData,
+        [field]: parsed
+      });
+    }
+  };
+
+  const handleResetBeamLength = () => {
     updateRoofSlab({
       ...currentData,
-      [field]: val === '' ? '' : (isNaN(val) ? val : parseFloat(val))
+      beamLength: autoPbLength,
+      isBeamManual: false
+    });
+  };
+
+  const handleResetSlabArea = () => {
+    updateRoofSlab({
+      ...currentData,
+      slabArea: gfArea,
+      isSlabManual: false
     });
   };
 
@@ -2152,7 +2196,20 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
         <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-3">
           <h3 className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400 flex items-center justify-between">
             <span>Roof Beams Schedule</span>
-            <span className="text-[10px] font-medium text-slate-400">(Linked to Plinth Beam length: 201 RFT)</span>
+            {!isManualBeam ? (
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded flex items-center gap-1" title="Excel C141 formula =+C32 (Auto-linked to PB1 Length)">
+                Auto-linked PB1 🔗
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResetBeamLength}
+                className="text-[10px] font-bold text-slate-400 hover:text-emerald-500 underline"
+                title="Reset to PB1 length"
+              >
+                Reset to PB1 🔗
+              </button>
+            )}
           </h3>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -2160,9 +2217,13 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
               <input
                 type="number"
                 step="0.1"
-                value={currentData.beamLength ?? 201}
+                value={currentBeamLength}
                 onChange={(e) => handleChange('beamLength', e.target.value)}
-                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+                className={`w-full px-2.5 py-1.5 text-xs rounded-lg border font-bold ${
+                  !isManualBeam
+                    ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100'
+                } focus:ring-1 focus:ring-violet-500 outline-none`}
               />
             </div>
             <div>
@@ -2189,7 +2250,7 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
           <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-xs">
             <span className="text-slate-500">Beam Concrete Volume:</span>
             <span className="font-bold text-violet-600 dark:text-violet-400">
-              {Math.round((estimate?.roofBeamVolumeCft || 87.89) * 100) / 100} CFT
+              {Math.round((estimate?.roofBeamVolumeCft || 0) * 100) / 100} CFT
             </span>
           </div>
         </div>
@@ -2198,7 +2259,20 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
         <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-3">
           <h3 className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400 flex items-center justify-between">
             <span>Roof Slab Concrete</span>
-            <span className="text-[10px] font-medium text-slate-400">(Linked to GF Area: 858 sq.ft)</span>
+            {!isManualSlab ? (
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded flex items-center gap-1" title="Excel H141 (Auto-linked to Ground Floor Area)">
+                Auto-linked GF Area 🔗
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResetSlabArea}
+                className="text-[10px] font-bold text-slate-400 hover:text-emerald-500 underline"
+                title="Reset to GF Area"
+              >
+                Reset to GF Area 🔗
+              </button>
+            )}
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -2206,9 +2280,13 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
               <input
                 type="number"
                 step="0.1"
-                value={currentData.slabArea ?? 858}
+                value={currentSlabArea}
                 onChange={(e) => handleChange('slabArea', e.target.value)}
-                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-violet-500 outline-none"
+                className={`w-full px-2.5 py-1.5 text-xs rounded-lg border font-bold ${
+                  !isManualSlab
+                    ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100'
+                } focus:ring-1 focus:ring-violet-500 outline-none`}
               />
             </div>
             <div>
@@ -2226,7 +2304,7 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate }) {
           <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-xs">
             <span className="text-slate-500">Slab Concrete Volume:</span>
             <span className="font-bold text-violet-600 dark:text-violet-400">
-              {Math.round((estimate?.roofSlabVolumeCft || 356.93) * 100) / 100} CFT
+              {Math.round((estimate?.roofSlabVolumeCft || 0) * 100) / 100} CFT
             </span>
           </div>
         </div>

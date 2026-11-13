@@ -35,10 +35,10 @@ export function calculateCivilEstimateComplete(data, rates) {
   const totalBuiltupArea = floorItems.reduce((acc, f) => acc + (f.computedArea || 0), 0);
   // Ground floor outer dimensions & perimeter (DATA SHEET G42 = 2 * (B5 + C5))
   const gfFloor = floorItems[0] || {};
-  const gfArea = gfFloor.computedArea !== undefined ? gfFloor.computedArea : 858;
-  const gfLength = Number(gfFloor.length) || 22;
-  const gfBreadth = Number(gfFloor.breadth) || 39;
-  const computedGfPerimeter = 2 * (gfLength + gfBreadth); // e.g. 2*(22+39) = 122 RFT
+  const gfArea = gfFloor.computedArea !== undefined ? gfFloor.computedArea : 0;
+  const gfLength = Number(gfFloor.length) || 0;
+  const gfBreadth = Number(gfFloor.breadth) || 0;
+  const computedGfPerimeter = (gfLength > 0 && gfBreadth > 0) ? (2 * (gfLength + gfBreadth)) : 0;
 
   // -------------------------------------------------------------
   // 2. FOOTINGS & COLUMNS SCHEDULE
@@ -173,23 +173,21 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 2. Otherwise auto-link to Ground Floor perimeter 2*(L+B)
   const bsmPerimeter = (basement?.outerPerimeter !== undefined && basement?.outerPerimeter !== null && (basement?.isPerimeterManual || (Number(basement.outerPerimeter) !== 122 && Number(basement.outerPerimeter) > 0)))
     ? Number(basement.outerPerimeter)
-    : (computedGfPerimeter || Number(basement?.outerPerimeter) || 122);
+    : (computedGfPerimeter || (gfFloor.length ? 0 : Number(basement?.outerPerimeter)) || 0);
 
   // In Excel DATA SHEET C42: =+F32 (links to PB1 length or total plinth beam length).
   // If user explicitly modified flyashLength in basement, use it; otherwise auto-link to totalPbLength
   const bsmFlyashL = (basement?.flyashLength !== undefined && basement?.flyashLength !== null && basement?.isFlyashLengthManual)
     ? Number(basement.flyashLength)
-    : (basement?.flyashLength !== undefined && basement?.flyashLength !== null && Number(basement.flyashLength) !== 201)
-      ? Number(basement.flyashLength)
-      : (totalPbLength || Number(basement?.flyashLength) || 201);
+    : (totalPbLength || Number(basement?.flyashLength) || 0);
 
   const bsmFlyashB = Number(basement?.flyashBreadth) || 0.75;
   const bsmFlyashD = Number(basement?.flyashDepth) || 1.25;
-  const bsmHeight = Number(basement?.height) || 3.0;
+  const bsmHeight = Number(basement?.height) || 0;
 
   const basementBrickworkCft = bsmFlyashL * bsmFlyashB * bsmFlyashD;
   const basementFlyashBricksNos = basementBrickworkCft * 12;
-  const basementFlyashCementBags = (basementBrickworkCft / 35.314) * 6.336 * 0.999 || 10.22;
+  const basementFlyashCementBags = basementBrickworkCft > 0 ? ((basementBrickworkCft / 35.314) * 6.336 * 0.999) : 0;
   const basementFlyashSandCft = basementFlyashCementBags * (20.0 / 3.0);
 
   const basementBrickworkMatCost = (basementFlyashCementBags * rates.cement) + (basementFlyashBricksNos * rates.brickFlyash) + (basementFlyashSandCft * rates.msand);
@@ -267,14 +265,14 @@ export function calculateCivilEstimateComplete(data, rates) {
   });
 
   // Net Brickwork Volume: Gross - Deductions = 1485 - 168.75 = 1316.25 CFT
-  const netBrickworkCft = Math.max(0, grossWallVolumeCft - totalDeductionsVolumeCft);
+  const netBrickworkCft = grossWallVolumeCft > 0 ? Math.max(0, grossWallVolumeCft - totalDeductionsVolumeCft) : 0;
   // Red Chamber Bricks Count: Net CFT * 12 = 1316.25 * 12 = 15,795 Nos
   const chamberBricksNos = netBrickworkCft * 12;
 
   // Cement & M-Sand from BOQ Row 12 (V12 formula):
   // Cement = (Net CFT / 35.314) * (1.54/7) * (1440/50) = 73.711 bags
   // M-Sand = Cement * 8.0 = 589.688 CFT
-  const chamberCementBags = (netBrickworkCft / 35.314) * (1.54 / 7) * (1440 / 50) || 73.71;
+  const chamberCementBags = netBrickworkCft > 0 ? ((netBrickworkCft / 35.314) * (1.54 / 7) * (1440 / 50)) : 0;
   const chamberSandCft = chamberCementBags * 8.0;
 
   const chamberBrickworkMatCost = (chamberCementBags * rates.cement) + 
@@ -341,21 +339,21 @@ export function calculateCivilEstimateComplete(data, rates) {
   // -------------------------------------------------------------
   // From DATA SHEET Section 8 & Sheet 5.SILL & LINTEL
   // Brickwork wall length sum for lintel default (DATA SHEET D116 = +C51+C52+C53+C54 = 245 rft)
-  const totalBrickworkWallLength = (brickwork?.walls || []).reduce((acc, w) => acc + (Number(w.length) || 0), 0) || 245;
+  const totalBrickworkWallLength = (brickwork?.walls || []).reduce((acc, w) => acc + (Number(w.length) || 0), 0);
 
   const currentSillLintel = sillAndLintel || data?.sillLintel || {};
 
   // Sill length defaults to computed ground floor perimeter (2*(L+B) = 122 RFT) unless isSillManual is true
   const sillLen = (currentSillLintel?.isSillManual && currentSillLintel?.sillLength !== undefined && currentSillLintel?.sillLength !== '')
     ? Number(currentSillLintel.sillLength)
-    : (computedGfPerimeter || bsmPerimeter || Number(currentSillLintel?.sillLength) || 122);
+    : (computedGfPerimeter || bsmPerimeter || Number(currentSillLintel?.sillLength) || 0);
   const sillWidth = Number(currentSillLintel?.sillB) || 0.75;
   const sillThk = Number(currentSillLintel?.sillD) || 0.25;
 
   // Lintel length defaults to total superstructure wall runs length (245 RFT) unless isLintelManual is true
   const lintelLen = (currentSillLintel?.isLintelManual && currentSillLintel?.lintelLength !== undefined && currentSillLintel?.lintelLength !== '')
     ? Number(currentSillLintel.lintelLength)
-    : (totalBrickworkWallLength || Number(currentSillLintel?.lintelLength) || 245);
+    : (totalBrickworkWallLength || Number(currentSillLintel?.lintelLength) || 0);
   const lintelWidth = Number(currentSillLintel?.lintelB) || 0.75;
   const lintelThk = Number(currentSillLintel?.lintelD) || 0.5;
 
@@ -382,7 +380,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   const lintelTotalCost = lintelMatCost + lintelLabCost;
 
   // Lofts, Sunshades & Counter Slabs RCC
-  const rawSlabs = Array.isArray(currentSillLintel?.slabs) && currentSillLintel.slabs.length > 0
+  const rawSlabs = Array.isArray(currentSillLintel?.slabs)
     ? currentSillLintel.slabs
     : [
         { id: 's1', name: 'Kitchen Counter Slab', length: 16, breadth: 3.0, depth: 0.25 },
@@ -414,6 +412,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 8. TILES & GRANITE WORK (Sheet 6.TILES WORK & BOQ Items 30-38)
   // -------------------------------------------------------------
   const tilesInput = data?.tiles || {};
+  const scInput = data?.staircase || {};
   
   // Calculate dynamic room areas from plastering.rooms if user altered rooms:
   const roomsList = plastering?.rooms || [];
@@ -431,37 +430,37 @@ export function calculateCivilEstimateComplete(data, rates) {
 
   const dynBathroomFloorSqft = toiletRooms.reduce((acc, r) => acc + ((Number(r.length)||0)*(Number(r.breadth)||0)), 0);
   const dynParkingSqft = ((Number(porticoRoom.length)||0)*(Number(porticoRoom.breadth)||0));
-  const dynKitchenWallSqft = ((Number(kitchenRoom.length)||0) + (Number(kitchenRoom.breadth)||0)) > 0 ? ((Number(kitchenRoom.length)||10) * 4) : 64;
+  const dynKitchenWallSqft = ((Number(kitchenRoom.length)||0) + (Number(kitchenRoom.breadth)||0)) > 0 ? ((Number(kitchenRoom.length)||10) * 4) : 0;
   const dynBathroomWallSqft = toiletRooms.reduce((acc, r) => acc + (2 * ((Number(r.length)||0) + (Number(r.breadth)||0)) * 7), 0); // 7ft dadoing
-  const dynCountertopSqft = ((Number(kitchenRoom.length)||16) * (Number(kitchenRoom.breadth)||3) > 0) ? 60 : 60;
+  const dynCountertopSqft = ((Number(kitchenRoom.length)||0) * (Number(kitchenRoom.breadth)||0) > 0) ? 60 : 0;
 
   const tileFlooringSqft = (tilesInput?.isFlooringManual && tilesInput.flooringArea !== undefined && tilesInput.flooringArea !== '') 
     ? Number(tilesInput.flooringArea) 
-    : (dynFlooringSqft > 0 ? dynFlooringSqft : (Number(tilesInput?.flooringArea) || 532.5));
+    : (dynFlooringSqft > 0 ? dynFlooringSqft : (Number(tilesInput?.flooringArea) || 0));
 
   const tileBathroomFloorSqft = (tilesInput?.isBathroomFloorManual && tilesInput.bathroomFloorArea !== undefined && tilesInput.bathroomFloorArea !== '') 
     ? Number(tilesInput.bathroomFloorArea) 
-    : (dynBathroomFloorSqft > 0 ? dynBathroomFloorSqft : (Number(tilesInput?.bathroomFloorArea) || 60));
+    : (dynBathroomFloorSqft > 0 ? dynBathroomFloorSqft : (Number(tilesInput?.bathroomFloorArea) || 0));
 
   const tileParkingSqft = (tilesInput?.isParkingManual && tilesInput.parkingArea !== undefined && tilesInput.parkingArea !== '') 
     ? Number(tilesInput.parkingArea) 
-    : (dynParkingSqft > 0 ? dynParkingSqft : (Number(tilesInput?.parkingArea) || 123));
+    : (dynParkingSqft > 0 ? dynParkingSqft : (Number(tilesInput?.parkingArea) || 0));
 
   const tileKitchenWallSqft = (tilesInput?.isKitchenWallManual && tilesInput.kitchenWallArea !== undefined && tilesInput.kitchenWallArea !== '') 
     ? Number(tilesInput.kitchenWallArea) 
-    : (dynKitchenWallSqft > 0 ? dynKitchenWallSqft : (Number(tilesInput?.kitchenWallArea) || 64));
+    : (dynKitchenWallSqft > 0 ? dynKitchenWallSqft : (Number(tilesInput?.kitchenWallArea) || 0));
 
   const tileBathroomWallSqft = (tilesInput?.isBathroomWallManual && tilesInput.bathroomWallArea !== undefined && tilesInput.bathroomWallArea !== '') 
     ? Number(tilesInput.bathroomWallArea) 
-    : (dynBathroomWallSqft > 0 ? dynBathroomWallSqft : (Number(tilesInput?.bathroomWallArea) || 520));
+    : (dynBathroomWallSqft > 0 ? dynBathroomWallSqft : (Number(tilesInput?.bathroomWallArea) || 0));
 
   const tileSkirtingRft = (tilesInput?.isSkirtingManual && tilesInput.skirtingLength !== undefined && tilesInput.skirtingLength !== '') 
     ? Number(tilesInput.skirtingLength) 
-    : (dynFlooringSqft > 0 ? (dynFlooringSqft / 6.17) : (Number(tilesInput?.skirtingLength) || 86.28));
+    : (dynFlooringSqft > 0 ? (dynFlooringSqft / 6.17) : (Number(tilesInput?.skirtingLength) || 0));
 
   const tileCountertopSqft = (tilesInput.countertopArea !== undefined && tilesInput.countertopArea !== '') 
     ? Number(tilesInput.countertopArea) 
-    : 60;
+    : 0;
 
   // Tile Material Costs (Supply)
   const tileFlooringMatCost = tileFlooringSqft * (rates.tileFlooringRate || 60);
@@ -483,12 +482,16 @@ export function calculateCivilEstimateComplete(data, rates) {
 
   // Araldite & Tile Paste (Paste for wall tiles, skirting & countertops)
   // Area = kitchen wall (64) + bath wall (520) + countertop (60) + skirting (86.28) + steps granite (171.5) = 901.78 sq.ft
-  const tilePasteAreaSqft = tileKitchenWallSqft + tileBathroomWallSqft + tileCountertopSqft + tileSkirtingRft + 171.5;
+  const tilePasteAreaSqft = (tileKitchenWallSqft + tileBathroomWallSqft + tileCountertopSqft + tileSkirtingRft > 0)
+    ? (tileKitchenWallSqft + tileBathroomWallSqft + tileCountertopSqft + tileSkirtingRft + (scInput?.stepsCount ? 171.5 : 0))
+    : 0;
   const tilePasteCost = tilePasteAreaSqft * (rates.aralditePasteRate || 15);
 
   // Tile Underbed Mortar (2.5" thick mortar bed = 0.21 ft)
   // Area = flooring (532.5) + bath floor (60) + parking (123) + countertop (60) + steps (171.5) = 947 sq.ft
-  const tileMortarAreaSqft = tileFlooringSqft + tileBathroomFloorSqft + tileParkingSqft + tileCountertopSqft + 171.5;
+  const tileMortarAreaSqft = (tileFlooringSqft + tileBathroomFloorSqft + tileParkingSqft + tileCountertopSqft > 0)
+    ? (tileFlooringSqft + tileBathroomFloorSqft + tileParkingSqft + tileCountertopSqft + (scInput?.stepsCount ? 171.5 : 0))
+    : 0;
   const tileMortarVolumeCft = tileMortarAreaSqft * 0.21;
   const tileMortarCementBags = (tileMortarVolumeCft / 35.314) * 7.5; // Mortar cement
   const tileMortarSandCft = tileMortarVolumeCft * 1.155;
@@ -505,20 +508,22 @@ export function calculateCivilEstimateComplete(data, rates) {
   // -------------------------------------------------------------
   // 10. DOORS & WINDOWS JOINERY (Sheet 7.DOOR & WINDOW & BOQ Items 25-29)
   // -------------------------------------------------------------
-  const rawJoinery = data?.joinery?.items || [
-    { id: 'j1', name: 'Main Door (Kinza Teak Wood)', length: 3.25, height: 7, nos: 1, rate: 1071, spec: 'Teak frame & carved panel shutter' },
-    { id: 'j2', name: 'Room & Outer Doors', length: 3.0, height: 7, nos: 3, rate: 428, spec: 'Sal / Mahogany frame with flush door' },
-    { id: 'j3', name: 'Pooja Door (Teak Wood)', length: 3.0, height: 7, nos: 1, rate: 500, spec: 'Teak frame & CNC pooja design shutter' },
-    { id: 'j4', name: 'Bathroom PVC Doors', length: 2.5, height: 7, nos: 2, rate: 142, spec: 'FRP / PVC water-resistant door' },
-    { id: 'j5', name: 'UPVC Windows with Safety MS Grill', length: 3.0, height: 4.2, nos: 5, rate: 600, spec: '3-track UPVC sliding with mosquito mesh & grill' }
-  ];
+  const rawJoinery = Array.isArray(data?.joinery?.items)
+    ? data.joinery.items
+    : [
+        { id: 'j1', name: 'Main Door (Kinza Teak Wood)', length: 3.25, height: 7, nos: 1, rate: 1071, spec: 'Teak frame & carved panel shutter' },
+        { id: 'j2', name: 'Room & Outer Doors', length: 3.0, height: 7, nos: 3, rate: 428, spec: 'Sal / Mahogany frame with flush door' },
+        { id: 'j3', name: 'Pooja Door (Teak Wood)', length: 3.0, height: 7, nos: 1, rate: 500, spec: 'Teak frame & CNC pooja design shutter' },
+        { id: 'j4', name: 'Bathroom PVC Doors', length: 2.5, height: 7, nos: 2, rate: 142, spec: 'FRP / PVC water-resistant door' },
+        { id: 'j5', name: 'UPVC Windows with Safety MS Grill', length: 3.0, height: 4.2, nos: 5, rate: 600, spec: '3-track UPVC sliding with mosquito mesh & grill' }
+      ];
 
   let totalJoineryCost = 0;
   let totalJoineryAreaSqft = 0;
   const itemizedJoinery = rawJoinery.map(j => {
     const l = Number(j.length) || 0;
     const h = Number(j.height) || 0;
-    const nos = Number(j.nos) || 1;
+    const nos = j.nos !== undefined && j.nos !== null ? Number(j.nos) : 1;
     const area = l * h * nos;
     const rate = Number(j.rate) || 0;
     const cost = area * rate;
@@ -534,7 +539,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   // If user hasn't explicitly set isBeamManual, auto-link to totalPbLength from Section 3!
   const roofBeamLength = (roofSlabInput?.isBeamManual && roofSlabInput?.beamLength !== undefined && roofSlabInput?.beamLength !== '')
     ? Number(roofSlabInput.beamLength)
-    : (totalPbLength || Number(roofSlabInput?.beamLength) || 201);
+    : (totalPbLength || Number(roofSlabInput?.beamLength) || 0);
   const roofBeamBreadth = Number(roofSlabInput.beamBreadth) || 0.75;
   const roofBeamDepth = Number(roofSlabInput.beamDepth) || 0.583;
   const roofBeamVolumeCft = roofBeamLength * roofBeamBreadth * roofBeamDepth;
@@ -543,12 +548,12 @@ export function calculateCivilEstimateComplete(data, rates) {
   // If user hasn't explicitly set isSlabManual, auto-link to Ground Floor Area (gfArea) from Section 1!
   const roofSlabArea = (roofSlabInput?.isSlabManual && roofSlabInput?.slabArea !== undefined && roofSlabInput?.slabArea !== '')
     ? Number(roofSlabInput.slabArea)
-    : (gfArea || Number(roofSlabInput?.slabArea) || 858);
+    : (gfArea || Number(roofSlabInput?.slabArea) || 0);
   const roofSlabThickness = Number(roofSlabInput.slabThickness) || 0.416; // 5 inches
-  const roofSlabVolumeCft = roofSlabArea * roofSlabThickness; // 356.93 CFT
+  const roofSlabVolumeCft = roofSlabArea * roofSlabThickness;
   const roofSlabCost = roofSlabVolumeCft * (rates.roofSlabConcreteRate || 523.8);
 
-  const totalRoofConcreteVolumeCft = roofBeamVolumeCft + roofSlabVolumeCft; // 444.82 CFT
+  const totalRoofConcreteVolumeCft = roofBeamVolumeCft + roofSlabVolumeCft;
   const totalRoofConcreteCost = roofBeamCost + roofSlabCost;
 
   // Roof Concrete BOM Breakdown (M20 grade: 8.064 bags/m3, 3.2 kg steel/cft)
@@ -564,15 +569,15 @@ export function calculateCivilEstimateComplete(data, rates) {
   // Dynamically linked to plastering unless isManual
   const paintInnerSqft = (paintingInput?.isInnerManual && paintingInput.innerWallArea !== undefined && paintingInput.innerWallArea !== '')
     ? Number(paintingInput.innerWallArea)
-    : (netInnerPlasteringSqft > 0 ? netInnerPlasteringSqft : (Number(paintingInput?.innerWallArea) || 3115));
+    : (netInnerPlasteringSqft > 0 ? netInnerPlasteringSqft : (Number(paintingInput?.innerWallArea) || 0));
 
   const paintOuterSqft = (paintingInput?.isOuterManual && paintingInput.outerWallArea !== undefined && paintingInput.outerWallArea !== '')
     ? Number(paintingInput.outerWallArea)
-    : (totalOuterPlasteringSqft > 0 ? totalOuterPlasteringSqft : (Number(paintingInput?.outerWallArea) || 2276.25));
+    : (totalOuterPlasteringSqft > 0 ? totalOuterPlasteringSqft : (Number(paintingInput?.outerWallArea) || 0));
 
   const paintCeilingSqft = (paintingInput?.isCeilingManual && paintingInput.ceilingArea !== undefined && paintingInput.ceilingArea !== '')
     ? Number(paintingInput.ceilingArea)
-    : (totalCeilingSqft > 0 ? totalCeilingSqft : (Number(paintingInput?.ceilingArea) || 808));
+    : (totalCeilingSqft > 0 ? totalCeilingSqft : (Number(paintingInput?.ceilingArea) || 0));
 
   const paintInnerCost = paintInnerSqft * (rates.paintInnerRate || 28);
   const paintOuterCost = paintOuterSqft * (rates.paintOuterRate || 34);
@@ -582,30 +587,29 @@ export function calculateCivilEstimateComplete(data, rates) {
   // -------------------------------------------------------------
   // 13. STAIRCASE WORKS (Sheet 10.STAIRCASE & BOQ Items 21, 23)
   // -------------------------------------------------------------
-  const scInput = data?.staircase || {};
-  const scWidth = Number(scInput.width) || 3.5;
-  const scTread = Number(scInput.tread) || 1.0;
-  const scRiser = Number(scInput.riser) || 0.583;
-  const scStepsCount = Number(scInput.stepsCount) || 21;
-  const scLandingArea = Number(scInput.landingArea) || 24.5;
-  const scHandrailLength = Number(scInput.handrailLength) || 21;
+  const scWidth = Number(scInput.width) || 0;
+  const scTread = Number(scInput.tread) || 0;
+  const scRiser = Number(scInput.riser) || 0;
+  const scStepsCount = Number(scInput.stepsCount) || 0;
+  const scLandingArea = Number(scInput.landingArea) || 0;
+  const scHandrailLength = Number(scInput.handrailLength) || 0;
 
   // Brick Steps: Width * Tread * Riser * No. of steps
-  const scBrickworkVolumeCft = scWidth * scTread * scRiser * scStepsCount; // 42.85 CFT
+  const scBrickworkVolumeCft = scWidth * scTread * scRiser * scStepsCount;
   const scBrickworkCost = scBrickworkVolumeCft * (rates.staircaseBrickRate || 250);
 
   // Steps Granite: ((Width * Tread) + (Width * Riser)) * Steps + Landing
-  const scStepGraniteArea = ((scWidth * scTread) + (scWidth * scRiser)) * scStepsCount + scLandingArea; // 171.5 sq.ft
+  const scStepGraniteArea = ((scWidth * scTread) + (scWidth * scRiser)) * scStepsCount + scLandingArea;
   const scGraniteCost = scStepGraniteArea * (rates.staircaseGraniteRate || 320);
 
   // Handrail
   const scHandrailCost = scHandrailLength * (rates.staircaseHandrailRate || 1000);
 
   // Waist Slab Concrete: L * B * D
-  const scWaistL = Number(scInput.waistSlabLength) || 21;
-  const scWaistB = Number(scInput.waistSlabBreadth) || 6;
-  const scWaistD = Number(scInput.waistSlabDepth) || 0.5;
-  const scConcreteVolumeCft = scWaistL * scWaistB * scWaistD; // 63 CFT
+  const scWaistL = Number(scInput.waistSlabLength) || 0;
+  const scWaistB = Number(scInput.waistSlabBreadth) || 0;
+  const scWaistD = Number(scInput.waistSlabDepth) || 0;
+  const scConcreteVolumeCft = scWaistL * scWaistB * scWaistD;
   const scConcreteCost = scConcreteVolumeCft * (rates.roofSlabConcreteRate || 523.8);
 
   const totalStaircaseCost = scBrickworkCost + scGraniteCost + scHandrailCost + scConcreteCost;
@@ -623,13 +627,13 @@ export function calculateCivilEstimateComplete(data, rates) {
   // Electrical dynamically linked to totalBuiltupArea
   const electricalSqft = (othersInput?.isElectricalManual && othersInput.electricalArea !== undefined && othersInput.electricalArea !== '')
     ? Number(othersInput.electricalArea)
-    : (totalBuiltupArea || gfArea || 858);
+    : (totalBuiltupArea || gfArea || 0);
 
   // Terrace Surkhi dynamically linked to roofSlabArea minus outer perimeter parapet
   const dynamicSurkhiArea = Math.max(0, (roofSlabArea || gfArea) - (bsmPerimeter * 0.75));
   const terraceSurkhiSqft = (othersInput?.isSurkhiManual && othersInput.terraceSurkhiArea !== undefined && othersInput.terraceSurkhiArea !== '')
     ? Number(othersInput.terraceSurkhiArea)
-    : (dynamicSurkhiArea > 0 ? dynamicSurkhiArea : 766.5);
+    : (dynamicSurkhiArea > 0 ? dynamicSurkhiArea : 0);
 
   const electricalTotalCost = electricalSqft * (rates.electricalPlumbingRate || 200);
   const terraceSurkhiVolumeCft = terraceSurkhiSqft * 0.25; // 3 inches chips concrete bed
