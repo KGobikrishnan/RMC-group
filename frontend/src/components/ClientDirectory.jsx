@@ -132,22 +132,22 @@ export function ClientDirectoryPage({ setActiveTab, onSelectClient }) {
   return (
     <div className="space-y-6 text-left">
       {/* Top Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-white text-slate-900 shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
+            <span className="p-2 bg-teal-50 text-teal-700 rounded-xl">
               <Users className="w-5 h-5" />
             </span>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">Client Directory & CRM</h2>
           </div>
-          <p className="text-xs text-indigo-200/80">
-            Real-time client records stored in PostgreSQL Database <span className="font-mono font-bold text-amber-300">RMC</span>
+          <p className="text-xs text-slate-500">
+            Manage client contacts and connect them to project estimates.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold shadow-sm transition-all active:scale-95 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Client</span>
@@ -340,7 +340,7 @@ export function ClientDirectoryPage({ setActiveTab, onSelectClient }) {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Er. M. Jahir Hussain"
+              placeholder="Client full name"
                   value={newClient.name}
                   onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"

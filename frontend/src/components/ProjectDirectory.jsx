@@ -495,22 +495,22 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
   return (
     <div className="space-y-6 text-left">
       {/* Top Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-white text-slate-900 shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
+            <span className="p-2 bg-teal-50 text-teal-700 rounded-xl">
               <FolderGit2 className="w-5 h-5" />
             </span>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">Project Portfolio Directory</h2>
           </div>
-          <p className="text-xs text-indigo-200/80">
-            Real-time project estimates stored in PostgreSQL Database <span className="font-mono font-bold text-amber-300">RMC</span>
+          <p className="text-xs text-slate-500">
+            Track project estimates, clients and construction details in one place.
           </p>
         </div>
 
         <button
           onClick={handleOpenNewProject}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold shadow-sm transition-all active:scale-95 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>New Project Estimate</span>
@@ -706,7 +706,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/80 rounded-t-3xl shrink-0">
               <div className="flex items-center gap-3">
-                <span className="p-2.5 bg-blue-600 text-white rounded-2xl shadow-md shadow-blue-500/20">
+                      <span className="p-2.5 bg-teal-700 text-white rounded-2xl shadow-sm">
                   <FolderGit2 className="w-5 h-5" />
                 </span>
                 <div>

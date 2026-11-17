@@ -279,14 +279,14 @@ export default function App() {
 
   // Navigation Items (Project inputs is now fully integrated inside Project Directory estimation popup)
   const navTabs = [
-    { path: '/dashboard', label: 'Main Dashboard', icon: Home, badge: 'Overview' },
-    { path: '/projects', label: 'Project Directory', icon: FolderGit2, badge: 'Portfolio' },
-    { path: '/clients', label: 'Client Directory', icon: Users, badge: 'CRM' },
-    { path: '/breakup', label: 'Profit & Rate/Sq.ft', icon: Sliders, badge: `${rates.contractorMarginPct || 10}% Margin` },
-    { path: '/foundation-summary', label: 'Foundation Summary', icon: PieChart },
-    { path: '/boq', label: 'Civil BOQ', icon: FileSpreadsheet, badge: `${estimate.boqSchedule?.length || 18} Items` },
-    { path: '/bom', label: 'Materials BOM', icon: Box, badge: 'Procurement' },
-    { path: '/quotation', label: 'Client Quotation', icon: FileText, badge: 'Print PDF' },
+    { path: '/dashboard', label: 'Overview', icon: Home },
+    { path: '/projects', label: 'Projects', icon: FolderGit2 },
+    { path: '/clients', label: 'Clients', icon: Users },
+    { path: '/breakup', label: 'Cost & Margin', icon: Sliders },
+    { path: '/foundation-summary', label: 'Foundation', icon: PieChart },
+    { path: '/boq', label: 'BOQ', icon: FileSpreadsheet },
+    { path: '/bom', label: 'Materials', icon: Box },
+    { path: '/quotation', label: 'Quotation', icon: FileText },
   ];
 
   const scrollToModule = (modId) => {
@@ -311,17 +311,17 @@ export default function App() {
 
   // When authenticated, render enterprise application shell
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans flex antialiased selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="app-shell min-h-screen text-slate-800 font-sans flex antialiased selection:bg-teal-200 selection:text-teal-950">
       {/* SIDEBAR NAVIGATION */}
       <aside
-        className={`no-print fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0f172a]/95 backdrop-blur-2xl border-r border-slate-800/80 transition-all duration-300 ease-in-out lg:static ${
-          sidebarCollapsed ? 'w-20' : 'w-72'
+        className={`no-print fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen ${
+          sidebarCollapsed ? 'w-20' : 'w-[260px]'
         } ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Logo & Brand Header */}
-        <div className="h-20 px-5 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40">
+        <div className="h-[76px] px-5 flex items-center justify-between border-b border-slate-100">
           <div className="flex items-center gap-3.5 overflow-hidden cursor-pointer group" onClick={() => navigate('/dashboard')}>
-            <div className="relative flex-shrink-0 w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500/20 via-slate-800 to-slate-900 p-2 border border-amber-500/30 shadow-lg shadow-amber-500/10 flex items-center justify-center group-hover:border-amber-400/50 transition-all">
+            <div className="relative flex-shrink-0 w-11 h-11 rounded-2xl bg-teal-50 p-2 border border-teal-100 flex items-center justify-center group-hover:bg-teal-100 transition-all">
               <img
                 src={rmcLogo}
                 alt="RMC Group Logo"
@@ -335,15 +335,12 @@ export default function App() {
             {!sidebarCollapsed && (
               <div className="text-left min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="text-sm font-extrabold tracking-tight text-white group-hover:text-amber-300 transition-colors">
+                  <h1 className="text-sm font-extrabold tracking-tight text-slate-900 group-hover:text-teal-700 transition-colors">
                     RMC GROUP
                   </h1>
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
-                    PRO
-                  </span>
                 </div>
-                <p className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase font-mono">
-                  Civil Engineering Suite
+                <p className="text-[10px] font-semibold text-slate-500 tracking-wider uppercase">
+                  Project workspace
                 </p>
               </div>
             )}
@@ -358,28 +355,26 @@ export default function App() {
 
         {/* System Core Badge */}
         {!sidebarCollapsed && (
-          <div className="px-5 py-2.5 border-b border-slate-800/60 bg-slate-950/40 flex items-center justify-between text-xs">
+          <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${backendStatus === 'online' ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${backendStatus === 'online' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
               </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-300">
-                {backendStatus === 'online' ? 'PostgreSQL: RMC' : 'Local Storage Mode'}
+              <span className="text-[11px] font-semibold text-slate-600">
+                {backendStatus === 'online' ? 'Connected' : 'Offline mode'}
               </span>
             </div>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              AUDITED
-            </span>
+            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">{backendStatus === 'online' ? 'Live' : 'Local'}</span>
           </div>
         )}
 
         {/* Navigation Routes List */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 text-left">
+        <div className="flex-1 overflow-y-auto py-5 px-3 space-y-6 text-left">
           <div>
             {!sidebarCollapsed && (
-              <div className="px-3 pb-2 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
-                Navigation Matrix
+              <div className="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Workspace
               </div>
             )}
             <div className="space-y-1">
@@ -394,13 +389,13 @@ export default function App() {
                       setMobileSidebarOpen(false);
                     }}
                     title={item.label}
-                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left relative ${
+                      className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left relative ${
                       isActive
-                        ? 'bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent text-amber-300 border-l-2 border-amber-400 font-extrabold shadow-sm'
-                        : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                        ? 'bg-teal-50 text-teal-800 font-bold'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-500'}`} />
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-teal-700' : 'text-slate-400'}`} />
                     {!sidebarCollapsed && (
                       <div className="flex-1 flex items-center justify-between min-w-0">
                         <span className="truncate">{item.label}</span>
@@ -425,19 +420,19 @@ export default function App() {
         </div>
 
         {/* Sidebar Footer Controls */}
-        <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 space-y-3">
+        <div className="p-4 border-t border-slate-100 space-y-3">
           {!sidebarCollapsed && (
-            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 border border-amber-500/20 text-xs text-left shadow-lg">
+            <div className="p-4 rounded-2xl bg-slate-900 text-xs text-left shadow-sm">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">Live Estimate</span>
-                <span className="text-[10px] font-mono font-bold text-amber-400">12% MARGIN</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Current estimate</span>
+                <span className="text-[10px] font-bold text-teal-300">{rates.contractorMarginPct || 0}%</span>
               </div>
-              <span className="text-lg font-black text-white font-mono tracking-tight block">
+              <span className="text-lg font-black text-white tracking-tight block">
                 ₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </span>
-              <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 pt-1.5 border-t border-slate-800 font-mono">
+              <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-700">
                 <span>{(estimate.totalBuiltupArea || 0).toLocaleString()} Sq.ft</span>
-                <span className="text-amber-400/90 font-bold">₹ {Math.round(estimate.costPerSqft).toLocaleString('en-IN')}/sq.ft</span>
+                <span className="text-teal-300 font-bold">₹ {Math.round(estimate.costPerSqft || 0).toLocaleString('en-IN')}/sq.ft</span>
               </div>
             </div>
           )}
@@ -445,7 +440,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleLogout}
-              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold text-slate-600 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 transition-colors"
               title="Sign Out"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -454,7 +449,7 @@ export default function App() {
 
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex items-center justify-center p-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="hidden lg:flex items-center justify-center p-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             >
               <Menu className="w-4 h-4" />
@@ -474,34 +469,34 @@ export default function App() {
       {/* MAIN VIEWPORT */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Sticky App Header */}
-        <header className="no-print sticky top-0 z-30 bg-[#0b0f19]/80 backdrop-blur-xl border-b border-slate-800/80 h-16 px-4 sm:px-6 flex items-center justify-between">
+        <header className="no-print sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-slate-200 h-[76px] px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="lg:hidden p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="font-mono text-slate-500 hidden sm:inline text-[11px]">ACTIVE WORKSPACE /</span>
-              <span className="font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
-                {location.pathname === '/' ? '/dashboard' : location.pathname}
+              <span className="font-semibold text-slate-400 hidden sm:inline">Workspace</span>
+              <span className="font-bold text-slate-900 text-base">
+                {navTabs.find((item) => item.path === location.pathname)?.label || 'Overview'}
               </span>
             </div>
           </div>
 
           {/* Quick Metrics Bar in Header */}
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-5 text-xs">
+              <div className="hidden xl:flex items-center gap-5 text-xs">
               <div className="text-left font-mono">
-                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">Contract Area</span>
-                <span className="font-extrabold text-white">{(estimate.totalBuiltupArea || 0).toLocaleString()} Sq.ft</span>
+                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">Built-up area</span>
+                <span className="font-extrabold text-slate-800">{(estimate.totalBuiltupArea || 0).toLocaleString()} Sq.ft</span>
               </div>
-              <div className="h-5 w-px bg-slate-800" />
+              <div className="h-5 w-px bg-slate-200" />
               <div className="text-left font-mono">
-                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">Total Quotation</span>
-                <span className="font-black text-amber-400">₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">Estimate</span>
+                <span className="font-black text-teal-700">₹ {(estimate.grandTotalCost || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               </div>
             </div>
 
@@ -509,36 +504,36 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsRateModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/60 shadow-sm transition-all"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm transition-all"
                 title="Open Rates Configuration"
               >
-                <Sliders className="w-3.5 h-3.5 text-amber-400" />
+                <Sliders className="w-3.5 h-3.5 text-teal-700" />
                 <span className="hidden sm:inline">Rate Master</span>
               </button>
 
               <button
                 onClick={handleResetEstimate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 border border-slate-800 transition-all"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all"
                 title="Clear active estimate"
               >
-                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
                 <span className="hidden sm:inline">New Estimate</span>
               </button>
 
               <button
                 onClick={handleSave}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 transition-all active:scale-95"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-teal-700 hover:bg-teal-800 text-white shadow-sm transition-all active:scale-95"
                 title="Save to PostgreSQL & LocalStorage"
               >
                 {saveSuccess ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{saveSuccess ? 'Saved' : 'Save Plan'}</span>
+                <span className="hidden sm:inline">{saveSuccess ? 'Saved' : 'Save estimate'}</span>
               </button>
             </div>
           </div>
         </header>
 
         {/* Dynamic Route Content Area */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        <main className="max-w-[1600px] mx-auto px-4 sm:px-6 xl:px-10 py-7 flex-1 w-full">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             

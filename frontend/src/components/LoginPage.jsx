@@ -52,15 +52,15 @@ export function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-950 relative overflow-hidden font-sans p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#f5f7f6] relative overflow-hidden font-sans p-4">
       {/* Dynamic Background Architectural Mesh & Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#cbd5d1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-600/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl shadow-black/80 z-10">
+      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-2xl shadow-slate-300/60 z-10">
         {/* Top Logo and Branding */}
         <div className="text-center space-y-3 mb-8">
           <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-800/80 border border-slate-700/60 shadow-inner">
@@ -75,14 +75,14 @@ export function LoginPage({ onLoginSuccess }) {
             />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white flex items-center justify-center gap-2">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center justify-center gap-2">
               RMC GROUP
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                Enterprise
+              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                Workspace
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1 font-medium">
-              Civil Estimation, Structural BOQ & Commercial Quotation Engine
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+              Civil estimates, materials and client quotations
             </p>
           </div>
         </div>

@@ -74,7 +74,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
       val: `₹ ${(totalCost).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
       sub: `₹ ${Math.round(ratePerSqft).toLocaleString('en-IN')} / sq.ft`,
       highlight: true,
-      color: 'from-amber-500/20 via-slate-900 to-slate-950 border-amber-500/40 text-amber-300',
+      color: 'from-teal-50 via-white to-white border-teal-200 text-teal-800',
       badge: `${margin}% Markup Incl.`
     },
     {
@@ -96,7 +96,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
       val: `+ ₹ ${(profitMarkup).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
       sub: `${margin}% Contractor Margin`,
       icon: TrendingUp,
-      colorText: 'text-emerald-400',
+      colorText: 'text-emerald-700',
       badge: 'Profit'
     }
   ];
@@ -114,13 +114,13 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
   ];
 
   return (
-    <div className="space-y-6 text-left">
+    <div className="space-y-7 text-left">
       {/* 1. ARCHITECTURAL HERO BANNER */}
-      <div className="p-7 sm:p-9 rounded-3xl bg-[#0f172a]/90 backdrop-blur-xl border border-slate-800 text-white shadow-2xl relative overflow-hidden group">
+      <div className="p-7 sm:p-9 rounded-[28px] bg-slate-950 border border-slate-800 text-white shadow-xl relative overflow-hidden group">
         {/* Subtle grid pattern inside card */}
         <div className="absolute inset-0 bg-blueprint-grid opacity-20 pointer-events-none" />
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 -mb-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 -mb-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2.5">
@@ -128,12 +128,12 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
               <GreetingIcon className={`w-3.5 h-3.5 ${greeting.color}`} />
               <span className="text-slate-300">{greeting.text}!</span>
               <span className="text-slate-600">•</span>
-                <span className="text-amber-400">ENGINEERING SUITE</span>
+              <span className="text-teal-300">PROJECT WORKSPACE</span>
             </div>
 
             <div className="flex items-center gap-3">
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-100">{clientName || 'New Project'}</span> 👋
+                {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 via-cyan-200 to-white">{clientName || 'Your next project'}</span>
               </h2>
             </div>
 
@@ -146,14 +146,14 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
             <button
               onClick={() => setActiveTab('quotation')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-extrabold shadow-lg shadow-amber-500/20 transition-all active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-extrabold shadow-lg shadow-teal-500/20 transition-all active:scale-95"
             >
               <FileText className="w-4 h-4" />
               <span>Client Quotation</span>
             </button>
             <button
               onClick={() => setActiveTab('breakup')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 text-xs font-bold border border-slate-700/80 transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-100 text-xs font-bold border border-white/10 transition-all"
             >
               <Sliders className="w-4 h-4 text-amber-400" />
               <span>Profit Simulator</span>
@@ -164,27 +164,27 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
         {/* Project Meta Details Bar inside Banner */}
         <div className="mt-7 pt-5 border-t border-slate-800/90 grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
           <div className="flex items-center gap-3 text-slate-300">
-            <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <User className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                  <User className="w-4 h-4 text-teal-300 flex-shrink-0" />
             </div>
             <div className="truncate">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">Client / Lead</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Client</span>
               <span className="font-bold text-white truncate">{clientName || 'Not set'}</span>
             </div>
           </div>
           <div className="flex items-center gap-3 text-slate-300">
-            <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                  <MapPin className="w-4 h-4 text-teal-300 flex-shrink-0" />
             </div>
             <div className="truncate">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">Site Location</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Site location</span>
               <span className="font-bold text-white truncate">{siteLocation || 'Not set'}</span>
             </div>
           </div>
           <div className="flex items-center gap-3 text-slate-300 justify-between">
             <div className="flex items-center gap-3 truncate">
-              <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60">
-                <Phone className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                    <Phone className="w-4 h-4 text-teal-300 flex-shrink-0" />
               </div>
               <div className="truncate">
                 <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">Contact</span>
@@ -193,7 +193,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
             </div>
             <button
               onClick={() => setIsEditingInfo(!isEditingInfo)}
-              className="text-[11px] font-mono font-bold text-amber-400 hover:text-amber-300 underline"
+                className="text-[11px] font-bold text-teal-300 hover:text-white"
             >
               {isEditingInfo ? 'Close' : 'Edit'}
             </button>
@@ -202,7 +202,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
 
         {/* Editable Form Drawer if editing */}
         {isEditingInfo && (
-          <div className="mt-5 p-4 rounded-2xl bg-slate-900/90 border border-amber-500/20 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs animate-in fade-in">
+          <div className="mt-5 p-4 rounded-2xl bg-slate-900/90 border border-teal-500/20 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs animate-in fade-in">
             <div>
               <label className="text-[10px] font-mono uppercase font-bold text-slate-400 block mb-1">Client Name</label>
               <input
@@ -249,33 +249,33 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
             key={idx}
             className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
               s.highlight
-                ? 'bg-gradient-to-br from-amber-500/15 via-[#0f172a] to-slate-950 border-amber-500/30 text-white shadow-xl shadow-amber-500/5'
-                : 'bg-[#0f172a]/80 backdrop-blur-md border-slate-800/80 shadow-sm hover:border-slate-700/80'
+                ? 'bg-gradient-to-br from-teal-50 via-white to-white border-teal-200 text-slate-900 shadow-sm'
+                : 'bg-white border-slate-200 shadow-sm hover:border-teal-200 hover:shadow-md'
             }`}
           >
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${s.highlight ? 'text-amber-400' : 'text-slate-400'}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${s.highlight ? 'text-teal-700' : 'text-slate-500'}`}>
                   {s.label}
                 </span>
                 {s.badge && (
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-semibold ${
                     s.highlight 
-                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' 
-                      : 'bg-slate-800 text-slate-300 border border-slate-700/60'
+                      ? 'bg-teal-100 text-teal-800 border border-teal-200'
+                      : 'bg-slate-100 text-slate-600 border border-slate-200'
                   }`}>
                     {s.badge}
                   </span>
                 )}
               </div>
-              <div className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${s.highlight ? 'text-amber-300' : s.colorText || 'text-white'}`}>
+              <div className={`text-2xl sm:text-3xl font-black tracking-tight ${s.highlight ? 'text-teal-800' : s.colorText || 'text-slate-900'}`}>
                 {s.val}
               </div>
             </div>
             <div className={`text-xs mt-3 pt-2.5 border-t font-mono font-semibold ${
               s.highlight 
-                ? 'border-amber-500/20 text-amber-200/80' 
-                : 'border-slate-800 text-slate-400'
+                ? 'border-teal-100 text-teal-800/70'
+                : 'border-slate-100 text-slate-500'
             }`}>
               {s.sub}
             </div>
@@ -286,24 +286,24 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
       {/* 3. PROJECT PROGRESS MILESTONES & SPECIFIED MATERIALS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Milestone Phases */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-[#0f172a]/80 backdrop-blur-md border border-slate-800/80 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2.5">
-              <span className="p-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl">
+              <span className="p-2 bg-teal-50 text-teal-700 border border-teal-100 rounded-xl">
                 <Clock className="w-5 h-5" />
               </span>
               <div>
-                <h3 className="text-sm font-bold text-white">Construction Milestone Roadmap</h3>
-                <p className="text-xs text-slate-400">Milestone payment schedule based on official contract quote</p>
+                <h3 className="text-sm font-bold text-slate-900">Payment milestones</h3>
+                <p className="text-xs text-slate-500">Illustrative split based on the current estimate</p>
               </div>
             </div>
             <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
-              4 STAGES
+              4 stages
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-extrabold text-amber-400">Stage 1: Advance Token</span>
                 <span className="font-mono font-black text-white px-2 py-0.5 rounded bg-slate-800">10%</span>
@@ -316,7 +316,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-extrabold text-indigo-400">Stage 2: Plinth Level</span>
                 <span className="font-mono font-black text-white px-2 py-0.5 rounded bg-slate-800">20%</span>
@@ -329,7 +329,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-extrabold text-purple-400">Stage 3: Roof Slab</span>
                 <span className="font-mono font-black text-white px-2 py-0.5 rounded bg-slate-800">30%</span>
@@ -342,7 +342,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-extrabold text-emerald-400">Stage 4: Handover</span>
                 <span className="font-mono font-black text-white px-2 py-0.5 rounded bg-slate-800">40%</span>
@@ -358,9 +358,9 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
         </div>
 
         {/* Right Col: Standard Materials Card */}
-        <div className="p-6 rounded-3xl bg-[#0f172a]/80 backdrop-blur-md border border-slate-800/80 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h3 className="text-sm font-bold text-white">Specified Materials</h3>
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900">Specified materials</h3>
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               GRADE 53 DALMIA
             </span>

@@ -61,23 +61,23 @@ export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
   return (
     <div className="space-y-6 text-left">
       {/* Top Banner & Margin Controller */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white shadow-xl border border-indigo-500/30 space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-indigo-500/20">
+      <div className="p-6 rounded-3xl bg-slate-950 text-white shadow-xl border border-slate-800 space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
+              <span className="p-2 bg-teal-400/10 text-teal-300 rounded-xl">
                 <Sliders className="w-5 h-5" />
               </span>
               <h3 className="text-lg font-black tracking-tight">Contractor Profit Margin & Cost Breakup</h3>
             </div>
-            <p className="text-xs text-indigo-200/80 mt-1">
-              Live simulation matching Excel Sheet <span className="font-bold text-white">12.Breakup</span> • Adjust margin to compare rate/sq.ft and profit yield
+            <p className="text-xs text-slate-300 mt-1">
+              Adjust the margin to compare the quoted rate per square foot and projected profit.
             </p>
           </div>
 
           <div className="flex items-baseline gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10">
             <span className="text-xs font-semibold text-indigo-200">Selected Margin:</span>
-            <span className="text-2xl font-black text-amber-400">{margin}%</span>
+            <span className="text-2xl font-black text-teal-300">{margin}%</span>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
               step="0.5"
               value={margin}
               onChange={handleSliderChange}
-              className="w-full h-3 bg-indigo-950/80 rounded-lg appearance-none cursor-pointer accent-amber-400 focus:outline-none"
+              className="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-400 focus:outline-none"
             />
             <div className="flex items-center gap-2 pt-1 flex-wrap">
               <span className="text-xs text-indigo-300 font-semibold">Quick Presets:</span>
@@ -107,7 +107,7 @@ export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
                   onClick={() => handlePresetClick(p)}
                   className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                     margin === p
-                      ? 'bg-amber-400 text-slate-950 shadow-md font-black scale-105'
+                      ? 'bg-teal-300 text-slate-950 shadow-md font-black scale-105'
                       : 'bg-white/10 text-white hover:bg-white/20'
                   }`}
                 >
@@ -123,7 +123,7 @@ export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
               Total Quoted Rate / Sq.ft
             </div>
             <div className="text-3xl font-black text-white">
-              ₹ {Math.round(quotedRatePerSqft).toLocaleString('en-IN')} <span className="text-sm font-semibold text-amber-300">/ sq.ft</span>
+              ₹ {Math.round(quotedRatePerSqft).toLocaleString('en-IN')} <span className="text-sm font-semibold text-teal-300">/ sq.ft</span>
             </div>
             <div className="text-[11px] text-indigo-300">
               Net Profit Yield: <b className="text-emerald-400">₹ {Math.round(markupAmount).toLocaleString('en-IN')}</b>
@@ -727,7 +727,7 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
         </div>
 
         {/* Pricing Summary Box */}
-        <div className="my-6 p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-md space-y-4">
+        <div className="my-6 p-5 rounded-2xl bg-slate-950 text-white shadow-md space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
             <div>
               <div className="text-xs font-bold uppercase tracking-wider text-indigo-300">
