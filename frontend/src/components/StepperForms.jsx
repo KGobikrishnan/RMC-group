@@ -34,7 +34,7 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
     const nextNum = builtup.floors.length + 1;
     const newFloors = [
       ...builtup.floors,
-      { id: String(Date.now()), name: `Floor ${nextNum}`, length: 20, breadth: 30, area: 600 }
+      { id: String(Date.now()), name: `Floor ${nextNum}`, length: 0, breadth: 0, area: 0 }
     ];
     const totalArea = newFloors.reduce((acc, f) => acc + (f.area || 0), 0);
     updateBuiltup({
@@ -58,7 +58,7 @@ export function TotalAreaModule({ builtup, updateBuiltup }) {
   const totalArea = builtup.floors.reduce((acc, f) => acc + ((f.length || 0) * (f.breadth || 0)), 0);
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl">
@@ -177,7 +177,7 @@ export function FootingModule({ footings, updateFootings, estimate }) {
     const newRow = {
       id: `f${num}`,
       colId: `c${num}`,
-      nos: 2,
+      nos: 0,
       colL: 0.75,
       colB: 1.25,
       colD: 5.0,
@@ -196,7 +196,7 @@ export function FootingModule({ footings, updateFootings, estimate }) {
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
@@ -436,10 +436,10 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
     const newRow = {
       id: `pb${Date.now()}`,
       name: `PB${num}`,
-      length: 50,
+      length: 0,
       excavationB: 1.0,
       excavationD: 0.5,
-      concreteLength: 50,
+      concreteLength: 0,
       concreteB: 0.75,
       concreteD: 1.25,
     };
@@ -452,7 +452,7 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl">
@@ -780,7 +780,7 @@ export function BasementModule({ basement, updateBasement, estimate, builtup, pl
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 rounded-xl">
@@ -964,7 +964,7 @@ export function BasementModule({ basement, updateBasement, estimate, builtup, pl
               </span>
             </div>
             <div className="text-base font-black text-amber-700 dark:text-amber-300">
-              {format2Dec(basement.height || 3.0)} <span className="text-xs font-semibold">ft</span>
+              {format2Dec(basement.height ?? 0)} <span className="text-xs font-semibold">ft</span>
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
               Gravel Vol: <b>{format2Dec(estimate?.basementGravelCft || 0)} CFT</b>
@@ -1034,7 +1034,7 @@ export function BrickworkModule({ brickwork, updateBrickwork, estimate }) {
     const newWall = {
       id: `w${Date.now()}`,
       name: `Wall Segment ${num}`,
-      length: 25,
+      length: 0,
       breadth: 0.75,
       height: 9.0
     };
@@ -1049,7 +1049,7 @@ export function BrickworkModule({ brickwork, updateBrickwork, estimate }) {
   const handleOpeningChange = (idx, field, val) => {
     const newOps = [...openings];
     newOps[idx] = { ...newOps[idx], [field]: field === 'type' ? val : (parseFloat(val) || 0) };
-    newOps[idx].deductionCft = (newOps[idx].nos || 1) * (newOps[idx].width || 0) * (newOps[idx].thickness || 0.75) * (newOps[idx].height || 0);
+    newOps[idx].deductionCft = (Number(newOps[idx].nos) || 0) * (Number(newOps[idx].width) || 0) * (Number(newOps[idx].thickness) || 0) * (Number(newOps[idx].height) || 0);
     updateBrickwork({ ...brickwork, openings: newOps });
   };
 
@@ -1057,11 +1057,11 @@ export function BrickworkModule({ brickwork, updateBrickwork, estimate }) {
     const newOp = {
       id: `op${Date.now()}`,
       type: 'UPVC Window (4x4)',
-      nos: 2,
-      width: 4.0,
-      thickness: 0.75,
-      height: 4.0,
-      deductionCft: 24.0
+      nos: 0,
+      width: 0,
+      thickness: 0,
+      height: 0,
+      deductionCft: 0
     };
     updateBrickwork({ ...brickwork, openings: [...openings, newOp] });
   };
@@ -1072,7 +1072,7 @@ export function BrickworkModule({ brickwork, updateBrickwork, estimate }) {
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-xl">
@@ -1311,9 +1311,9 @@ export function PlasteringModule({ plastering, updatePlastering, estimate }) {
     const newRoom = {
       id: `r${Date.now()}`,
       name: `Room ${num}`,
-      length: 12,
-      breadth: 10,
-      height: 10
+      length: 0,
+      breadth: 0,
+      height: 0
     };
     updatePlastering({ ...plastering, rooms: [...rooms, newRoom] });
   };
@@ -1324,7 +1324,7 @@ export function PlasteringModule({ plastering, updatePlastering, estimate }) {
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl">
@@ -1475,7 +1475,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
   const gfBreadth = gfFloor?.breadth !== undefined ? Number(gfFloor.breadth) : 39;
   const autoSillLength = 2 * (gfLength + gfBreadth); // 2*(22+39) = 122 RFT
 
-  const totalBrickworkWallLength = (brickwork?.walls || []).reduce((acc, w) => acc + (Number(w.length) || 0), 0) || 245;
+  const totalBrickworkWallLength = (brickwork?.walls || []).reduce((acc, w) => acc + (Number(w.length) || 0), 0);
   const autoLintelLength = totalBrickworkWallLength; // 111+84+0+50 = 245 RFT
 
   const isManualSill = Boolean(currentData.isSillManual);
@@ -1524,9 +1524,9 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
     const newSlab = {
       id: `s${Date.now()}`,
       name: `RCC Slab / Loft ${num}`,
-      length: 15,
-      breadth: 2.0,
-      depth: 0.25
+      length: 0,
+      breadth: 0,
+      depth: 0
     };
     updateSillLintel({ ...currentData, slabs: [...slabs, newSlab] });
   };
@@ -1537,7 +1537,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 text-left">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
@@ -1600,7 +1600,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
               />
             </div>
           </div>
-          <div className="text-[11px] text-slate-400">Rebar: 2 nos 8mm TMT bars ({format2Dec(estimate?.sillSteelKg || 146.4)} kg)</div>
+          <div className="text-[11px] text-slate-400">Rebar: 2 nos 8mm TMT bars ({format2Dec(estimate?.sillSteelKg || 0)} kg)</div>
         </div>
 
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-2">
@@ -1644,7 +1644,7 @@ export function SillLintelModule({ sillLintel, sillAndLintel: propSillAndLintel,
               />
             </div>
           </div>
-          <div className="text-[11px] text-slate-400">Rebar: 10mm TMT bars ({format2Dec(estimate?.lintelSteelKg || 349.1)} kg)</div>
+          <div className="text-[11px] text-slate-400">Rebar: 10mm TMT bars ({format2Dec(estimate?.lintelSteelKg || 0)} kg)</div>
         </div>
       </div>
 
@@ -1808,7 +1808,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.flooringArea ?? 532.5}
+            value={currentData.flooringArea ?? 0}
             onChange={(e) => handleChange('flooringArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1822,7 +1822,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.bathroomFloorArea ?? 60}
+            value={currentData.bathroomFloorArea ?? 0}
             onChange={(e) => handleChange('bathroomFloorArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1836,7 +1836,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.parkingArea ?? 123}
+            value={currentData.parkingArea ?? 0}
             onChange={(e) => handleChange('parkingArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1850,7 +1850,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.kitchenWallArea ?? 64}
+            value={currentData.kitchenWallArea ?? 0}
             onChange={(e) => handleChange('kitchenWallArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1864,7 +1864,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.bathroomWallArea ?? 520}
+            value={currentData.bathroomWallArea ?? 0}
             onChange={(e) => handleChange('bathroomWallArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1878,7 +1878,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.skirtingLength ?? 86.28}
+            value={currentData.skirtingLength ?? 0}
             onChange={(e) => handleChange('skirtingLength', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1892,7 +1892,7 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.countertopArea ?? 60}
+            value={currentData.countertopArea ?? 0}
             onChange={(e) => handleChange('countertopArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none"
           />
@@ -1905,19 +1905,19 @@ export function TilesModule({ tiles, updateTiles, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Tiles Flooring: </span>
           <span className="font-extrabold text-amber-600 dark:text-amber-400">
-            {format2Dec((Number(currentData.flooringArea) || 532.5) + (Number(currentData.bathroomFloorArea) || 60) + (Number(currentData.parkingArea) || 123))} Sq.ft
+            {format2Dec((Number(currentData.flooringArea ?? 0)) + (Number(currentData.bathroomFloorArea ?? 0)) + (Number(currentData.parkingArea ?? 0)))} Sq.ft
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Wall Dadoing: </span>
           <span className="font-extrabold text-orange-600 dark:text-orange-400">
-            {format2Dec((Number(currentData.kitchenWallArea) || 64) + (Number(currentData.bathroomWallArea) || 520))} Sq.ft
+            {format2Dec((Number(currentData.kitchenWallArea ?? 0)) + (Number(currentData.bathroomWallArea ?? 0)))} Sq.ft
           </span>
         </div>
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Araldite Paste Area: </span>
           <span className="font-extrabold text-slate-800 dark:text-slate-200">
-            {format2Dec(estimate?.tilePasteAreaSqft || 901.78)} Sq.ft
+            {format2Dec(estimate?.tilePasteAreaSqft || 0)} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
@@ -1950,10 +1950,10 @@ export function JoineryModule({ joinery, updateJoinery, estimate }) {
     const newItem = {
       id: 'j_' + Date.now(),
       name: 'Custom Window / Door',
-      length: 3.0,
-      height: 4.0,
-      nos: 1,
-      rate: 450,
+      length: 0,
+      height: 0,
+      nos: 0,
+      rate: 0,
       spec: 'Fabricated hardwood / aluminium with glazing'
     };
     updateJoinery({ items: [...items, newItem] });
@@ -2096,7 +2096,7 @@ export function JoineryModule({ joinery, updateJoinery, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Joinery Items: </span>
           <span className="font-extrabold text-cyan-600 dark:text-cyan-400">
-            {items.reduce((acc, it) => acc + (Number(it.nos) || 1), 0)} Nos
+            {items.reduce((acc, it) => acc + (Number(it.nos ?? 0)), 0)} Nos
           </span>
         </div>
         <div>
@@ -2123,7 +2123,7 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate, builtup, pl
   const currentData = roofSlab || {};
 
   // Auto-linked plinth beam length from Section 3
-  const autoPbLength = estimate?.totalPbLength !== undefined ? estimate.totalPbLength : (plinthBeams?.[0]?.length ?? 201);
+  const autoPbLength = estimate?.totalPbLength ?? 0;
   const isManualBeam = Boolean(currentData?.isBeamManual);
   const currentBeamLength = isManualBeam ? (currentData.beamLength ?? autoPbLength) : autoPbLength;
 
@@ -2131,7 +2131,7 @@ export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate, builtup, pl
   const gfFloor = builtup?.floors?.[0];
   const gfArea = gfFloor?.area !== undefined && gfFloor?.area > 0 
     ? Number(gfFloor.area) 
-    : (gfFloor?.length && gfFloor?.breadth ? Number(gfFloor.length) * Number(gfFloor.breadth) : (estimate?.gfArea ?? 858));
+    : (gfFloor?.length && gfFloor?.breadth ? Number(gfFloor.length) * Number(gfFloor.breadth) : (estimate?.gfArea ?? 0));
   const isManualSlab = Boolean(currentData?.isSlabManual);
   const currentSlabArea = isManualSlab ? (currentData.slabArea ?? gfArea) : gfArea;
 
@@ -2374,7 +2374,7 @@ export function PaintingModule({ painting, updatePainting, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.innerWallArea ?? 2626.5}
+            value={currentData.innerWallArea ?? 0}
             onChange={(e) => handleChange('innerWallArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-pink-500 outline-none"
           />
@@ -2388,7 +2388,7 @@ export function PaintingModule({ painting, updatePainting, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.outerWallArea ?? 2276.25}
+            value={currentData.outerWallArea ?? 0}
             onChange={(e) => handleChange('outerWallArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-pink-500 outline-none"
           />
@@ -2402,7 +2402,7 @@ export function PaintingModule({ painting, updatePainting, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.ceilingArea ?? 808}
+            value={currentData.ceilingArea ?? 0}
             onChange={(e) => handleChange('ceilingArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-pink-500 outline-none"
           />
@@ -2415,7 +2415,7 @@ export function PaintingModule({ painting, updatePainting, estimate }) {
         <div>
           <span className="text-slate-500 dark:text-slate-400 font-medium">Total Paint Surface Area: </span>
           <span className="font-extrabold text-pink-600 dark:text-pink-400">
-            {format2Dec((Number(currentData.innerWallArea) || 2626.5) + (Number(currentData.outerWallArea) || 2276.25) + (Number(currentData.ceilingArea) || 808))} Sq.ft
+            {format2Dec((Number(currentData.innerWallArea ?? 0)) + (Number(currentData.outerWallArea ?? 0)) + (Number(currentData.ceilingArea ?? 0)))} Sq.ft
           </span>
         </div>
         <div className="flex items-center gap-1.5 font-bold">
@@ -2468,7 +2468,7 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.width ?? 3.5}
+            value={currentData.width ?? 0}
             onChange={(e) => handleChange('width', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none"
           />
@@ -2483,7 +2483,7 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
             <input
               type="number"
               step="0.01"
-              value={currentData.tread ?? 1.0}
+              value={currentData.tread ?? 0}
               onChange={(e) => handleChange('tread', e.target.value)}
               className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500 outline-none"
               placeholder="Tread (1 ft)"
@@ -2491,7 +2491,7 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
             <input
               type="number"
               step="0.001"
-              value={currentData.riser ?? 0.583}
+              value={currentData.riser ?? 0}
               onChange={(e) => handleChange('riser', e.target.value)}
               className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500 outline-none"
               placeholder="Riser (0.583 ft)"
@@ -2507,7 +2507,7 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
           <input
             type="number"
             step="1"
-            value={currentData.stepsCount ?? 21}
+            value={currentData.stepsCount ?? 0}
             onChange={(e) => handleChange('stepsCount', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none"
           />
@@ -2521,7 +2521,7 @@ export function StaircaseModule({ staircase, updateStaircase, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.handrailLength ?? 21}
+            value={currentData.handrailLength ?? 0}
             onChange={(e) => handleChange('handrailLength', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none"
           />
@@ -2599,12 +2599,12 @@ export function OthersModule({ others, updateOthers, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.electricalArea ?? 858}
+            value={currentData.electricalArea ?? 0}
             onChange={(e) => handleChange('electricalArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none"
           />
           <span className="text-[10px] text-slate-400 block mt-1">
-            Linked to Built-Up Area: 858 sq.ft @ ₹200/sq.ft (₹150 material + ₹50 labour)
+            Linked to total built-up area @ configured rate
           </span>
         </div>
 
@@ -2615,12 +2615,12 @@ export function OthersModule({ others, updateOthers, estimate }) {
           <input
             type="number"
             step="0.1"
-            value={currentData.terraceSurkhiArea ?? 766.5}
+            value={currentData.terraceSurkhiArea ?? 0}
             onChange={(e) => handleChange('terraceSurkhiArea', e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none"
           />
           <span className="text-[10px] text-slate-400 block mt-1">
-            Roof area minus parapet outer wall = 766.5 sq.ft (3" chips concrete bed)
+            Auto-linked to roof area minus parapet footprint (3" chips concrete bed)
           </span>
         </div>
       </div>
@@ -2670,8 +2670,8 @@ export function AdditionalWorksModule({ additionalWorks, updateAdditionalWorks, 
       id: 'add_' + Date.now(),
       name: 'Custom Site Work',
       unit: 'LS',
-      qty: 1,
-      rate: 15000,
+      qty: 0,
+      rate: 0,
       spec: 'Custom extra site infrastructure item'
     };
     updateAdditionalWorks([...items, newItem]);

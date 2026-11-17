@@ -37,7 +37,7 @@ export function ClientDirectoryPage({ setActiveTab, onSelectClient }) {
     altPhone: '',
     email: '',
     location: '',
-    city: 'Theni',
+    city: '',
     status: 'Active',
     address: ''
   });
@@ -104,7 +104,7 @@ export function ClientDirectoryPage({ setActiveTab, onSelectClient }) {
           altPhone: '',
           email: '',
           location: '',
-          city: 'Theni',
+          city: '',
           status: 'Active',
           address: ''
         });

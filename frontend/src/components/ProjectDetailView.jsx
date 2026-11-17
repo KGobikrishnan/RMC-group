@@ -36,7 +36,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
   if (!project) return null;
 
   const estimateData = project.estimate_data || project.estimateData || {};
-  const rates = project.schedule_rates || project.scheduleRates || DEFAULT_RATES;
+  const rates = { ...DEFAULT_RATES, ...(project.schedule_rates || project.scheduleRates || {}) };
   
   // Recalculate using audited engine to ensure 100% precision
   const estimate = calculateCivilEstimateComplete(estimateData, rates);
@@ -188,7 +188,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
           </div>
           <div className="text-xs text-text-muted flex items-center justify-between">
             <span>Contractor Margin:</span>
-            <b className="text-accent-teal font-mono">{rates.contractorMarginPct || 10}% Included</b>
+            <b className="text-accent-teal font-mono">{rates.contractorMarginPct ?? 0}% Included</b>
           </div>
         </div>
       </div>
@@ -743,7 +743,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                   Net inner area after door/window deduction
                 </div>
                 <div className="text-accent-teal font-mono font-bold pt-2 border-t border-surface-border">
-                  Rate: ₹ {rates.plasterWallInnerRate || 19} / sq.ft
+                  Rate: ₹ {rates.labourInnerPlasterPerSqft ?? 0} / sq.ft
                 </div>
               </div>
 
@@ -883,35 +883,35 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                   <tr className="hover:bg-surface-elevated/40">
                     <td className="py-2 px-3 font-bold text-text-primary">Vitrified Floor Tiles (Living, Bed, Pooja)</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-teal">{(estimate.tileFlooringSqft || 0).toFixed(1)} Sq.ft</td>
-                    <td className="py-2 px-3 text-right font-mono">₹ {rates.tileFlooringRate || 60}/sqft</td>
-                    <td className="py-2 px-3 text-right font-mono">₹ {rates.tileFlooringLabour || 24}/sqft</td>
+                    <td className="py-2 px-3 text-right font-mono">₹ {rates.rateFlooringTile ?? 0}/sqft</td>
+                    <td className="py-2 px-3 text-right font-mono">₹ {24}/sqft</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-gold">
-                      ₹ {Math.round((estimate.tileFlooringSqft || 0) * ((rates.tileFlooringRate || 60) + (rates.tileFlooringLabour || 24))).toLocaleString('en-IN')}
+                      ₹ {Math.round((estimate.tileFlooringSqft || 0) * ((rates.rateFlooringTile ?? 0) + (24))).toLocaleString('en-IN')}
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-elevated/40">
                     <td className="py-2 px-3 font-bold text-text-primary">Bathroom Anti-skid Flooring</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-teal">{(estimate.tileBathroomFloorSqft || 0).toFixed(1)} Sq.ft</td>
-                    <td className="py-2 px-3 text-right font-mono">₹ {rates.tileBathroomFloorRate || 50}/sqft</td>
-                    <td className="py-2 px-3 text-right font-mono">₹ {rates.tileBathroomFloorLabour || 24}/sqft</td>
+                    <td className="py-2 px-3 text-right font-mono">₹ {rates.rateBathroomFloorTile ?? 0}/sqft</td>
+                    <td className="py-2 px-3 text-right font-mono">₹ {24}/sqft</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-gold">
-                      ₹ {Math.round((estimate.tileBathroomFloorSqft || 0) * ((rates.tileBathroomFloorRate || 50) + (rates.tileBathroomFloorLabour || 24))).toLocaleString('en-IN')}
+                      ₹ {Math.round((estimate.tileBathroomFloorSqft || 0) * ((rates.rateBathroomFloorTile ?? 0) + (24))).toLocaleString('en-IN')}
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-elevated/40">
                     <td className="py-2 px-3 font-bold text-text-primary">Bathroom Wall Dadoing (7ft Height)</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-teal">{(estimate.tileBathroomWallSqft || 0).toFixed(1)} Sq.ft</td>
-                    <td className="py-2 px-3 text-right font-mono">₹ {rates.tileBathroomWallRate || 50}/sqft</td>
-                    <td className="py-2 px-3 text-right font-mono">₹ {rates.tileBathroomWallLabour || 30}/sqft</td>
+                    <td className="py-2 px-3 text-right font-mono">₹ {rates.rateBathroomWallTile ?? 0}/sqft</td>
+                    <td className="py-2 px-3 text-right font-mono">₹ {30}/sqft</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-gold">
-                      ₹ {Math.round((estimate.tileBathroomWallSqft || 0) * ((rates.tileBathroomWallRate || 50) + (rates.tileBathroomWallLabour || 30))).toLocaleString('en-IN')}
+                      ₹ {Math.round((estimate.tileBathroomWallSqft || 0) * ((rates.rateBathroomWallTile ?? 0) + (30))).toLocaleString('en-IN')}
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-elevated/40">
                     <td className="py-2 px-3 font-bold text-text-primary">Kitchen Wall Tiles & Granite Slab Countertop</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-teal">{(estimate.tileKitchenWallSqft || 0) + (estimate.tileCountertopSqft || 0)} Sq.ft</td>
-                    <td className="py-2 px-3 text-right font-mono">Granite ₹{rates.graniteCountertopRate || 160}</td>
-                    <td className="py-2 px-3 text-right font-mono">Labour ₹{rates.graniteCountertopLabour || 160}</td>
+                    <td className="py-2 px-3 text-right font-mono">Granite ₹{rates.rateCountertopGranite ?? 0}</td>
+                    <td className="py-2 px-3 text-right font-mono">Labour ₹{160}</td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-accent-gold">
                       ₹ {Math.round(((estimate.tileKitchenWallSqft || 0) * 74) + ((estimate.tileCountertopSqft || 0) * 320)).toLocaleString('en-IN')}
                     </td>
@@ -1091,7 +1091,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                   {(estimate.paintInnerSqft || 0).toFixed(1)} <span className="text-xs font-semibold text-text-muted">Sq.ft</span>
                 </div>
                 <div className="text-text-muted text-[11px]">
-                  Rate: <b>₹ {rates.paintInnerRate || 28} / sq.ft</b> (Putty + Primer + Emulsion)
+                  Rate: <b>₹ {rates.rateInnerWallPainting ?? 0} / sq.ft</b> (Putty + Primer + Emulsion)
                 </div>
                 <div className="text-accent-gold font-mono font-bold pt-2 border-t border-surface-border">
                   Cost: ₹ {Math.round(estimate.paintInnerCost || 0).toLocaleString('en-IN')}
@@ -1104,7 +1104,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                   {(estimate.paintOuterSqft || 0).toFixed(1)} <span className="text-xs font-semibold text-text-muted">Sq.ft</span>
                 </div>
                 <div className="text-text-muted text-[11px]">
-                  Rate: <b>₹ {rates.paintOuterRate || 34} / sq.ft</b> (Apex Weatherproof)
+                  Rate: <b>₹ {rates.rateOuterWallPainting ?? 0} / sq.ft</b> (Apex Weatherproof)
                 </div>
                 <div className="text-accent-teal font-mono font-bold pt-2 border-t border-surface-border">
                   Cost: ₹ {Math.round(estimate.paintOuterCost || 0).toLocaleString('en-IN')}
@@ -1117,7 +1117,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                   {(estimate.paintCeilingSqft || 0).toFixed(1)} <span className="text-xs font-semibold text-text-muted">Sq.ft</span>
                 </div>
                 <div className="text-text-muted text-[11px]">
-                  Rate: <b>₹ {rates.paintCeilingRate || 25} / sq.ft</b> (White Emulsion)
+                  Rate: <b>₹ {rates.rateCeilingPainting ?? 0} / sq.ft</b> (White Emulsion)
                 </div>
                 <div className="text-accent-gold font-mono font-bold pt-2 border-t border-surface-border">
                   Cost: ₹ {Math.round(estimate.paintCeilingCost || 0).toLocaleString('en-IN')}
@@ -1231,7 +1231,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="text-text-muted">Rate @ ₹{rates.electricalPlumbingRate || 200}/sq.ft × {Math.round(estimate.electricalSqft || 0)} Sq.ft</div>
+                <div className="text-text-muted">Rate @ ₹{rates.rateElectricalPlumbing ?? 0}/sq.ft × {Math.round(estimate.electricalSqft || 0)} Sq.ft</div>
                 <div className="text-base font-black text-accent-gold">₹ {Math.round(estimate.electricalTotalCost || 0).toLocaleString('en-IN')}</div>
               </div>
             </div>
@@ -1274,7 +1274,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
               </div>
               <div className="p-3.5 rounded-xl bg-surface-base border border-surface-border">
                 <span className="text-[10px] text-text-muted block">Weathering Rate</span>
-                <span className="font-mono font-bold text-accent-gold">₹ {rates.terraceSurkhiRate || 98.2} / CFT</span>
+                <span className="font-mono font-bold text-accent-gold">₹ {rates.rateTerraceBrickbatPerCft ?? 0} / CFT</span>
               </div>
             </div>
           </div>
@@ -1400,7 +1400,7 @@ export function ProjectDetailView({ project, onBack, onOpenQuotation, onEditProj
                 </tr>
                 <tr className="bg-surface-base font-bold">
                   <td colSpan="5" className="py-2 px-3 text-right text-accent-teal">
-                    Contractor Margin ({rates.contractorMarginPct || 10}%):
+                    Contractor Margin ({rates.contractorMarginPct ?? 0}%):
                   </td>
                   <td className="py-2 px-3 text-right font-mono text-sm font-black text-accent-teal">
                     ₹ {Math.round(estimate.contractorMarkup || 0).toLocaleString('en-IN')}

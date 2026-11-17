@@ -28,7 +28,7 @@ import {
   X
 } from 'lucide-react';
 import { fetchProjects, fetchClients, fetchProjectById, saveProjectToBackend, deleteProjectFromBackend } from '../api/rmcApi';
-import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from '../data/initialData';
+import { DEFAULT_RATES } from '../data/initialData';
 import { BLANK_PROJECT_DATA } from '../data/blankProjectData';
 import { calculateCivilEstimateComplete } from '../utils/calculator';
 import { ProjectDetailView } from './ProjectDetailView';
@@ -65,6 +65,18 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
 
   // Stepper active tab in full estimation modal: 'meta' | 'substructure' | 'superstructure' | 'finishes' | 'infra'
   const [activeStepTab, setActiveStepTab] = useState('meta');
+  const estimateSteps = [
+    { id: 'meta', short: 'Project', title: 'Project details', help: 'Add the client and site details first.' },
+    { id: 'substructure', short: 'Foundation', title: 'Foundation & plinth', help: 'Enter floor sizes, footing quantities and plinth beam measurements.' },
+    { id: 'superstructure', short: 'Walls & RCC', title: 'Walls, plaster & concrete', help: 'Add wall lengths, room sizes, openings and lintel or sunshade measurements.' },
+    { id: 'finishes', short: 'Finishes', title: 'Finishes & services', help: 'Fill only the finish and service items included in this project.' },
+    { id: 'infra', short: 'Extra works', title: 'Site & extra works', help: 'Add site infrastructure and optional works, then review the estimate.' },
+  ];
+  const currentStepIndex = estimateSteps.findIndex((step) => step.id === activeStepTab);
+  const setStepByOffset = (offset) => {
+    const next = Math.max(0, Math.min(estimateSteps.length - 1, currentStepIndex + offset));
+    setActiveStepTab(estimateSteps[next].id);
+  };
 
   // New Project State with integrated complete 15-module estimate inputs (Defaults to clean Blank template)
   const [newProject, setNewProject] = useState({
@@ -76,7 +88,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
     siteAddress: '',
     status: 'In Estimation',
     stage: 'Quotation Ready',
-    completionDate: 'Target: 2027',
+    completionDate: '',
     estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
   });
 
@@ -84,16 +96,6 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
     setNewProject(prev => ({
       ...prev,
       estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
-    }));
-  };
-
-  const handleLoadSampleBenchmark = () => {
-    setNewProject(prev => ({
-      ...prev,
-      title: prev.title || 'Residential Villa G+2 (Benchmark Model)',
-      clientName: prev.clientName || 'Er. M. Jahir Hussain',
-      siteAddress: prev.siteAddress || 'Building Doctor Complex, Uthamapalayam - 625533',
-      estimateData: JSON.parse(JSON.stringify(INITIAL_PROJECT_DATA))
     }));
   };
 
@@ -301,7 +303,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
         siteAddress: fullProj.site_address || '',
         status: fullProj.status || 'In Estimation',
         stage: fullProj.stage || 'Quotation Ready',
-        completionDate: fullProj.completion_date || 'Target: 2027',
+        completionDate: fullProj.completion_date || '',
         estimateData: loadedEstimateData
       });
       setActiveStepTab('meta');
@@ -324,7 +326,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
       siteAddress: '',
       status: 'In Estimation',
       stage: 'Quotation Ready',
-      completionDate: 'Target: 2027',
+      completionDate: '',
       estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
     });
     setActiveStepTab('meta');
@@ -345,8 +347,8 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
         ...newProject.estimateData,
         builtup: {
           ...newProject.estimateData.builtup,
-          clientName: newProject.clientName || 'Er. Client Project',
-          siteLocation: newProject.siteAddress || 'Site Location'
+          clientName: newProject.clientName || '',
+          siteLocation: newProject.siteAddress || ''
         }
       };
 
@@ -374,10 +376,13 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
         if (onSelectProject) {
           onSelectProject({
             id: res.data?.id,
+            projectCode: generatedCode,
+            projectType: newProject.projectType,
             clientId: newProject.clientId,
             clientName: newProject.clientName,
             siteLocation: newProject.siteAddress,
             title: newProject.title,
+            scheduleRates: rates,
             estimateData: syncedEstimateData
           });
         }
@@ -394,7 +399,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
           siteAddress: '',
           status: 'In Estimation',
           stage: 'Quotation Ready',
-          completionDate: 'Target: 2027',
+          completionDate: '',
           estimateData: JSON.parse(JSON.stringify(BLANK_PROJECT_DATA))
         });
       }
@@ -434,6 +439,29 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
       setViewingProject(proj);
     } finally {
       setLoadingDetails(false);
+    }
+  };
+
+  const handleSelectProjectForQuotation = async (project) => {
+    try {
+      const result = await fetchProjectById(project.id);
+      const fullProject = result.success && result.data ? result.data : project;
+      const rawEstimate = fullProject.estimate_data || fullProject.estimateData;
+      const estimateData = typeof rawEstimate === 'string' ? JSON.parse(rawEstimate) : rawEstimate;
+      onSelectProject?.({
+        id: fullProject.id,
+        title: fullProject.title,
+        projectCode: fullProject.project_code,
+        projectType: fullProject.project_type,
+        clientId: fullProject.client_id,
+        clientName: fullProject.client_name,
+        siteLocation: fullProject.site_address,
+        scheduleRates: fullProject.schedule_rates || fullProject.scheduleRates,
+        estimateData
+      });
+      setActiveTab?.('quotation');
+    } catch (err) {
+      console.error('Could not load project for quotation:', err);
     }
   };
 
@@ -609,7 +637,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                   <div>
                     <span className="text-[10px] text-slate-400 block font-semibold">Structure & Floors</span>
                     <span className="font-bold text-slate-800 dark:text-slate-200">
-                      {p.floors || 'G + 1 Floors'}
+                      {p.floors || 'Not set'}
                     </span>
                     <span className="text-[10px] text-slate-400 block">{p.columns_count || 8} Columns Isolated</span>
                   </div>
@@ -657,16 +685,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       <span>View Details</span>
                     </button>
                     <button
-                      onClick={() => {
-                        if (onSelectProject) {
-                          onSelectProject({
-                            clientName: p.client_name,
-                            siteLocation: p.site_address,
-                            id: p.id
-                          });
-                        }
-                        if (setActiveTab) setActiveTab('quotation');
-                      }}
+                      onClick={() => handleSelectProjectForQuotation(p)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all"
                     >
                       <span>Quotation</span>
@@ -693,15 +712,13 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                      {editingProjectId ? 'Edit Project Estimation & Specifications' : 'New Project Estimation & Client Linking'}
+                      {editingProjectId ? 'Edit project estimate' : 'Create a project estimate'}
                     </h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
                       PostgreSQL: RMC
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500">
-                    {editingProjectId ? 'Update 15-module civil inputs and live recalculate BOQ/BOM' : 'Complete 15-Module Civil Estimation inside modal with live BOQ/BOM cost calculation'}
-                  </p>
+                  <p className="text-xs text-slate-500">Enter measurements in order. Totals update automatically as you go.</p>
                 </div>
               </div>
 
@@ -715,14 +732,6 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                     title="Clear all fields to start fresh with custom site measurements"
                   >
                     Clear to Blank
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleLoadSampleBenchmark}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-all flex items-center gap-1"
-                    title="Load sample villa model from 03-11-2026_BRICK_ESTIMATE.xlsm"
-                  >
-                    <span>⚡ Sample Model</span>
                   </button>
                 </div>
 
@@ -741,8 +750,24 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
               </div>
             </div>
 
-            {/* Stepper Navigation Bar */}
-            <div className="px-6 py-2.5 bg-slate-100/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto text-xs shrink-0">
+            {/* Simple, sequential estimate steps */}
+            <div className="px-5 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Step {currentStepIndex + 1} of {estimateSteps.length}: {estimateSteps[currentStepIndex]?.title}</span>
+                <span className="text-xs text-slate-500">{Math.round(((currentStepIndex + 1) / estimateSteps.length) * 100)}% complete</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-3"><div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${((currentStepIndex + 1) / estimateSteps.length) * 100}%` }} /></div>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {estimateSteps.map((step, index) => (
+                  <button key={step.id} type="button" onClick={() => setActiveStepTab(step.id)} aria-current={activeStepTab === step.id ? 'step' : undefined}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${activeStepTab === step.id ? 'bg-blue-600 text-white' : index < currentStepIndex ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                    <span className={`grid place-items-center w-5 h-5 rounded-full text-[10px] ${activeStepTab === step.id ? 'bg-white/20' : 'bg-white dark:bg-slate-700'}`}>{index < currentStepIndex ? '✓' : index + 1}</span>{step.short}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Legacy navigation hidden in favor of the compact stepper above. */}
+            {false && <div className="px-6 py-2.5 bg-slate-100/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto text-xs shrink-0">
               <button
                 onClick={() => setActiveStepTab('meta')}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
@@ -797,19 +822,22 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
               >
                 <span>5. Site Infrastructure (Sec 14-15)</span>
               </button>
-            </div>
+            </div>}
 
             {/* Modal Body with Scroll */}
-            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50/60 dark:bg-slate-950/30">
+              <div className="max-w-4xl mx-auto px-4 py-3 rounded-xl border border-blue-100 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/30 text-sm text-blue-900 dark:text-blue-100">
+                <span className="font-bold">{estimateSteps[currentStepIndex]?.title}:</span> {estimateSteps[currentStepIndex]?.help} Dimensions are in feet unless the field says otherwise. Leave excluded work at 0.
+              </div>
               {/* TAB 1: Project Metadata & Client Linking */}
               {activeStepTab === 'meta' && (
                 <div className="space-y-4 max-w-2xl mx-auto">
                   <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60">
                     <h4 className="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider mb-1">
-                      Step 1: Link Client from CRM
+                      Project and client details
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                      Select client created in Client Directory or enter new details to link directly with quotation.
+                      Choose a saved client, or leave it empty and enter the client name below.
                     </p>
 
                     <div>
@@ -821,7 +849,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                         onChange={(e) => handleClientSelectChange(e.target.value)}
                         className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-800 dark:text-slate-100 shadow-sm"
                       >
-                        <option value="">-- Choose from Registered Clients (e.g. Mr. Krishnan) --</option>
+                        <option value="">Choose a saved client (optional)</option>
                         {clients.map(c => (
                           <option key={c.id} value={c.id}>
                             {c.name} {c.company ? `(${c.company})` : ''} - {c.phone}
@@ -837,7 +865,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Modern Residential Villa G+1"
+                        placeholder="Example: Kumar residence"
                         value={newProject.title}
                         onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
@@ -848,7 +876,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Mr. Krishnan"
+                        placeholder="Enter the client name"
                         value={newProject.clientName}
                         onChange={(e) => setNewProject({ ...newProject, clientName: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold"
@@ -899,7 +927,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       onClick={() => setActiveStepTab('substructure')}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
                     >
-                      <span>Proceed to Substructure Inputs</span>
+                      <span>Continue to foundation</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -943,7 +971,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       onClick={() => setActiveStepTab('superstructure')}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
                     >
-                      <span>Proceed to Superstructure</span>
+                      <span>Continue to walls and RCC</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -984,7 +1012,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       onClick={() => setActiveStepTab('finishes')}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
                     >
-                      <span>Proceed to Finishes</span>
+                      <span>Continue to finishes</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -1034,7 +1062,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                       onClick={() => setActiveStepTab('infra')}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
                     >
-                      <span>Proceed to Site Infrastructure</span>
+                      <span>Continue to extra works</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -1064,7 +1092,7 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                     </button>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                        Ready to Save & Generate Quotation
+                        Check the live total below, then save the estimate.
                       </span>
                     </div>
                   </div>

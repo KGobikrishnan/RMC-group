@@ -29,9 +29,9 @@ import {
 
 export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scrollToModule, updateProjectInfo }) {
   const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const [clientName, setClientName] = useState(data.projectInfo?.clientName || "Er. M. Jahir Hussain");
-  const [siteLocation, setSiteLocation] = useState(data.projectInfo?.siteLocation || "Building Doctor Complex, Uthamapalayam - 625533");
-  const [contactNumber, setContactNumber] = useState(data.projectInfo?.contactNumber || "9489141122 / 9111493336");
+  const [clientName, setClientName] = useState(data.builtup?.clientName || data.projectInfo?.clientName || '');
+  const [siteLocation, setSiteLocation] = useState(data.builtup?.siteLocation || data.projectInfo?.siteLocation || '');
+  const [contactNumber, setContactNumber] = useState(data.projectInfo?.contactNumber || '');
 
   // Determine dynamic greeting based on current local hour
   const getGreeting = () => {
@@ -60,10 +60,11 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
   };
 
   const totalCost = estimate.grandTotalCost || 0;
-  const directCivil = estimate.totalDirectCost || (totalCost / (1 + (rates.contractorMarginPct || 10) / 100));
+  const margin = Number(rates.contractorMarginPct ?? 0);
+  const directCivil = Number(estimate.totalDirectCost ?? 0);
   const profitMarkup = totalCost - directCivil;
-  const gfArea = estimate.gfArea || 858;
-  const totalBuiltup = estimate.totalBuiltupArea || 1758;
+  const gfArea = Number(estimate.gfArea ?? 0);
+  const totalBuiltup = Number(estimate.totalBuiltupArea ?? 0);
   const ratePerSqft = gfArea > 0 ? (totalCost / gfArea) : 0;
 
   // Key quick metrics cards
@@ -74,7 +75,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
       sub: `₹ ${Math.round(ratePerSqft).toLocaleString('en-IN')} / sq.ft`,
       highlight: true,
       color: 'from-amber-500/20 via-slate-900 to-slate-950 border-amber-500/40 text-amber-300',
-      badge: `${rates.contractorMarginPct || 10}% Markup Incl.`
+      badge: `${margin}% Markup Incl.`
     },
     {
       label: 'Contract Plinth Area',
@@ -93,7 +94,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
     {
       label: 'Contractor Profit Yield',
       val: `+ ₹ ${(profitMarkup).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
-      sub: `${rates.contractorMarginPct || 10}% Contractor Margin`,
+      sub: `${margin}% Contractor Margin`,
       icon: TrendingUp,
       colorText: 'text-emerald-400',
       badge: 'Profit'
@@ -103,8 +104,8 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
   // Quick module navigation cards
   const moduleCards = [
     { id: 'sec1', num: '01', title: 'Built-Up Area', desc: 'Outer-to-outer floors', val: `${Math.round(totalBuiltup)} Sq.ft`, icon: Maximize2, color: 'text-amber-400' },
-    { id: 'sec2', num: '02', title: 'Footings & Column Stubs', desc: `${estimate.totalColumnsCount || 8} Isolated Footings`, val: `${Math.round(estimate.totalFootingConcreteCft || 0)} CFT`, icon: Box, color: 'text-indigo-400' },
-    { id: 'sec3', num: '03', title: 'Plinth Beams', desc: `${Math.round(estimate.totalPbLength || 201)} RFT Beams`, val: `${Math.round(estimate.totalPlinthConcreteCft || 0)} CFT`, icon: Building2, color: 'text-emerald-400' },
+    { id: 'sec2', num: '02', title: 'Footings & Column Stubs', desc: `${estimate.totalColumnsCount || 0} Isolated Footings`, val: `${Math.round(estimate.totalFootingConcreteCft || 0)} CFT`, icon: Box, color: 'text-indigo-400' },
+    { id: 'sec3', num: '03', title: 'Plinth Beams', desc: `${Math.round(estimate.totalPbLength || 0)} RFT Beams`, val: `${Math.round(estimate.totalPlinthConcreteCft || 0)} CFT`, icon: Building2, color: 'text-emerald-400' },
     { id: 'sec4', num: '04', title: 'Basement & Backfilling', desc: 'Flyash masonry & gravel', val: `${Math.round(estimate.basementGravelCft || 0)} CFT`, icon: Grid, color: 'text-purple-400' },
     { id: 'sec5', num: '05', title: 'Superstructure Brickwork', desc: '9" & 4.5" Chamber Bricks', val: `${Math.round(estimate.brickwork?.chamberBricksNos || 0).toLocaleString()} Nos`, icon: Hammer, color: 'text-rose-400' },
     { id: 'sec6', num: '06', title: 'Plastering Works', desc: '1:3 Ceiling & 1:6 Walls', val: `${Math.round(estimate.plastering?.totalPlasteringSqft || 0)} Sq.ft`, icon: Layers, color: 'text-amber-400' },
@@ -127,17 +128,17 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
               <GreetingIcon className={`w-3.5 h-3.5 ${greeting.color}`} />
               <span className="text-slate-300">{greeting.text}!</span>
               <span className="text-slate-600">•</span>
-              <span className="text-amber-400">ENGINEERING SUITE</span>
+                <span className="text-amber-400">ENGINEERING SUITE</span>
             </div>
 
             <div className="flex items-center gap-3">
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-100">{clientName || "Valued Client"}</span> 👋
+                {greeting.text}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-100">{clientName || 'New Project'}</span> 👋
               </h2>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Civil estimation and structural BOQ for <span className="font-semibold text-slate-200">{siteLocation || 'site location'}</span> strictly audited against <span className="font-mono text-amber-400">03-11-2026_BRICK_ESTIMATE.xlsm</span>.
+              Civil estimation and structural BOQ for <span className="font-semibold text-slate-200">{siteLocation || 'site location'}</span>.
             </p>
           </div>
 
@@ -168,7 +169,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
             </div>
             <div className="truncate">
               <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">Client / Lead</span>
-              <span className="font-bold text-white truncate">{clientName}</span>
+              <span className="font-bold text-white truncate">{clientName || 'Not set'}</span>
             </div>
           </div>
           <div className="flex items-center gap-3 text-slate-300">
@@ -177,7 +178,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
             </div>
             <div className="truncate">
               <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">Site Location</span>
-              <span className="font-bold text-white truncate">{siteLocation}</span>
+              <span className="font-bold text-white truncate">{siteLocation || 'Not set'}</span>
             </div>
           </div>
           <div className="flex items-center gap-3 text-slate-300 justify-between">
@@ -187,7 +188,7 @@ export function ProjectMainDashboard({ data, estimate, rates, setActiveTab, scro
               </div>
               <div className="truncate">
                 <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">Contact</span>
-                <span className="font-bold text-white font-mono">{contactNumber}</span>
+                <span className="font-bold text-white font-mono">{contactNumber || 'Not set'}</span>
               </div>
             </div>
             <button

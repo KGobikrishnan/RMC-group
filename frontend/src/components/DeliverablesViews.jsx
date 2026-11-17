@@ -695,11 +695,11 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
         <div className="my-5 p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs gap-2">
           <div>
             <span className="font-bold text-slate-700">Quotation Ref: </span>
-            <span className="font-mono font-bold text-blue-700">RMC/EST/{new Date().getFullYear()}/042</span>
+            <span className="font-mono font-bold text-blue-700">{projectInfo.projectCode || 'Draft'}</span>
           </div>
           <div>
             <span className="font-bold text-slate-700">Date of Quote: </span>
-            <span className="font-semibold">{projectInfo.quoteDate || '05-Nov-2026'}</span>
+            <span className="font-semibold">{projectInfo.quoteDate || 'Not set'}</span>
           </div>
           <div className="text-slate-500 italic">
             * Inclusive of {margin}% Contractor Profit & 2% Wastage Allowance

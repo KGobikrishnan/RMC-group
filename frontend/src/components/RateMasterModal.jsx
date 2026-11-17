@@ -13,22 +13,76 @@ export default function RateMasterModal({ isOpen, onClose, rates, setRates, onRe
 
   const sections = [
     {
-      title: 'Foundation Raw Materials',
+      title: 'Materials',
       fields: [
-        { key: 'cement', label: 'Cement (Dalmia / UltraTech)', unit: '₹ / Bag', step: '5' },
-        { key: 'steel', label: 'TMT Steel (ARS Fe550D ISI)', unit: '₹ / Kg', step: '1' },
-        { key: 'msand', label: 'M-Sand (Concrete Sand)', unit: '₹ / CFT', step: '1' },
-        { key: 'aggregate', label: '20mm Blue Metal Aggregate', unit: '₹ / CFT', step: '1' },
+        { key: 'cement', label: 'Cement', unit: '₹ / Bag' },
+        { key: 'steel', label: 'TMT Steel', unit: '₹ / Kg' },
+        { key: 'msand', label: 'M-Sand', unit: '₹ / CFT' },
+        { key: 'psand', label: 'P-Sand', unit: '₹ / CFT' },
+        { key: 'aggregate', label: 'Aggregate', unit: '₹ / CFT' },
+        { key: 'gravel', label: 'Gravel', unit: '₹ / CFT' },
+        { key: 'brickFlyash', label: 'Flyash Brick', unit: '₹ / Piece' },
+        { key: 'brickChamber', label: 'Chamber Brick', unit: '₹ / Piece' },
       ]
     },
     {
-      title: 'Foundation Work Labour Rates',
+      title: 'Structure & Masonry Labour',
       fields: [
-        { key: 'labourExcavationPerCft', label: 'Earth Excavation Labour', unit: '₹ / CFT', step: '1' },
-        { key: 'labourPccPerCft', label: 'PCC 1:4:8 Bed Concrete Labour', unit: '₹ / CFT', step: '1' },
-        { key: 'labourFootingConcretePerCft', label: 'Footing Concrete M20 Labour', unit: '₹ / CFT', step: '1' },
-        { key: 'labourColumnStubPerCft', label: 'Column Stub M20 Labour', unit: '₹ / CFT', step: '1' },
-        { key: 'labourBackfillingPerCft', label: 'Backfilling & Compaction Labour', unit: '₹ / CFT', step: '1' },
+        { key: 'labourExcavationPerCft', label: 'Earth Excavation', unit: '₹ / CFT' },
+        { key: 'labourPccPerCft', label: 'Foundation PCC', unit: '₹ / CFT' },
+        { key: 'labourFootingConcretePerCft', label: 'Footing Concrete', unit: '₹ / CFT' },
+        { key: 'labourColumnStubPerCft', label: 'Column Concrete', unit: '₹ / CFT' },
+        { key: 'labourBackfillingPerCft', label: 'Backfilling', unit: '₹ / CFT' },
+        { key: 'labourPlinthExcavationPerCft', label: 'Plinth Excavation', unit: '₹ / CFT' },
+        { key: 'labourPlinthConcretePerCft', label: 'Plinth Concrete', unit: '₹ / CFT' },
+        { key: 'labourBasementBrickworkPerCft', label: 'Basement Brickwork', unit: '₹ / CFT' },
+        { key: 'labourBasementPlasterPerSqft', label: 'Basement Plaster', unit: '₹ / Sq.ft' },
+        { key: 'labourBasementGravelPerCft', label: 'Gravel Filling', unit: '₹ / CFT' },
+        { key: 'labourFlooringPccPerSqft', label: 'Flooring PCC', unit: '₹ / Sq.ft' },
+        { key: 'labourChamberBrickworkPerCft', label: 'Chamber Brickwork', unit: '₹ / CFT' },
+        { key: 'labourCeilingPlasterPerSqft', label: 'Ceiling Plaster', unit: '₹ / Sq.ft' },
+        { key: 'labourInnerPlasterPerSqft', label: 'Inner Plaster', unit: '₹ / Sq.ft' },
+        { key: 'labourOuterPlasterPerSqft', label: 'Outer Plaster', unit: '₹ / Sq.ft' },
+        { key: 'labourSillBeamPerRft', label: 'Sill Beam', unit: '₹ / RFT' },
+        { key: 'labourLintelBeamPerRft', label: 'Lintel Beam', unit: '₹ / RFT' },
+        { key: 'labourLoftsSunshadesPerCft', label: 'Lofts & Sunshades', unit: '₹ / CFT' },
+      ]
+    },
+    {
+      title: 'Tiles & Granite',
+      fields: [
+        { key: 'rateFlooringTile', label: 'Flooring Tile', unit: '₹ / Sq.ft' },
+        { key: 'rateBathroomFloorTile', label: 'Bathroom Floor Tile', unit: '₹ / Sq.ft' },
+        { key: 'rateParkingTile', label: 'Parking Tile', unit: '₹ / Sq.ft' },
+        { key: 'rateKitchenWallTile', label: 'Kitchen Wall Tile', unit: '₹ / Sq.ft' },
+        { key: 'rateBathroomWallTile', label: 'Bathroom Wall Tile', unit: '₹ / Sq.ft' },
+        { key: 'rateSkirtingTile', label: 'Skirting Tile', unit: '₹ / Sq.ft' },
+        { key: 'rateCountertopGranite', label: 'Countertop Granite', unit: '₹ / Sq.ft' },
+        { key: 'rateStaircaseGranite', label: 'Staircase Granite', unit: '₹ / Sq.ft' },
+        { key: 'rateTilePasteAraldite', label: 'Tile Adhesive', unit: '₹ / Sq.ft' },
+        { key: 'tileFlooringLabour', label: 'Floor Tile Labour', unit: '₹ / Sq.ft' },
+        { key: 'tileBathroomFloorLabour', label: 'Bathroom Floor Labour', unit: '₹ / Sq.ft' },
+        { key: 'tileParkingLabour', label: 'Parking Tile Labour', unit: '₹ / Sq.ft' },
+        { key: 'tileKitchenWallLabour', label: 'Kitchen Wall Tile Labour', unit: '₹ / Sq.ft' },
+        { key: 'tileBathroomWallLabour', label: 'Bathroom Wall Tile Labour', unit: '₹ / Sq.ft' },
+        { key: 'tileSkirtingLabour', label: 'Skirting Labour', unit: '₹ / Sq.ft' },
+        { key: 'graniteCountertopLabour', label: 'Granite Countertop Labour', unit: '₹ / Sq.ft' },
+      ]
+    },
+    {
+      title: 'Roof, Painting & Services',
+      fields: [
+        { key: 'rateRoofBeamConcretePerCft', label: 'Roof Beam Concrete', unit: '₹ / CFT' },
+        { key: 'rateRoofSlabConcretePerCft', label: 'Roof Slab Concrete', unit: '₹ / CFT' },
+        { key: 'rateStaircaseConcrete', label: 'Staircase Concrete', unit: '₹ / CFT' },
+        { key: 'rateInnerWallPainting', label: 'Inner Wall Paint', unit: '₹ / Sq.ft' },
+        { key: 'rateOuterWallPainting', label: 'Outer Wall Paint', unit: '₹ / Sq.ft' },
+        { key: 'rateCeilingPainting', label: 'Ceiling Paint', unit: '₹ / Sq.ft' },
+        { key: 'rateStaircaseBrickSteps', label: 'Staircase Masonry', unit: '₹ / CFT' },
+        { key: 'rateStaircaseHandrail', label: 'Handrail', unit: '₹ / RFT' },
+        { key: 'rateElectricalPlumbing', label: 'Electrical & Plumbing', unit: '₹ / Sq.ft' },
+        { key: 'rateTerraceBrickbatPerCft', label: 'Terrace Brickbat', unit: '₹ / CFT' },
+        { key: 'rateTerraceLimePerBag', label: 'Terrace Lime', unit: '₹ / Bag' },
       ]
     }
   ];
@@ -43,8 +97,8 @@ export default function RateMasterModal({ isOpen, onClose, rates, setRates, onRe
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Foundation Rates & Markup Master</h3>
-              <p className="text-xs text-slate-500">Live prices for Cement, Steel, M-Sand, Aggregates & Labour</p>
+      <h3 className="text-base font-bold text-slate-900 dark:text-white">Rate & Markup Master</h3>
+              <p className="text-xs text-slate-500">Edit material, labour and trade rates used by every estimate</p>
             </div>
           </div>
           <button

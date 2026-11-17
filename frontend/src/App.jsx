@@ -12,7 +12,6 @@ import {
   Moon, 
   Sun, 
   HardHat,
-  Sparkles,
   Save,
   Check,
   Box,
@@ -34,7 +33,8 @@ import {
 
 import rmcLogo from './assets/logo-rmc.png';
 
-import { DEFAULT_RATES, INITIAL_PROJECT_DATA } from './data/initialData';
+import { DEFAULT_RATES } from './data/initialData';
+import { BLANK_PROJECT_DATA } from './data/blankProjectData';
 import { calculateCivilEstimateComplete } from './utils/calculator';
 import RateMasterModal from './components/RateMasterModal';
 import { LoginPage } from './components/LoginPage';
@@ -68,6 +68,20 @@ import { saveProjectToBackend, checkBackendHealth } from './api/rmcApi';
 
 const STORAGE_KEY_DATA = 'rmc_substructure_audit_v8';
 const STORAGE_KEY_RATES = 'rmc_substructure_rates_v8';
+const STORAGE_KEY_VERSION = 'rmc_dynamic_data_v1';
+
+function loadInitialProjectData() {
+  const saved = localStorage.getItem(STORAGE_KEY_DATA);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      const isOldSample = parsed.builtup?.clientName === 'Er. M. Jahir Hussain Villa'
+        || parsed.builtup?.floors?.some((floor) => Number(floor.length) === 22 && Number(floor.breadth) === 39);
+      if (!isOldSample) return parsed;
+    } catch { /* discard malformed local estimate and start clean */ }
+  }
+  return JSON.parse(JSON.stringify(BLANK_PROJECT_DATA));
+}
 
 export default function App() {
   const location = useLocation();
@@ -101,21 +115,25 @@ export default function App() {
   const [rates, setRates] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY_RATES);
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      try { return { ...DEFAULT_RATES, ...JSON.parse(saved) }; } catch (e) { /* ignore */ }
     }
     return DEFAULT_RATES;
   });
 
   // Project Input Data State
   const [data, setData] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_DATA);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
-    }
-    return INITIAL_PROJECT_DATA;
+    return loadInitialProjectData();
   });
 
+  useEffect(() => {
+    if (localStorage.getItem(STORAGE_KEY_VERSION) !== '1') {
+      localStorage.setItem(STORAGE_KEY_VERSION, '1');
+      localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
+    }
+  }, []);
+
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
+  const [activeProject, setActiveProject] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -213,17 +231,21 @@ export default function App() {
       localStorage.setItem(STORAGE_KEY_RATES, JSON.stringify(rates));
       
       // Also sync to PostgreSQL database RMC
-      await saveProjectToBackend({
-        id: 'proj_active_session',
-        title: data.builtup?.clientName ? `${data.builtup.clientName} - Active Estimate` : 'G+1 Residential Project',
-        projectCode: 'RMC-ACTIVE-01',
-        siteAddress: data.builtup?.siteLocation || 'Theni Site',
+      const savedProject = await saveProjectToBackend({
+        id: activeProject?.id || `proj_${Date.now()}`,
+        title: data.builtup?.title || data.builtup?.clientName || 'Untitled Estimate',
+        projectCode: activeProject?.project_code || activeProject?.projectCode || `RMC/${new Date().getFullYear()}/${Date.now().toString().slice(-4)}`,
+        clientId: activeProject?.client_id || activeProject?.clientId || null,
+        projectType: activeProject?.project_type || activeProject?.projectType,
+        siteAddress: data.builtup?.siteLocation || '',
         status: 'In Progress',
         estimateData: data,
         scheduleRates: rates
       });
 
-      setSaveSuccess(true);
+      if (savedProject.success) setActiveProject(savedProject.data);
+
+      setSaveSuccess(false);
       setTimeout(() => setSaveSuccess(false), 2000);
     } catch (e) {
       console.error('Failed to save to backend / local storage', e);
@@ -232,13 +254,11 @@ export default function App() {
     }
   };
 
-  // Reset to Sample Initial Data
-  const handleResetToSample = () => {
-    if (window.confirm("Reset all civil inputs to original verified Excel data (03-11-2026_BRICK_ESTIMATE.xlsm)?")) {
-      setData(INITIAL_PROJECT_DATA);
-      setRates(DEFAULT_RATES);
-      localStorage.removeItem(STORAGE_KEY_DATA);
-      localStorage.removeItem(STORAGE_KEY_RATES);
+  const handleResetEstimate = () => {
+    if (window.confirm('Clear the active estimate and start a new blank estimate?')) {
+      setData(JSON.parse(JSON.stringify(BLANK_PROJECT_DATA)));
+      setActiveProject(null);
+      localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(BLANK_PROJECT_DATA));
     }
   };
 
@@ -497,12 +517,12 @@ export default function App() {
               </button>
 
               <button
-                onClick={handleResetToSample}
+                onClick={handleResetEstimate}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 border border-slate-800 transition-all"
-                title="Reset Sample Values"
+                title="Clear active estimate"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Sample Villa</span>
+                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">New Estimate</span>
               </button>
 
               <button
@@ -556,8 +576,14 @@ export default function App() {
                   else navigate('/dashboard');
                 }}
                 onSelectProject={(prj) => {
+                  setActiveProject(prj);
                   if (prj.estimateData) {
-                    setData(prj.estimateData);
+                    const projectEstimate = typeof prj.estimateData === 'string' ? JSON.parse(prj.estimateData) : prj.estimateData;
+                    setData(projectEstimate);
+                    if (prj.scheduleRates) {
+                      const projectRates = typeof prj.scheduleRates === 'string' ? JSON.parse(prj.scheduleRates) : prj.scheduleRates;
+                      setRates({ ...DEFAULT_RATES, ...projectRates });
+                    }
                   } else {
                     updateProjectInfo({
                       clientName: prj.clientName || prj.client_name,
@@ -604,14 +630,14 @@ export default function App() {
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Active Estimate</span>
                         <span className="text-xs font-mono font-bold text-amber-300">
-                          {data.builtup?.projectCode || 'RMC/2026/ACTIVE'}
+                          {activeProject?.project_code || activeProject?.projectCode || data.builtup?.projectCode || 'Not saved'}
                         </span>
                       </div>
                       <h2 className="text-base font-extrabold text-white">
                         {data.builtup?.title || `${data.builtup?.clientName || 'Standard'} Residence Estimate`}
                       </h2>
                       <p className="text-xs text-slate-300">
-                        Client: <b className="text-blue-300">{data.builtup?.clientName || 'Not linked'}</b> • Site: {data.builtup?.siteLocation || 'Theni District'}
+                        Client: <b className="text-blue-300">{data.builtup?.clientName || 'Not linked'}</b> • Site: {data.builtup?.siteLocation || 'Not set'}
                       </p>
                     </div>
                   </div>
@@ -808,7 +834,7 @@ export default function App() {
                 estimate={estimate} 
                 rates={rates} 
                 setRates={setRates}
-                builtupSqft={estimate.totalBuiltupArea || 1758}
+                builtupSqft={estimate.totalBuiltupArea || 0}
               />
             } />
 
@@ -833,9 +859,10 @@ export default function App() {
                 estimate={estimate} 
                 rates={rates} 
                 projectInfo={{
-                  clientName: data.builtup?.clientName || 'Er. Client Project',
-                  siteLocation: data.builtup?.siteLocation || 'Residential Site',
-                  quoteDate: '05-Nov-2026'
+                  clientName: data.builtup?.clientName || '',
+                  siteLocation: data.builtup?.siteLocation || '',
+                  quoteDate: data.builtup?.quoteDate || data.projectInfo?.quoteDate || '',
+                  projectCode: activeProject?.project_code || activeProject?.projectCode || data.builtup?.projectCode || ''
                 }} 
               />
             } />

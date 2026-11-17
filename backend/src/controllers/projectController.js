@@ -98,6 +98,8 @@ export async function saveProject(req, res) {
     const totalCost = calcResults?.grandTotalCost || 0;
     const directCost = calcResults?.totalDirectCost || 0;
     const ratePerSqft = totalSqft > 0 ? (totalCost / totalSqft) : 0;
+    const floorNames = (estimateData.builtup?.floors || []).map((floor) => floor.name).filter(Boolean);
+    const floorSummary = floorNames.join(', ').slice(0, 100);
 
     const queryText = `
       INSERT INTO projects (
@@ -141,12 +143,12 @@ export async function saveProject(req, res) {
       stage || 'Quotation Ready',
       totalSqft,
       gfPlinthSqft,
-      floors || 'G + 1 Floors',
-      columnsCount || 8,
+      floors || floorSummary,
+      columnsCount ?? calcResults.totalColumnsCount ?? 0,
       totalCost,
       directCost,
       ratePerSqft,
-      completionDate || 'Target: 2027',
+      completionDate || '',
       JSON.stringify(estimateData),
       JSON.stringify(scheduleRates),
       JSON.stringify(calcResults)
