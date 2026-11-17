@@ -86,7 +86,7 @@ export function calculateCivilEstimateComplete(data, rates) {
     };
   });
 
-  const pccCementBags = (totalPccCft / 35.314) * 3.41169;
+  const pccCementBags = (totalPccCft / 35.314) * 3.8644076657;
   const pccSandCft = pccCementBags * 6.0;
   const pccAggCft = pccCementBags * 10.0;
   const pccMatCost = (pccCementBags * rates.cement) + (pccSandCft * rates.msand) + (pccAggCft * rates.aggregate);
@@ -301,7 +301,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   });
 
   // Inner Wall Plaster Area (1:6) = Wall Area (2*(L+B)*H) = 3115 sq.ft
-  const netInnerPlasteringSqft = totalInnerWallGrossSqft;
+  const netInnerPlasteringSqft = Math.max(0, totalInnerWallGrossSqft - (Number(plastering?.innerDeductionsSqft) || 0));
 
   // Outer Plastering Surfaces (Building outer 122*13.5 + Parapet 132*4 + Sunshade 22.5*2.25*2) = 2276.25 sq.ft
   const rawOuter = plastering?.outerSurfaces || [];
@@ -321,7 +321,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   const ceilingCementBags = ((totalCeilingSqft * 0.05) / 35.314) * 11.08;
   const ceilingPsandCft = ceilingCementBags * 4.0;
   const ceilingPlasterMatCost = (ceilingCementBags * rates.cement) + (ceilingPsandCft * rates.psand);
-  const ceilingPlasterLabCost = totalCeilingSqft * rates.labourCeilingPlasterPerSqft;
+  const ceilingPlasterLabCost = totalCeilingSqft * (Number(rates.labourCeilingPlasterPerSqft) || 80);
   const ceilingPlasterTotalCost = ceilingPlasterMatCost + ceilingPlasterLabCost;
 
   // Wall Inner (1:6) & Outer (1:6) Plaster:
@@ -463,22 +463,22 @@ export function calculateCivilEstimateComplete(data, rates) {
     : 0;
 
   // Tile Material Costs (Supply)
-  const tileFlooringMatCost = tileFlooringSqft * (rates.tileFlooringRate || 60);
-  const tileBathroomFloorMatCost = tileBathroomFloorSqft * (rates.tileBathroomFloorRate || 50);
-  const tileParkingMatCost = tileParkingSqft * (rates.tileParkingRate || 50);
-  const tileKitchenWallMatCost = tileKitchenWallSqft * (rates.tileKitchenWallRate || 50);
-  const tileBathroomWallMatCost = tileBathroomWallSqft * (rates.tileBathroomWallRate || 50);
-  const tileSkirtingMatCost = tileSkirtingRft * (rates.tileSkirtingRate || 60);
-  const tileCountertopMatCost = tileCountertopSqft * (rates.graniteCountertopRate || 160);
+  const tileFlooringMatCost = tileFlooringSqft * (rates.rateFlooringTile ?? 60);
+  const tileBathroomFloorMatCost = tileBathroomFloorSqft * (rates.rateBathroomFloorTile ?? 50);
+  const tileParkingMatCost = tileParkingSqft * (rates.rateParkingTile ?? 50);
+  const tileKitchenWallMatCost = tileKitchenWallSqft * (rates.rateKitchenWallTile ?? 50);
+  const tileBathroomWallMatCost = tileBathroomWallSqft * (rates.rateBathroomWallTile ?? 50);
+  const tileSkirtingMatCost = tileSkirtingRft * (rates.rateSkirtingTile ?? 60);
+  const tileCountertopMatCost = tileCountertopSqft * (rates.rateCountertopGranite ?? 160);
 
   // Tile Laying Labour Costs
-  const tileFlooringLabCost = tileFlooringSqft * (rates.tileFlooringLabour || 24);
-  const tileBathroomFloorLabCost = tileBathroomFloorSqft * (rates.tileBathroomFloorLabour || 24);
-  const tileParkingLabCost = tileParkingSqft * (rates.tileParkingLabour || 24);
-  const tileKitchenWallLabCost = tileKitchenWallSqft * (rates.tileKitchenWallLabour || 24);
-  const tileBathroomWallLabCost = tileBathroomWallSqft * (rates.tileBathroomWallLabour || 30);
-  const tileSkirtingLabCost = (tileSkirtingRft / 8) * 6 * 4 * (rates.tileFlooringLabour || 24); // Excel formula: D45/8*6*4*24
-  const tileCountertopLabCost = tileCountertopSqft * (rates.graniteCountertopLabour || 160);
+  const tileFlooringLabCost = tileFlooringSqft * 24;
+  const tileBathroomFloorLabCost = tileBathroomFloorSqft * 24;
+  const tileParkingLabCost = tileParkingSqft * 24;
+  const tileKitchenWallLabCost = tileKitchenWallSqft * 24;
+  const tileBathroomWallLabCost = tileBathroomWallSqft * 30;
+  const tileSkirtingLabCost = (tileSkirtingRft / 8) * 6 * 4 * 24;
+  const tileCountertopLabCost = tileCountertopSqft * 160;
 
   // Araldite & Tile Paste (Paste for wall tiles, skirting & countertops)
   // Area = kitchen wall (64) + bath wall (520) + countertop (60) + skirting (86.28) + steps granite (171.5) = 901.78 sq.ft
@@ -600,7 +600,7 @@ export function calculateCivilEstimateComplete(data, rates) {
 
   // Steps Granite: ((Width * Tread) + (Width * Riser)) * Steps + Landing
   const scStepGraniteArea = ((scWidth * scTread) + (scWidth * scRiser)) * scStepsCount + scLandingArea;
-  const scGraniteCost = scStepGraniteArea * (rates.staircaseGraniteRate || 320);
+  const scGraniteCost = scStepGraniteArea * (rates.rateStaircaseGranite ?? 160);
 
   // Handrail
   const scHandrailCost = scHandrailLength * (rates.staircaseHandrailRate || 1000);
@@ -610,7 +610,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   const scWaistB = Number(scInput.waistSlabBreadth) || 0;
   const scWaistD = Number(scInput.waistSlabDepth) || 0;
   const scConcreteVolumeCft = scWaistL * scWaistB * scWaistD;
-  const scConcreteCost = scConcreteVolumeCft * (rates.roofSlabConcreteRate || 523.8);
+  const scConcreteCost = scConcreteVolumeCft * 523.8;
 
   const totalStaircaseCost = scBrickworkCost + scGraniteCost + scHandrailCost + scConcreteCost;
 
@@ -637,7 +637,7 @@ export function calculateCivilEstimateComplete(data, rates) {
 
   const electricalTotalCost = electricalSqft * (rates.electricalPlumbingRate || 200);
   const terraceSurkhiVolumeCft = terraceSurkhiSqft * 0.25; // 3 inches chips concrete bed
-  const terraceSurkhiTotalCost = terraceSurkhiVolumeCft * (rates.terraceSurkhiRate || 98.2);
+  const terraceSurkhiTotalCost = (terraceSurkhiVolumeCft * 74) + ((Number(othersInput.surkhiThickness) || 0.25) * terraceSurkhiSqft * 3);
 
   const totalOthersCost = electricalTotalCost + terraceSurkhiTotalCost;
 
@@ -760,7 +760,7 @@ export function calculateCivilEstimateComplete(data, rates) {
     // 15. Additional Works
     totalAdditionalCost;
 
-  const contractorMarkup = (totalDirectCost * rates.contractorMarginPct) / 100;
+  const contractorMarkup = (totalDirectCost * (Number(rates.contractorMarginPct) || 0)) / 100;
   const grandTotalCost = totalDirectCost + contractorMarkup;
   const costPerSqft = totalBuiltupArea > 0 ? (grandTotalCost / totalBuiltupArea) : 0;
 

@@ -25,7 +25,7 @@ export const DEFAULT_RATES = {
 
   // Superstructure (5, 6, 7) Labour & Contract Rates
   labourChamberBrickworkPerCft: 22,// Red Chamber Brickwork labour
-  labourCeilingPlasterPerSqft: 42.5,// Ceiling Plastering (1:3 Mortar)
+  labourCeilingPlasterPerSqft: 80,  // BOQ combined rate in Excel row 60
   labourInnerPlasterPerSqft: 39.5, // Inner Wall Plastering (1:6 Mortar)
   labourOuterPlasterPerSqft: 34,   // Outer Wall Plastering (1:6 Mortar)
   

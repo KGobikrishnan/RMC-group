@@ -23,18 +23,20 @@ import rmcLogo from '../assets/logo-rmc.png';
  * FEATURE 2: Interactive Contractor Profit Margin Slider & Breakup Analysis (Sheet 12.Breakup)
  */
 export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
-  const margin = rates.contractorMarginPct || 10;
-  const gfArea = estimate.gfArea || 858;
-  const totalBuiltup = estimate.totalBuiltupArea || 1758;
+  const margin = Number(rates.contractorMarginPct ?? 0);
+  const gfArea = Number(estimate.gfArea ?? 0);
+  const totalBuiltup = Number(estimate.totalBuiltupArea ?? 0);
 
   // Direct civil work total before markup
-  const directCivilCost = estimate.totalDirectCost || (estimate.grandTotalCost / (1 + margin / 100));
+  const totalDirectCost = Number(estimate.totalDirectCost ?? 0);
+  const additionalCost = Number(estimate.totalAdditionalCost ?? 0);
+  const directCivilCost = Math.max(0, totalDirectCost - additionalCost);
   const markupAmount = directCivilCost * (margin / 100);
   const overallWithMarkup = directCivilCost + markupAmount;
 
   // Additional Works (Site Infrastructure)
-  const additionalCost = estimate.totalAdditionalCost || 203400;
-  const totalProjectWithAdditional = overallWithMarkup + additionalCost;
+  const additionalQuotedCost = additionalCost * (1 + margin / 100);
+  const totalProjectWithAdditional = overallWithMarkup + additionalQuotedCost;
 
   // Rates per sq.ft
   const directRatePerSqft = gfArea > 0 ? (directCivilCost / gfArea) : 0;
@@ -253,7 +255,7 @@ export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
               ].map((tier) => {
                 const tierMarkup = directCivilCost * (tier.pct / 100);
                 const tierCivil = directCivilCost + tierMarkup;
-                const tierGrand = tierCivil + additionalCost;
+                const tierGrand = tierCivil + (additionalCost * (1 + tier.pct / 100));
                 const tierCivilRate = gfArea > 0 ? (tierCivil / gfArea) : 0;
                 const tierGrandRate = gfArea > 0 ? (tierGrand / gfArea) : 0;
                 const isCurrent = Math.abs(margin - tier.pct) < 0.1;
@@ -285,7 +287,7 @@ export function ProfitBreakupDashboard({ estimate, rates, updateRates }) {
                       + ₹ {Math.round(tierMarkup).toLocaleString('en-IN')}
                     </td>
                     <td className="py-3 px-3 text-right text-slate-500">
-                      ₹ {Math.round(additionalCost).toLocaleString('en-IN')}
+                      ₹ {Math.round(additionalCost * (1 + tier.pct / 100)).toLocaleString('en-IN')}
                     </td>
                     <td className="py-3 px-3 text-right font-black text-slate-900 dark:text-white text-sm">
                       ₹ {Math.round(tierGrand).toLocaleString('en-IN')}
@@ -578,15 +580,17 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
     window.print();
   };
 
-  const margin = rates.contractorMarginPct || 10;
-  const gfArea = estimate.gfArea || 858;
-  const totalBuiltup = estimate.totalBuiltupArea || 1758;
+  const margin = Number(rates.contractorMarginPct ?? 0);
+  const gfArea = Number(estimate.gfArea ?? 0);
+  const totalBuiltup = Number(estimate.totalBuiltupArea ?? 0);
 
-  const directCivilCost = estimate.totalDirectCost || (estimate.grandTotalCost / (1 + margin / 100));
+  const totalDirectCost = Number(estimate.totalDirectCost ?? 0);
+  const additionalCost = Number(estimate.totalAdditionalCost ?? 0);
+  const directCivilCost = Math.max(0, totalDirectCost - additionalCost);
   const markupAmount = directCivilCost * (margin / 100);
   const civilQuotedAmount = directCivilCost + markupAmount;
-  const additionalCost = estimate.totalAdditionalCost || 203400;
-  const grandTotalAmount = civilQuotedAmount + additionalCost;
+  const additionalQuotedCost = additionalCost * (1 + margin / 100);
+  const grandTotalAmount = civilQuotedAmount + additionalQuotedCost;
 
   const civilRatePerSqft = gfArea > 0 ? (civilQuotedAmount / gfArea) : 0;
   const overallRatePerSqft = gfArea > 0 ? (grandTotalAmount / gfArea) : 0;
@@ -742,7 +746,7 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
                 2. Site External Infrastructure
               </div>
               <div className="text-xl sm:text-2xl font-black text-purple-200 mt-1">
-                ₹ {Math.round(additionalCost).toLocaleString('en-IN')}
+                ₹ {Math.round(additionalQuotedCost).toLocaleString('en-IN')}
               </div>
               <div className="text-xs text-purple-300 mt-0.5">
                 UG Sump, Septic Tank, OHT Stand, Compound Wall, Gate
