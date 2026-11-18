@@ -701,49 +701,49 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
 
       {/* Add New Project Modal - Complete 15 Modules Estimation Engine Pop-Up */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
-          <div className="w-full max-w-6xl max-h-[92vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col text-left animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+          <div className="w-full max-w-6xl max-h-[92vh] bg-white border border-[#e2e9e6] rounded-3xl shadow-2xl flex flex-col text-left animate-in fade-in zoom-in-95">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/80 rounded-t-3xl shrink-0">
+            <div className="px-6 py-4 border-b border-[#e2e9e6] flex items-center justify-between bg-[#f8faf9] rounded-t-3xl shrink-0">
               <div className="flex items-center gap-3">
-                      <span className="p-2.5 bg-teal-700 text-white rounded-2xl shadow-sm">
+                <span className="p-2.5 bg-[#0f766e] text-white rounded-2xl shadow-sm">
                   <FolderGit2 className="w-5 h-5" />
                 </span>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                      {editingProjectId ? 'Edit project estimate' : 'Create a project estimate'}
+                    <h3 className="text-base sm:text-lg font-black text-[#17211f]">
+                      {editingProjectId ? 'Edit Project Estimate' : 'Create Project Estimate'}
                     </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                       PostgreSQL: RMC
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500">Enter measurements in order. Totals update automatically as you go.</p>
+                  <p className="text-xs text-[#667772]">Enter measurements in order. Totals update automatically as you go.</p>
                 </div>
               </div>
 
               {/* Live Cost Summary Pill & Mode Toggle in Header */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
+                <div className="flex items-center gap-1.5 p-1 bg-[#e2e9e6]/60 rounded-xl">
                   <button
                     type="button"
                     onClick={handleResetToBlank}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:shadow-xs transition-all"
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#293936] hover:bg-white hover:shadow-xs transition-all"
                     title="Clear all fields to start fresh with custom site measurements"
                   >
                     Clear to Blank
                   </button>
                 </div>
 
-                <div className="hidden sm:block text-right px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl">
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Estimate Total</span>
-                  <span className="text-sm font-black text-blue-600 dark:text-blue-400">
+                <div className="hidden sm:block text-right px-3 py-1.5 bg-[#eaf6f4] border border-[#c8e7e2] rounded-2xl">
+                  <span className="text-[10px] font-bold text-[#667772] block uppercase">Estimate Total</span>
+                  <span className="text-sm font-black text-[#0f766e] font-mono">
                     ₹ {Math.round(liveEstimate.grandTotalCost || 0).toLocaleString('en-IN')}
                   </span>
                 </div>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="p-2 rounded-xl text-[#667772] hover:text-[#17211f] hover:bg-[#e2e9e6] transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -751,83 +751,50 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
             </div>
 
             {/* Simple, sequential estimate steps */}
-            <div className="px-5 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+            <div className="px-6 py-3.5 bg-white border-b border-[#e2e9e6] shrink-0">
               <div className="flex items-center justify-between gap-3 mb-2">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Step {currentStepIndex + 1} of {estimateSteps.length}: {estimateSteps[currentStepIndex]?.title}</span>
-                <span className="text-xs text-slate-500">{Math.round(((currentStepIndex + 1) / estimateSteps.length) * 100)}% complete</span>
+                <span className="text-xs font-bold text-[#17211f]">Step {currentStepIndex + 1} of {estimateSteps.length}: {estimateSteps[currentStepIndex]?.title}</span>
+                <span className="text-xs text-[#667772] font-semibold">{Math.round(((currentStepIndex + 1) / estimateSteps.length) * 100)}% complete</span>
               </div>
-              <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-3"><div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${((currentStepIndex + 1) / estimateSteps.length) * 100}%` }} /></div>
+              <div className="h-1.5 rounded-full bg-[#f1f5f3] overflow-hidden mb-3">
+                <div className="h-full rounded-full bg-[#0f766e] transition-all" style={{ width: `${((currentStepIndex + 1) / estimateSteps.length) * 100}%` }} />
+              </div>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {estimateSteps.map((step, index) => (
-                  <button key={step.id} type="button" onClick={() => setActiveStepTab(step.id)} aria-current={activeStepTab === step.id ? 'step' : undefined}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${activeStepTab === step.id ? 'bg-blue-600 text-white' : index < currentStepIndex ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
-                    <span className={`grid place-items-center w-5 h-5 rounded-full text-[10px] ${activeStepTab === step.id ? 'bg-white/20' : 'bg-white dark:bg-slate-700'}`}>{index < currentStepIndex ? '✓' : index + 1}</span>{step.short}
+                  <button 
+                    key={step.id} 
+                    type="button" 
+                    onClick={() => setActiveStepTab(step.id)} 
+                    aria-current={activeStepTab === step.id ? 'step' : undefined}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+                      activeStepTab === step.id 
+                        ? 'bg-[#0f766e] text-white shadow-sm' 
+                        : index < currentStepIndex 
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                          : 'bg-[#f1f5f3] text-[#667772] hover:text-[#17211f]'
+                    }`}
+                  >
+                    <span className={`grid place-items-center w-5 h-5 rounded-full text-[10px] font-bold ${
+                      activeStepTab === step.id 
+                        ? 'bg-white/20 text-white' 
+                        : index < currentStepIndex 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-white text-[#667772]'
+                    }`}>
+                      {index < currentStepIndex ? '✓' : index + 1}
+                    </span>
+                    {step.short}
                   </button>
                 ))}
               </div>
             </div>
-            {/* Legacy navigation hidden in favor of the compact stepper above. */}
-            {false && <div className="px-6 py-2.5 bg-slate-100/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto text-xs shrink-0">
-              <button
-                onClick={() => setActiveStepTab('meta')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                  activeStepTab === 'meta'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span>1. Project & Client Details</span>
-              </button>
-
-              <button
-                onClick={() => setActiveStepTab('substructure')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                  activeStepTab === 'substructure'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span>2. Substructure (Sec 1-4)</span>
-              </button>
-
-              <button
-                onClick={() => setActiveStepTab('superstructure')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                  activeStepTab === 'superstructure'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span>3. Superstructure (Sec 5-7)</span>
-              </button>
-
-              <button
-                onClick={() => setActiveStepTab('finishes')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                  activeStepTab === 'finishes'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span>4. Finishes & Trades (Sec 8-13)</span>
-              </button>
-
-              <button
-                onClick={() => setActiveStepTab('infra')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                  activeStepTab === 'infra'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span>5. Site Infrastructure (Sec 14-15)</span>
-              </button>
-            </div>}
 
             {/* Modal Body with Scroll */}
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50/60 dark:bg-slate-950/30">
-              <div className="max-w-4xl mx-auto px-4 py-3 rounded-xl border border-blue-100 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/30 text-sm text-blue-900 dark:text-blue-100">
-                <span className="font-bold">{estimateSteps[currentStepIndex]?.title}:</span> {estimateSteps[currentStepIndex]?.help} Dimensions are in feet unless the field says otherwise. Leave excluded work at 0.
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6 bg-[#f5f7f6]">
+              <div className="max-w-4xl mx-auto px-4 py-3 rounded-2xl border border-[#c8e7e2] bg-[#eaf6f4] text-xs text-[#0f766e] flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-[#17211f]">{estimateSteps[currentStepIndex]?.title}:</span> {estimateSteps[currentStepIndex]?.help} Dimensions are in feet unless specified.
+                </div>
               </div>
               {/* TAB 1: Project Metadata & Client Linking */}
               {activeStepTab === 'meta' && (
@@ -1101,33 +1068,35 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
             </div>
 
             {/* Modal Sticky Footer with Live Cost & Submit */}
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-b-3xl shrink-0">
-              <div className="flex items-center gap-4 text-xs">
+            <div className="px-6 py-4 border-t border-[#e2e9e6] bg-[#f8faf9] flex flex-col sm:flex-row items-center justify-between gap-3 rounded-b-3xl shrink-0">
+              <div className="flex items-center gap-5 text-xs">
                 <div>
-                  <span className="text-slate-400 block font-semibold">Built-Up Area:</span>
-                  <span className="font-extrabold text-slate-800 dark:text-slate-200">
+                  <span className="text-[#667772] block font-semibold text-[11px]">Built-Up Area:</span>
+                  <span className="font-extrabold text-[#17211f] font-mono">
                     {Math.round(liveEstimate.totalBuiltupArea || 0).toLocaleString('en-IN')} Sq.ft
                   </span>
                 </div>
+                <div className="h-6 w-px bg-[#e2e9e6]" />
                 <div>
-                  <span className="text-slate-400 block font-semibold">Total Steel Rebar:</span>
-                  <span className="font-extrabold text-slate-800 dark:text-slate-200">
+                  <span className="text-[#667772] block font-semibold text-[11px]">Total Steel:</span>
+                  <span className="font-extrabold text-[#0f766e] font-mono">
                     {(liveEstimate.totalSteelTons || 0).toFixed(2)} MT
                   </span>
                 </div>
+                <div className="h-6 w-px bg-[#e2e9e6]" />
                 <div>
-                  <span className="text-slate-400 block font-semibold">Grand Estimate Total:</span>
-                  <span className="text-base font-black text-blue-600 dark:text-blue-400">
+                  <span className="text-[#667772] block font-semibold text-[11px]">Grand Estimate Total:</span>
+                  <span className="text-base font-black text-[#0f766e] font-mono">
                     ₹ {Math.round(liveEstimate.grandTotalCost || 0).toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+              <div className="flex items-center gap-2.5 self-stretch sm:self-auto justify-end">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs"
+                  className="px-4 py-2.5 rounded-xl text-[#667772] hover:bg-[#e2e9e6] font-bold text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -1135,10 +1104,10 @@ export function ProjectDirectoryPage({ setActiveTab, onSelectProject, currentEst
                   type="button"
                   onClick={handleAddProject}
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-lg shadow-blue-500/25 transition-all active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0f766e] hover:bg-[#115e59] text-white font-extrabold text-xs shadow-md shadow-[#0f766e]/20 transition-all active:scale-95 disabled:opacity-50"
                 >
                   <Check className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Saving to PostgreSQL...' : (editingProjectId ? 'Update Project & Recalculate' : 'Save Estimate & Open Quotation')}</span>
+                  <span>{isSubmitting ? 'Saving to Database...' : (editingProjectId ? 'Update Project & Recalculate' : 'Save Estimate & Open Quotation')}</span>
                 </button>
               </div>
             </div>

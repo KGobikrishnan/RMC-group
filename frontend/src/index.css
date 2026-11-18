@@ -15,41 +15,125 @@
   body { margin: 0; min-width: 320px; min-height: 100vh; font-family: var(--font-sans); background: #f5f7f6; color: #17211f; }
   button, input, select, textarea { font: inherit; }
   button { cursor: pointer; }
-  :focus-visible { outline: 3px solid rgba(13, 148, 136, .35); outline-offset: 2px; }
+  :focus-visible { outline: 3px solid rgba(15, 118, 110, .35); outline-offset: 2px; }
 }
 
 .app-shell { background: #f5f7f6; }
-.app-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) { color: #17211f; background-color: #fff; border-color: #dbe3e0; border-radius: 12px; min-height: 40px; }
-.app-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):focus { border-color: #0f9b8e; box-shadow: 0 0 0 3px rgba(15,155,142,.12); outline: none; }
+
+/* Clean, consistent input styling */
+.app-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) { 
+  color: #17211f; 
+  background-color: #fff; 
+  border: 1px solid #dbe3e0; 
+  border-radius: 12px; 
+  min-height: 38px;
+  padding: 0.5rem 0.75rem;
+}
+.app-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):focus { 
+  border-color: #0f766e; 
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15); 
+  outline: none; 
+}
 .app-shell :is(input, textarea)::placeholder { color: #9aa8a4; }
 .app-shell :is(input[type="number"]) { font-variant-numeric: tabular-nums; }
-.app-shell :is(.rounded-2xl, .rounded-3xl):is(.bg-white, .dark\:bg-slate-900) { box-shadow: 0 1px 2px rgba(15,23,42,.03), 0 6px 20px rgba(15,23,42,.025); }
-.app-shell .dark\:bg-slate-900 { background-color: #fff; }
-.app-shell .dark\:bg-slate-950 { background-color: #f8faf9; }
-.app-shell .dark\:text-white { color: #17211f; }
-.app-shell .dark\:text-slate-100, .app-shell .dark\:text-slate-200 { color: #293936; }
-.app-shell .dark\:text-slate-300, .app-shell .dark\:text-slate-400 { color: #667772; }
-.app-shell .dark\:border-slate-800, .app-shell .dark\:border-slate-700 { border-color: #e2e9e6; }
-.app-shell .dark\:bg-slate-800, .app-shell .dark\:bg-slate-800\/40, .app-shell .dark\:bg-slate-800\/80 { background-color: #f1f5f3; }
-.app-shell .dark\:bg-blue-950\/30, .app-shell .dark\:bg-indigo-950\/30 { background-color: #eaf6f4; }
-.app-shell :is(.bg-white.dark\:bg-slate-900, .dark\:bg-slate-900) { background-color: #fff; }
-.app-shell :is(.dark\:text-white) { color: #17211f; }
-.app-shell :is(.dark\:text-slate-100, .dark\:text-slate-200) { color: #293936; }
-.app-shell :is(.dark\:text-slate-300, .dark\:text-slate-400) { color: #667772; }
-.app-shell :is(.dark\:border-slate-800, .dark\:border-slate-700) { border-color: #e2e9e6; }
-.app-shell :is(.dark\:bg-slate-800, .dark\:bg-slate-800\/40, .dark\:bg-slate-800\/80) { background-color: #f1f5f3; }
-.app-shell :is(.text-blue-600, .text-blue-500, .text-indigo-600) { color: #0f766e; }
-.app-shell :is(.bg-blue-600, .bg-indigo-600) { background-color: #0f766e; }
-.app-shell :is(.hover\:bg-blue-700:hover, .hover\:bg-blue-500:hover, .hover\:bg-indigo-700:hover) { background-color: #115e59; }
-.app-shell :is(.bg-blue-50, .dark\:bg-blue-950\/30, .dark\:bg-indigo-950\/30) { background-color: #eaf6f4; }
-.app-shell :is(.border-blue-200, .border-blue-500, .dark\:border-blue-900\/60) { border-color: #c8e7e2; }
+
+/* Professional unified card styling */
+.app-shell :is(.rounded-2xl, .rounded-3xl):is(.bg-white, .dark\:bg-slate-900) { 
+  background-color: #ffffff !important;
+  border-color: #e2e9e6 !important;
+  color: #17211f !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02); 
+}
+
+/* Light theme overrides for dark: utility classes to keep entire app perfectly consistent */
+.app-shell .dark\:bg-slate-900,
+.app-shell .dark\:bg-slate-950,
+.app-shell :is(.bg-white.dark\:bg-slate-900, .dark\:bg-slate-900) { 
+  background-color: #ffffff !important; 
+}
+
+.app-shell .dark\:text-white,
+.app-shell :is(.dark\:text-white) { 
+  color: #17211f !important; 
+}
+
+.app-shell .dark\:text-slate-100, 
+.app-shell .dark\:text-slate-200,
+.app-shell :is(.dark\:text-slate-100, .dark\:text-slate-200) { 
+  color: #293936 !important; 
+}
+
+.app-shell .dark\:text-slate-300, 
+.app-shell .dark\:text-slate-400,
+.app-shell :is(.dark\:text-slate-300, .dark\:text-slate-400) { 
+  color: #667772 !important; 
+}
+
+.app-shell .dark\:border-slate-800, 
+.app-shell .dark\:border-slate-700,
+.app-shell :is(.dark\:border-slate-800, .dark\:border-slate-700) { 
+  border-color: #e2e9e6 !important; 
+}
+
+.app-shell .dark\:bg-slate-800, 
+.app-shell .dark\:bg-slate-800\/40, 
+.app-shell .dark\:bg-slate-800\/80,
+.app-shell :is(.dark\:bg-slate-800, .dark\:bg-slate-800\/40, .dark\:bg-slate-800\/80) { 
+  background-color: #f8faf9 !important; 
+}
+
+/* Harmonize highlight backgrounds (no muddy purples/blues) */
+.app-shell .dark\:bg-blue-950\/30, 
+.app-shell .dark\:bg-indigo-950\/30,
+.app-shell :is(.bg-blue-50, .dark\:bg-blue-950\/30, .dark\:bg-indigo-950\/30) { 
+  background-color: #eaf6f4 !important; 
+}
+
+.app-shell :is(.border-blue-200, .border-blue-500, .dark\:border-blue-900\/60, .dark\:border-blue-800\/60) { 
+  border-color: #c8e7e2 !important; 
+}
+
+.app-shell :is(.text-blue-600, .text-blue-500, .text-indigo-600) { 
+  color: #0f766e !important; 
+}
+
+.app-shell :is(.bg-blue-600, .bg-indigo-600) { 
+  background-color: #0f766e !important; 
+}
+
+.app-shell :is(.hover\:bg-blue-700:hover, .hover\:bg-blue-500:hover, .hover\:bg-indigo-700:hover) { 
+  background-color: #115e59 !important; 
+}
+
+/* Harmonize purple & amber pills */
+.app-shell :is(.bg-purple-50, .dark\:bg-purple-950\/60) {
+  background-color: #f5f0fa !important;
+}
+.app-shell :is(.text-purple-600, .text-purple-700, .dark\:text-purple-400) {
+  color: #6b21a8 !important;
+}
+.app-shell :is(.border-purple-200, .dark\:border-purple-900\/60) {
+  border-color: #e9d5ff !important;
+}
+
+.app-shell :is(.bg-amber-50, .dark\:bg-amber-950\/30, .bg-amber-100\/40) {
+  background-color: #fef8ee !important;
+}
+.app-shell :is(.text-amber-800, .text-amber-900, .dark\:text-amber-300, .text-amber-700) {
+  color: #92400e !important;
+}
+.app-shell :is(.border-amber-200, .border-amber-300, .dark\:border-amber-800) {
+  border-color: #fed7aa !important;
+}
+
+/* Scrollbars */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #f1f4f3; }
 ::-webkit-scrollbar-thumb { background: #cbd5d1; border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3a0; }
-.bg-blueprint-grid { background-size: 24px 24px; background-image: linear-gradient(to right, rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px); }
-.glass-panel { background: rgba(255,255,255,.82); backdrop-filter: blur(16px); border: 1px solid rgba(15,23,42,.08); }
-.glass-panel-amber { background: linear-gradient(135deg, rgba(13,148,136,.08), rgba(255,255,255,.9)); backdrop-filter: blur(16px); border: 1px solid rgba(13,148,136,.16); }
+
+.bg-blueprint-grid { background-size: 24px 24px; background-image: linear-gradient(to right, rgba(0,0,0,.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.02) 1px, transparent 1px); }
+.glass-panel { background: rgba(255,255,255,.9); backdrop-filter: blur(16px); border: 1px solid rgba(15,23,42,.08); }
 
 @media print {
   body { background: white !important; color: black !important; }

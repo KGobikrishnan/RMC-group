@@ -595,39 +595,95 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
   const civilRatePerSqft = gfArea > 0 ? (civilQuotedAmount / gfArea) : 0;
   const overallRatePerSqft = gfArea > 0 ? (grandTotalAmount / gfArea) : 0;
 
-  // Technical Scope extracted verbatim from Sheet 13.Quotaiton
-  const technicalSpecs = [
-    { no: '1', title: 'Structure Type', desc: 'Framed Structure as per Structural Design', highlight: true },
-    { no: '2', title: 'Foundation', desc: 'Isolated Footings up to 5 ft depth to hit hard stratum with PCC 1:4:8 bed' },
-    { no: '3', title: 'Plinth Beam', desc: 'Trench excavation, 2" M-Sand bed, PCC & Backfill included; bottom prepared with 1 layer flyash brick' },
-    { no: '4', title: 'Basement', desc: 'Raised up to 3 ft height from existing ground level using Flyash Bricks in CM 1:6; 2-side plastering, gravel filling & 4" M-sand bed; pest control applied before PCC' },
-    { no: '5', title: 'Cement & Concrete', desc: 'Grade 53 Dalmia / UltraTech Cement; M20 mix (1:1.5:3) for footings, column stubs, plinth beams, and roof members' },
-    { no: '6', title: 'Brickwork', desc: 'First-class flyash bricks in basement and 9" & 4.5" chamber burnt clay bricks in superstructure' },
-    { no: '7', title: 'Sill Beam (M15)', desc: '2 inch thick continuous sill concrete band throughout building length with 2 nos 8mm reinforcement steel' },
-    { no: '8', title: 'Lintel Beam', desc: '9" x 6" continuous RCC beam throughout building length using 10mm TMT bars' },
-    { no: '9', title: 'Roof Height & Slab', desc: '10 ft clear ceiling height; RCC roof slab min 5" depth with ARS Fe550D ISI TMT reinforcement rebar' },
-    { no: '10', title: 'Curing Schedule', desc: 'RCC Roof Slab ponding curing for 14-18 days; RCC columns wrapped in wet jute bags for 7 days' },
-    { no: '11', title: 'Lofts & Sunshades', desc: '1 ft 9 inch wide lofts in kitchen & all bedrooms; 2 ft wide weather sunshades over all external windows' },
-    { no: '12', title: 'Doors & Windows', desc: 'Teak frame with teak door for main entrance; Sal wood frame with flush doors for rooms; PVC doors for bathrooms; UPVC windows with 12mm round grill bars' },
-    { no: '13', title: 'Electrical Works', desc: 'Concealed Supreme ISI conduits, Finolex/Efab wires, GM/Legrand modular switches; AC points in all bedrooms, CCTV & DTH provision, UPS wiring' },
-    { no: '14', title: 'Plastering Works', desc: 'Internal wall plastering using fine P-Sand with smooth sponge finish; fibre mesh at beam/wall/column junctions to prevent micro-cracks' },
-    { no: '15', title: 'Plumbing & Sanitary', desc: 'Ashirvad UPVC for water lines, CPVC for hot water; Parryware floor-mounted closets, washbasins, Kerovit/Parryware mixer valves & taps; stainless/fiber kitchen sink' },
-    { no: '16', title: 'Tile & Granite Work', desc: 'Flooring tiles (₹60/sq.ft allowance); Jet black granite for kitchen countertop (₹160/sq.ft); 7 ft wall tile dadoing in bathrooms' },
-    { no: '17', title: 'Painting Works', desc: 'Internal: 2 coats Birla wall putty, 1 coat primer, 2 coats Asian Tractor Emulsion; External: 1 coat primer, 2 coats Asian Apex weather shield' },
-    { no: '18', title: 'Weathering Course', desc: 'Terrace brickbat surkhi / gyps concrete for required slope with water-tight mortar finish' },
-    { no: '19', title: 'Staircase & Handrail', desc: 'Brickwork steps with 6" waist slab, jet black granite treads and SS 304 grade safety handrail' },
+  // Engineering Stage Breakdown (Rollup of BOQ items for clear structural review)
+  const boq = estimate.boqSchedule || [];
+  const getSubtotal = (indices) => {
+    return indices.reduce((sum, idx) => {
+      const item = boq[idx];
+      return sum + (item ? item.totalCost : 0);
+    }, 0);
+  };
+
+  const stageBreakdown = [
+    {
+      trade: 'Substructure & Foundation Works',
+      desc: 'Earth excavation, PCC 1:4:8, Isolated Footings (M20), Column Stubs & Backfilling',
+      directCost: getSubtotal([0, 1, 2, 3, 4]),
+      badge: 'Earthwork & Footings'
+    },
+    {
+      trade: 'Plinth Beams & Basement Masonry',
+      desc: 'Trench excavation, RCC Plinth Beams (M20), Flyash brickwork in CM 1:6, 2-side plastering, Gravel filling, 4" M-sand & Flooring PCC',
+      directCost: getSubtotal([5, 6, 7, 8, 9, 10, 11]),
+      badge: 'Plinth & Basement'
+    },
+    {
+      trade: 'Superstructure Brick Masonry',
+      desc: '9" exterior load-bearing/panel walls & 4.5" partition walls in first-class Chamber burnt clay bricks (CM 1:6)',
+      directCost: getSubtotal([12]),
+      badge: 'Masonry'
+    },
+    {
+      trade: 'Structural RCC Frame, Lintel & Roof Slab',
+      desc: 'Sill continuous band (M15), Continuous Lintel beams, Cantilever lofts/sunshades & 5" thick M20 Roof slab with Fe550D TMT',
+      directCost: getSubtotal([15, 16, 17, 18]),
+      badge: 'RCC Frame'
+    },
+    {
+      trade: 'Plastering & Weathering Course',
+      desc: 'Ceiling plaster (CM 1:3), Internal smooth sponge plastering (CM 1:6), External sand-face plastering & Terrace Surkhi weathering course',
+      directCost: getSubtotal([13, 14, 20]),
+      badge: 'Plastering & Terrace'
+    },
+    {
+      trade: 'Staircase & Architectural Finishes',
+      desc: 'Brick steps with waist slab & SS handrail; Vitrified tile flooring, anti-skid toilet tiles, wall dadoing (7ft) & Jet black kitchen granite',
+      directCost: getSubtotal([19, 22]),
+      badge: 'Finishes'
+    },
+    {
+      trade: 'Doors, Windows & Painting Works',
+      desc: 'Teak main entrance door, Sal flush doors, PVC bath doors, UPVC windows; 2-coat Birla putty, primer & Asian Paints emulsion/Apex',
+      directCost: getSubtotal([21, 23]),
+      badge: 'Joinery & Paint'
+    },
+    {
+      trade: 'Concealed MEP (Electrical & Plumbing)',
+      desc: 'ISI Supreme conduits, Finolex cabling, modular switches, AC/UPS wiring; Ashirvad CPVC/UPVC water lines & Parryware sanitary fixtures',
+      directCost: getSubtotal([24]),
+      badge: 'MEP Services'
+    },
   ];
 
-  // Exclusions from Sheet 13.Quotaiton Row 141 to 156
+  if (additionalCost > 0) {
+    stageBreakdown.push({
+      trade: 'External Site Infrastructure',
+      desc: 'Underground RCC Sump, Septic Tank, OHT Brick Stand, Compound Wall, Ramp, Setback PCC & Main Gate',
+      directCost: additionalCost,
+      badge: 'External Infra'
+    });
+  }
+
+  // Engineering Material Grade Matrix
+  const materialGrades = [
+    { label: 'Structural Cement', spec: 'OPC / PPC 53 Grade', brand: 'Dalmia / UltraTech' },
+    { label: 'Reinforcement Steel', spec: 'Fe550D High Ductility ISI TMT', brand: 'ARS / Tata Tiscon / JSW' },
+    { label: 'Concrete Mix Design', spec: 'M20 Grade (1 : 1.5 : 3)', brand: 'Machine Mix + Needle Vibrator' },
+    { label: 'Superstructure Masonry', spec: 'First Class Burnt Red Chamber Bricks', brand: '9" Outer & 4.5" Inner (CM 1:6)' },
+    { label: 'Basement Masonry', spec: 'High-Density Flyash Bricks in CM 1:6', brand: '3 ft Height + 2-Side Plastering' },
+    { label: 'Sand Specifications', spec: 'Zone-II M-Sand (Concrete) & P-Sand (Plaster)', brand: 'Double-Washed Sifted Sand' },
+    { label: 'Roof Slab & Ceiling', spec: '5" Depth M20 RCC Slab with 10 ft Ceiling Ht', brand: 'Double Mat Mesh + Cover Blocks' },
+    { label: 'Curing Schedule', spec: '14 to 18 Days Ponding (Slab) / 7 Days Wrap (Cols)', brand: 'Potable Curing Water' },
+  ];
+
+  // Exclusions (Sheet 13.Quotaiton Row 141 to 156)
   const exclusionsList = [
-    'Borewell drilling, submersible pump, and pump cabling',
-    'Rock breaker charges if rock stratum is encountered below natural ground level',
-    'Architectural 3D elevation, municipal plan approvals, and liaison fees',
-    'EB line connection charges (both temporary construction supply and permanent meter)',
-    'Light fixtures, ceiling fans, kitchen chimney, and decorative electrical accessories',
-    'Specialist architectural elevation features outside standard plaster moldings',
-    'Labour shed, cement godown shed, and uninterrupted water/EB supply to be provided under client scope',
-    'Material price escalation beyond 5% will be adjusted based on actual average purchase bills'
+    'Borewell drilling, submersible pump motor & underground cable trenching',
+    'Hard rock blasting / pneumatic breaker charges if rock stratum is met below ground',
+    'Architectural 3D elevation renderings, DTCP / Local body plan approval & liaison fees',
+    'TNEB power line charges (temporary construction meter & permanent 3-phase meter)',
+    'Decorative light fittings, fans, chandeliers, kitchen chimney, water heaters & AC units',
+    'Uninterrupted water & electricity supply for construction to be provided at site by Client'
   ];
 
   return (
@@ -640,11 +696,11 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
               <FileText className="w-4 h-4" />
             </span>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Official Client Quotation & Technical Scope (Sheet 13.Quotaiton)
+              Engineering Civil Contract Quotation & Technical BOQ
             </h3>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Branded quotation with structural Er. credentials, detailed itemized scope, exclusions, and payment terms
+            Technical structural quotation with trade-wise BOQ breakup, material grade matrix, and milestone payment schedule
           </p>
         </div>
 
@@ -660,142 +716,256 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
       </div>
 
       {/* Formal Letterhead Document */}
-      <div className="p-8 sm:p-12 rounded-3xl bg-white text-slate-900 border border-slate-300 shadow-2xl max-w-4xl mx-auto quotation-sheet font-sans print:border-none print:shadow-none print:p-0">
-        {/* Header with Logo & Professional Stamp */}
-        <div className="flex items-start justify-between border-b-2 border-slate-900 pb-6 gap-4">
-          <div className="flex items-center gap-4">
+      <div className="p-6 sm:p-10 rounded-2xl bg-white text-slate-900 border border-slate-300 shadow-xl max-w-4xl mx-auto quotation-sheet font-sans print:border-none print:shadow-none print:p-0">
+        
+        {/* Header with Logo & Professional Credentials */}
+        <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5 gap-4">
+          <div className="flex items-center gap-3.5">
             <img
               src={rmcLogo}
               alt="RM Construction"
-              className="w-16 h-16 object-contain rounded-xl border border-slate-200 p-1 bg-white shadow-sm"
+              className="w-14 h-14 object-contain rounded-xl border border-slate-200 p-1 bg-white shadow-sm"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
             <div>
-              <div className="text-lg sm:text-xl font-black uppercase text-slate-950 tracking-tight">
+              <div className="text-lg font-black uppercase text-slate-950 tracking-tight">
                 Rtn. Er. M. JAHIR HUSSAIN, M.E.
               </div>
               <div className="text-xs font-bold text-blue-700 uppercase tracking-wider">
                 Structural Engineer & Chartered Builder
               </div>
-              <div className="text-sm font-black text-slate-800 tracking-wide mt-0.5">
-                RM CONSTRUCTION
+              <div className="text-xs font-black text-slate-800 tracking-wide mt-0.5">
+                RM CONSTRUCTION • DESIGN & BUILD
               </div>
             </div>
           </div>
 
-          <div className="text-right text-[11px] text-slate-600 space-y-0.5">
-            <div>Building Doctor Complex, L.F Main Road,</div>
+          <div className="text-right text-[11px] text-slate-600 leading-snug">
+            <div className="font-semibold text-slate-800">Building Doctor Complex, L.F Main Road,</div>
             <div>Opp to Ganipriya Mahal, Uthamapalayam - 625533</div>
-            <div className="font-bold text-slate-800">Mobile: +91 9489141122, 9111493336</div>
-            <div className="text-slate-500">License / Reg: Consulting Structural Engineer</div>
+            <div className="font-bold text-slate-900 mt-0.5">Mobile: +91 9489141122, 9111493336</div>
+            <div className="text-blue-700 font-semibold">License: Consulting Structural Engineer</div>
           </div>
         </div>
 
-        {/* Quotation Notice */}
-        <div className="my-5 p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs gap-2">
+        {/* Quotation Metadata Strip */}
+        <div className="my-4 p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between text-xs gap-2">
           <div>
-            <span className="font-bold text-slate-700">Quotation Ref: </span>
-            <span className="font-mono font-bold text-blue-700">{projectInfo.projectCode || 'Draft'}</span>
+            <span className="text-slate-500 font-medium">Ref No: </span>
+            <span className="font-mono font-bold text-blue-700">{projectInfo.projectCode || 'RMC/PRJ-01'}</span>
           </div>
           <div>
-            <span className="font-bold text-slate-700">Date of Quote: </span>
-            <span className="font-semibold">{projectInfo.quoteDate || 'Not set'}</span>
+            <span className="text-slate-500 font-medium">Date: </span>
+            <span className="font-bold text-slate-800">{projectInfo.quoteDate || 'Today'}</span>
           </div>
-          <div className="text-slate-500 italic">
-            * Inclusive of {margin}% Contractor Profit & 2% Wastage Allowance
+          <div>
+            <span className="text-slate-500 font-medium">Contract Type: </span>
+            <span className="font-bold text-slate-800">Civil Turnkey Contract (Material + Labour)</span>
+          </div>
+          <div className="text-[11px] text-slate-500 italic">
+            * Inclusive of {margin}% Contractor Profit & 2% Wastage
           </div>
         </div>
 
-        {/* Project Meta Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-blue-50/50 border border-blue-200 text-xs">
+        {/* Project Technical Reference Card */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-100/70 border border-slate-200 text-xs">
           <div>
-            <span className="text-slate-500 block font-semibold">Client Name:</span>
-            <span className="font-black text-slate-900">{projectInfo.clientName}</span>
+            <span className="text-slate-500 block text-[11px]">Client / Owner:</span>
+            <span className="font-black text-slate-900 text-sm">{projectInfo.clientName || 'Valued Client'}</span>
           </div>
           <div>
-            <span className="text-slate-500 block font-semibold">Site Location:</span>
-            <span className="font-bold text-slate-900">{projectInfo.siteLocation}</span>
+            <span className="text-slate-500 block text-[11px]">Site Location:</span>
+            <span className="font-bold text-slate-800">{projectInfo.siteLocation || 'Site Location'}</span>
           </div>
           <div>
-            <span className="text-slate-500 block font-semibold">GF Plinth Reference:</span>
-            <span className="font-black text-blue-800">{Math.round(gfArea)} Sq.ft</span>
+            <span className="text-slate-500 block text-[11px]">GF Plinth Area:</span>
+            <span className="font-black text-blue-700 text-sm">{Math.round(gfArea)} Sq.ft</span>
           </div>
           <div>
-            <span className="text-slate-500 block font-semibold">Total Built-Up Area:</span>
-            <span className="font-bold text-slate-900">{Math.round(totalBuiltup)} Sq.ft</span>
+            <span className="text-slate-500 block text-[11px]">Total Built-Up Area:</span>
+            <span className="font-black text-slate-900 text-sm">{Math.round(totalBuiltup)} Sq.ft</span>
           </div>
         </div>
 
-        {/* Pricing Summary Box */}
-        <div className="my-6 p-5 rounded-2xl bg-slate-950 text-white shadow-md space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        {/* Executive Cost Breakdown Strip (Clean Engineer Layout) */}
+        <div className="my-5 p-4 rounded-xl bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white shadow-sm border border-slate-800">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-800">
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-indigo-300">
-                1. Civil Construction Work (Main Villa)
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Civil Works (Main Structure)
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-white mt-1">
+              <div className="text-xl font-black text-white mt-0.5">
                 ₹ {Math.round(civilQuotedAmount).toLocaleString('en-IN')}
               </div>
-              <div className="text-xs text-indigo-200 mt-0.5">
-                Rate: <b className="text-amber-300 font-extrabold">₹ {Math.round(civilRatePerSqft).toLocaleString('en-IN')} / sq.ft</b> (Calculated on {gfArea} sq.ft GF Plinth)
+              <div className="text-[11px] text-amber-300 font-semibold mt-0.5">
+                ₹ {Math.round(civilRatePerSqft).toLocaleString('en-IN')} / sq.ft (GF Plinth)
               </div>
             </div>
 
-            <div className="text-right sm:border-l sm:border-white/10 sm:pl-6">
-              <div className="text-xs font-bold uppercase tracking-wider text-purple-300">
-                2. Site External Infrastructure
+            <div className="sm:pl-4">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Site Infrastructure (External)
               </div>
-              <div className="text-xl sm:text-2xl font-black text-purple-200 mt-1">
+              <div className="text-xl font-black text-white mt-0.5">
                 ₹ {Math.round(additionalQuotedCost).toLocaleString('en-IN')}
               </div>
-              <div className="text-xs text-purple-300 mt-0.5">
-                UG Sump, Septic Tank, OHT Stand, Compound Wall, Gate
+              <div className="text-[11px] text-slate-400 mt-0.5">
+                UG Sump, Septic Tank, Compound Wall
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-sm font-bold">
-            <span className="text-slate-300 uppercase tracking-wide text-xs">
-              Total Contract Value (Civil + External Infrastructure):
-            </span>
-            <span className="text-2xl font-black text-amber-400">
-              ₹ {Math.round(grandTotalAmount).toLocaleString('en-IN')}
-              <span className="text-xs text-slate-300 font-normal ml-2">
-                (Overall ₹ {Math.round(overallRatePerSqft).toLocaleString('en-IN')} / sq.ft)
-              </span>
-            </span>
+            <div className="sm:pl-4">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
+                Total Quoted Contract Value
+              </div>
+              <div className="text-2xl font-black text-amber-300 mt-0.5">
+                ₹ {Math.round(grandTotalAmount).toLocaleString('en-IN')}
+              </div>
+              <div className="text-[11px] text-slate-300 font-medium mt-0.5">
+                Overall: ₹ {Math.round(overallRatePerSqft).toLocaleString('en-IN')} / sq.ft
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Technical Scope of Works */}
-        <div className="space-y-4 my-6">
-          <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-1.5">
-            <ShieldCheck className="w-5 h-5 text-blue-700" />
-            <h4 className="text-sm font-black uppercase tracking-wider text-slate-950">
-              Detailed Scope of Works & Material Specifications
+        {/* 1. TRADE-WISE ENGINEERING COST SUMMARY TABLE */}
+        <div className="my-5 space-y-2">
+          <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-950 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+              1. Trade-Wise Engineering BOQ & Cost Breakdown
             </h4>
+            <span className="text-[11px] text-slate-500 font-semibold">Stage-by-Stage Rollup</span>
           </div>
 
-          <div className="divide-y divide-slate-200 text-xs">
-            {technicalSpecs.map((spec) => (
-              <div key={spec.no} className="py-2.5 flex items-start gap-3">
-                <span className="font-bold text-blue-700 w-6 flex-shrink-0">{spec.no}.</span>
-                <div className="flex-1">
-                  <span className="font-black text-slate-900">{spec.title}: </span>
-                  <span className="text-slate-700 leading-relaxed">{spec.desc}</span>
+          <div className="overflow-x-auto border border-slate-200 rounded-lg">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 font-bold uppercase text-[11px] border-b border-slate-200">
+                  <th className="py-2.5 px-3 w-10 text-center">#</th>
+                  <th className="py-2.5 px-3">Trade & Engineering Scope</th>
+                  <th className="py-2.5 px-3 text-right">Direct Cost (₹)</th>
+                  <th className="py-2.5 px-3 text-right">Quoted Value ({margin}% Inc)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 font-medium text-slate-800">
+                {stageBreakdown.map((stage, idx) => {
+                  const stageQuoted = stage.directCost * (1 + margin / 100);
+                  return (
+                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-2 px-3 text-center font-bold text-slate-500">{idx + 1}</td>
+                      <td className="py-2 px-3">
+                        <div className="font-bold text-slate-900 flex items-center gap-2">
+                          {stage.trade}
+                          <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded border border-slate-200">
+                            {stage.badge}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 leading-snug">{stage.desc}</div>
+                      </td>
+                      <td className="py-2 px-3 text-right font-mono font-semibold text-slate-700">
+                        ₹ {Math.round(stage.directCost).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-blue-700">
+                        ₹ {Math.round(stageQuoted).toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="bg-slate-100 font-black text-xs text-slate-900 border-t-2 border-slate-300">
+                  <td colSpan="2" className="py-2.5 px-3 text-right uppercase tracking-wider">
+                    Total Contract Valuation:
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono text-slate-700">
+                    ₹ {Math.round(totalDirectCost).toLocaleString('en-IN')}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono text-blue-700 text-sm">
+                    ₹ {Math.round(grandTotalAmount).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        {/* 2. STRUCTURAL MATERIAL GRADES & ENGINEERING STANDARDS MATRIX */}
+        <div className="my-5 space-y-2">
+          <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-950 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
+              2. Technical Material Specifications & Structural Design Matrix
+            </h4>
+            <span className="text-[11px] text-emerald-700 font-bold">IS Code Compliant</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            {materialGrades.map((mat, i) => (
+              <div key={i} className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-slate-900 block text-xs">{mat.label}</span>
+                  <span className="text-[11px] text-slate-600">{mat.spec}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 block">
+                    {mat.brand}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Work Excluded & Client Scope */}
-        <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-300 text-xs space-y-2.5 my-6">
-          <div className="flex items-center gap-2 font-black text-amber-900 uppercase tracking-wider">
-            <AlertCircle className="w-4 h-4 text-amber-600" />
-            Works Not Included in the Above Scope (Client Responsibility)
+        {/* 3. MILESTONE PAYMENT SCHEDULE TABLE */}
+        <div className="my-5 space-y-2">
+          <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-950 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 inline-block"></span>
+              3. Stage-Wise Milestone Payment Schedule
+            </h4>
+            <span className="text-[11px] text-slate-500 font-semibold">4 Payment Stages</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Stage 1: Advance</span>
+              <span className="font-black text-slate-900 block text-sm">10% on Agreement</span>
+              <span className="text-[11px] font-mono font-bold text-indigo-700 block mt-0.5">
+                ₹ {Math.round(grandTotalAmount * 0.10).toLocaleString('en-IN')}
+              </span>
+            </div>
+            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Stage 2: Plinth</span>
+              <span className="font-black text-slate-900 block text-sm">20% on Plinth Level</span>
+              <span className="text-[11px] font-mono font-bold text-indigo-700 block mt-0.5">
+                ₹ {Math.round(grandTotalAmount * 0.20).toLocaleString('en-IN')}
+              </span>
+            </div>
+            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Stage 3: Roof Slab</span>
+              <span className="font-black text-slate-900 block text-sm">30% on Slab Casting</span>
+              <span className="text-[11px] font-mono font-bold text-indigo-700 block mt-0.5">
+                ₹ {Math.round(grandTotalAmount * 0.30).toLocaleString('en-IN')}
+              </span>
+            </div>
+            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Stage 4: Finishing</span>
+              <span className="font-black text-slate-900 block text-sm">40% on Handover</span>
+              <span className="text-[11px] font-mono font-bold text-indigo-700 block mt-0.5">
+                ₹ {Math.round(grandTotalAmount * 0.40).toLocaleString('en-IN')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. EXCLUSIONS & CLIENT SCOPE */}
+        <div className="my-5 p-3 rounded-lg bg-amber-50/50 border border-amber-200 text-xs space-y-1.5">
+          <div className="font-bold text-amber-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+            Standard Exclusions & Client Scope of Supply
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-slate-700 text-[11px]">
             {exclusionsList.map((excl, i) => (
               <div key={i} className="flex items-start gap-1.5">
                 <span className="text-amber-600 font-bold">•</span>
@@ -805,54 +975,28 @@ export function FoundationQuotationView({ estimate, projectInfo, rates }) {
           </div>
         </div>
 
-        {/* Stage-wise Payment Schedule */}
-        <div className="my-6 space-y-3">
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1">
-            Standard Milestone Payment Schedule
-          </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-              <span className="text-[10px] text-slate-500 font-bold block">1. Advance</span>
-              <span className="font-black text-slate-900">10% on Agreement</span>
-            </div>
-            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-              <span className="text-[10px] text-slate-500 font-bold block">2. Foundation</span>
-              <span className="font-black text-slate-900">20% on Plinth Level</span>
-            </div>
-            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-              <span className="text-[10px] text-slate-500 font-bold block">3. Roof Slab</span>
-              <span className="font-black text-slate-900">30% on Slab Casting</span>
-            </div>
-            <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-              <span className="text-[10px] text-slate-500 font-bold block">4. Handover</span>
-              <span className="font-black text-slate-900">40% on Finishing</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Signatures */}
-        <div className="mt-10 pt-6 border-t-2 border-slate-400 grid grid-cols-2 gap-8 text-xs">
+        {/* 5. AUTHORIZED SIGNATURES & STAMP */}
+        <div className="mt-8 pt-4 border-t-2 border-slate-300 grid grid-cols-2 gap-8 text-xs">
           <div>
-            <div className="font-bold text-slate-900 mb-1">Client Acceptance:</div>
+            <div className="font-bold text-slate-900 mb-0.5">Client Confirmation:</div>
             <p className="text-[11px] text-slate-500 mb-8">
-              I/We hereby accept the quote and specifications detailed above.
+              Accepted the engineering specifications, BOQ quantities, and payment terms.
             </p>
             <div className="border-t border-dashed border-slate-400 pt-1 w-44 font-semibold text-slate-700">
-              Client Signature
+              Authorized Signature / Date
             </div>
           </div>
 
-          <div className="flex flex-col justify-end items-end space-y-6 text-right">
-            <div>
-              <div className="font-black text-slate-950 uppercase">For RM CONSTRUCTION</div>
-              <div className="text-[11px] text-blue-700 font-bold">Design & Execution Division</div>
-            </div>
+          <div className="flex flex-col justify-end items-end text-right">
+            <div className="font-black text-slate-950 uppercase text-xs">For RM CONSTRUCTION</div>
+            <div className="text-[11px] text-blue-700 font-bold mb-8">Design & Civil Execution Division</div>
             <div className="text-slate-800 font-bold text-center border-t-2 border-slate-800 pt-1.5 w-56">
               Rtn. Er. M. Jahir Hussain, M.E.<br />
               <span className="text-[10px] text-slate-500 font-normal">Consulting Structural Engineer</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

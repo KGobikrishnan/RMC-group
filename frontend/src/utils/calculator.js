@@ -174,10 +174,13 @@ export function calculateCivilEstimateComplete(data, rates) {
     : (computedGfPerimeter || Number(basement?.outerPerimeter) || 0);
 
   // In Excel DATA SHEET C42: =+F32 (links to PB1 length or total plinth beam length).
-  // If user explicitly modified flyashLength in basement, use it; otherwise auto-link to totalPbLength
+  // If user explicitly modified flyashLength in basement, use it; otherwise auto-link to PB1 or totalPbLength
+  const pb1Length = Number(rawBeams?.[0]?.length) || 0;
+  const activePbMasterLength = pb1Length > 0 ? pb1Length : totalPbLength;
+
   const bsmFlyashL = (basement?.flyashLength !== undefined && basement?.flyashLength !== null && basement?.isFlyashLengthManual)
     ? Number(basement.flyashLength)
-    : (totalPbLength || Number(basement?.flyashLength) || 0);
+    : (activePbMasterLength || Number(basement?.flyashLength) || 0);
 
   const bsmFlyashB = Number(basement?.flyashBreadth) || 0;
   const bsmFlyashD = Number(basement?.flyashDepth) || 0;
@@ -222,6 +225,7 @@ export function calculateCivilEstimateComplete(data, rates) {
   const flooringPccMatCost = (flooringPccCementBags * rates.cement) + (flooringPccSandCft * rates.msand) + (flooringPccAggCft * rates.aggregate);
   const flooringPccLabCost = flooringPccSqft * rates.labourFlooringPccPerSqft;
   const flooringPccTotalCost = flooringPccMatCost + flooringPccLabCost;
+  const basementTotalCost = basementBrickworkTotalCost + basementPlasterTotalCost + basementGravelTotalCost + basementMsandMatCost + flooringPccTotalCost;
 
   // -------------------------------------------------------------
   // 5. SUPERSTRUCTURE BRICKWORK (RED CHAMBER 9" & 4.5" WALLS)
@@ -520,10 +524,10 @@ export function calculateCivilEstimateComplete(data, rates) {
   // 11. ROOF SLAB & ROOF BEAM CONCRETE (Sheet 8.SLAB CONCRETE & BOQ Item 20)
   // -------------------------------------------------------------
   const roofSlabInput = data?.roofSlab || {};
-  // If user hasn't explicitly set isBeamManual, auto-link to totalPbLength from Section 3!
+  // If user hasn't explicitly set isBeamManual, auto-link to activePbMasterLength (PB1 or totalPbLength) from Section 3!
   const roofBeamLength = (roofSlabInput?.isBeamManual && roofSlabInput?.beamLength !== undefined && roofSlabInput?.beamLength !== '')
     ? Number(roofSlabInput.beamLength)
-    : (totalPbLength || Number(roofSlabInput?.beamLength) || 0);
+    : (activePbMasterLength || Number(roofSlabInput?.beamLength) || 0);
   const roofBeamBreadth = Number(roofSlabInput.beamBreadth) || 0;
   const roofBeamDepth = Number(roofSlabInput.beamDepth) || 0;
   const roofBeamVolumeCft = roofBeamLength * roofBeamBreadth * roofBeamDepth;
@@ -1070,6 +1074,8 @@ export function calculateCivilEstimateComplete(data, rates) {
     basementGravelTotalCost,
     basementMsandMatCost,
     flooringPccTotalCost,
+    basementTotalCost,
+    basementGrandTotalCost: basementTotalCost,
     // 5. Brickwork
     itemizedWalls,
     itemizedOpenings,

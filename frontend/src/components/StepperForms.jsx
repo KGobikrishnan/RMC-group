@@ -424,8 +424,8 @@ export function PlinthBeamModule({ plinthBeams, updatePlinthBeams, estimate }) {
       ...newBeams[idx],
       [field]: parsedVal
     };
-    // If length is changed on excavation side, synchronize length to concrete side if not individually overridden
-    if (field === 'length' && newBeams[idx].concreteLength === undefined) {
+    // When length is edited on Excavation side, always keep concreteLength synced unless user specified a distinct concreteLength
+    if (field === 'length') {
       newBeams[idx].concreteLength = parsedVal;
     }
     updatePlinthBeams(newBeams);
@@ -728,8 +728,10 @@ export function BasementModule({ basement, updateBasement, estimate, builtup, pl
   const gfBreadth = gfFloor?.breadth !== undefined ? Number(gfFloor.breadth) : 39;
   const autoGfPerimeter = Math.round(2 * (gfLength + gfBreadth) * 100) / 100; // e.g. 2*(22+39) = 122
 
-  // Auto-linked plinth beam length from Section 3
-  const autoPbLength = estimate?.totalPbLength !== undefined ? estimate.totalPbLength : 201;
+  // Auto-linked plinth beam length from Section 3 (PB1 or Total PB length)
+  const pb1Length = Number(plinthBeams?.[0]?.length) || 0;
+  const totalPbLength = Number(estimate?.totalPbLength) || 0;
+  const autoPbLength = pb1Length > 0 ? pb1Length : totalPbLength;
 
   const isManualPerimeter = Boolean(basement?.isPerimeterManual);
   const currentPerimeter = isManualPerimeter 
@@ -737,9 +739,10 @@ export function BasementModule({ basement, updateBasement, estimate, builtup, pl
     : autoGfPerimeter;
 
   const isManualFlyashLength = Boolean(basement?.isFlyashLengthManual);
+  // Auto-fill and auto-react to Plinth Beam length unless user explicitly typed a manual override
   const currentFlyashLength = isManualFlyashLength
     ? (basement.flyashLength ?? autoPbLength)
-    : (basement.flyashLength !== undefined && basement.flyashLength !== null ? basement.flyashLength : autoPbLength);
+    : autoPbLength;
 
   const handleChange = (field, val) => {
     const parsed = val === '' ? '' : (isNaN(val) ? val : parseFloat(val));
@@ -2122,8 +2125,10 @@ export function JoineryModule({ joinery, updateJoinery, estimate }) {
 export function RoofSlabModule({ roofSlab, updateRoofSlab, estimate, builtup, plinthBeams }) {
   const currentData = roofSlab || {};
 
-  // Auto-linked plinth beam length from Section 3
-  const autoPbLength = estimate?.totalPbLength ?? 0;
+  // Auto-linked plinth beam length from Section 3 (PB1 or total plinth beam length)
+  const pb1Length = Number(plinthBeams?.[0]?.length) || 0;
+  const totalPbLength = Number(estimate?.totalPbLength) || 0;
+  const autoPbLength = pb1Length > 0 ? pb1Length : totalPbLength;
   const isManualBeam = Boolean(currentData?.isBeamManual);
   const currentBeamLength = isManualBeam ? (currentData.beamLength ?? autoPbLength) : autoPbLength;
 

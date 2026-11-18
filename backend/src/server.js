@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { ensurePostgresRunning } from './config/ensurePostgres.js';
 import { pool } from './config/db.js';
 import { initDatabase } from './config/schema.js';
 import projectRoutes from './routes/projectRoutes.js';
@@ -39,6 +40,7 @@ app.use('/api/clients', clientRoutes);
 // Start server and initialize PostgreSQL
 async function startServer() {
   try {
+    await ensurePostgresRunning();
     await initDatabase();
     app.listen(PORT, () => {
       console.log(`🚀 RMC Backend Server running on http://localhost:${PORT}`);
