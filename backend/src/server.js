@@ -40,7 +40,11 @@ app.use('/api/clients', clientRoutes);
 // Start server and initialize PostgreSQL
 async function startServer() {
   try {
-    await ensurePostgresRunning();
+    // Only auto-spawn local dev cluster if not configured via DATABASE_URL or DB_HOST in production
+    const isProduction = process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL || (process.env.DB_HOST && process.env.DB_HOST !== 'localhost' && !process.env.DB_HOST.includes('.pgsockets'));
+    if (!isProduction && process.env.AUTO_START_LOCAL_POSTGRES !== 'false') {
+      await ensurePostgresRunning();
+    }
     await initDatabase();
     app.listen(PORT, () => {
       console.log(`🚀 RMC Backend Server running on http://localhost:${PORT}`);
