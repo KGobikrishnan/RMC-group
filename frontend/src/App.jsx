@@ -87,10 +87,12 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Authentication State
-  const [authToken, setAuthToken] = useState(() => localStorage.getItem('rmc_auth_token') || null);
+  // Authentication State (Session-only by default so refresh/new window lands on Login first)
+  const [authToken, setAuthToken] = useState(() => {
+    return sessionStorage.getItem('rmc_auth_token') || null;
+  });
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('rmc_user');
+    const saved = sessionStorage.getItem('rmc_user');
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { /* ignore */ }
     }
@@ -264,6 +266,8 @@ export default function App() {
 
   // Logout handler
   const handleLogout = () => {
+    sessionStorage.removeItem('rmc_auth_token');
+    sessionStorage.removeItem('rmc_user');
     localStorage.removeItem('rmc_auth_token');
     localStorage.removeItem('rmc_user');
     setAuthToken(null);
